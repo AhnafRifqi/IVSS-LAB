@@ -48,7 +48,16 @@ if ($list === false) $list = [];
                             <div class="text-muted">Tidak ada pendaftaran yang menunggu persetujuan Ketua.</div>
                         <?php else: ?>
                         <table class="table table-bordered">
-                            <thead><tr><th>No</th><th>NIM</th><th>Nama</th><th>Pembimbing</th><th>Tanggal</th><th>Aksi</th></tr></thead>
+                            <thead class="table-primary">
+                                <tr>
+                                    <th>No</th>
+                                    <th>NIM</th>
+                                    <th>Nama</th>
+                                    <th>Pembimbing</th>
+                                    <th>Tanggal</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
                             <tbody>
                             <?php $i=1; foreach ($list as $r): ?>
                                 <tr>
