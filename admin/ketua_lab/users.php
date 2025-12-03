@@ -29,6 +29,7 @@ $allowed_roles = ['ketua', 'admin', 'berita', 'mahasiswa'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $entity_type = trim($_POST['entity_type'] ?? '');
+    // tetap ambil entity_id dari satu field entity_id — JS akan memastikan hanya select aktif yang tidak disabled
     $entity_id   = trim($_POST['entity_id'] ?? '');
     $username    = trim($_POST['username'] ?? '');
     $password    = trim($_POST['password'] ?? '');
@@ -248,8 +249,18 @@ if ($users === false) $users = [];
 <script>
     function toggleEntitySelect() {
         var t = document.getElementById('entity_type').value;
-        document.getElementById('select-dosen').style.display = (t === 'dosen') ? 'block' : 'none';
-        document.getElementById('select-mhs').style.display = (t === 'mahasiswa') ? 'block' : 'none';
+        var sd = document.getElementById('select-dosen');
+        var sm = document.getElementById('select-mhs');
+
+        // tampil/hidden block
+        sd.style.display = (t === 'dosen') ? 'block' : 'none';
+        sm.style.display = (t === 'mahasiswa') ? 'block' : 'none';
+
+        // disable select yang tidak aktif supaya tidak terkirim saat submit
+        var selD = sd.querySelector('select[name="entity_id"]');
+        var selM = sm.querySelector('select[name="entity_id"]');
+        if (selD) selD.disabled = (t !== 'dosen');
+        if (selM) selM.disabled = (t !== 'mahasiswa');
     }
 
     function resetEntitySelect() {
@@ -258,6 +269,9 @@ if ($users === false) $users = [];
     }
 
     $(document).ready(function() {
+        // pastikan state awal benar (mis. setelah reload)
+        toggleEntitySelect();
+
         $('#usersTable').DataTable({
             "columnDefs": [{
                 "orderable": false,
