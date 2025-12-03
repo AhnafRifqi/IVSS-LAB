@@ -57,7 +57,7 @@ if ($list === false) $list = [];
                         <?php else: ?>
                         <div class="table-responsive">
                         <table class="table table-bordered">
-                            <thead class="table-primary">
+                            <thead class="table-primary text-center">
                                 <tr>
                                     <th>No</th>
                                     <th>NIM</th>
