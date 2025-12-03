@@ -8,16 +8,17 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $user_id = $_SESSION['user_id'];
+$role = $_SESSION['role'];
 
-// Ambil dataset publik + privat milik sendiri, gabungkan nama dari mahasiswa atau dosen
+// Ambil semua dataset publik + privat milik sendiri
 $q = pg_query_params($koneksi, "
     SELECT 
-        d.dataset_id, d.judul, d.deskripsi, d.file_path, d.visibility, d.tanggal_upload, d.uploader_by,
-        COALESCE(m.nama, dosen.nama, u.username) AS uploader_name
+        d.dataset_id, d.judul, d.deskripsi, d.file_path, d.uploader_by, d.tanggal_upload, d.visibility,
+        COALESCE(m.nama, dos.nama, u.username) AS uploader_name
     FROM dataset d
     LEFT JOIN users u ON d.uploader_by = u.user_id
     LEFT JOIN mahasiswa m ON u.user_id = m.user_id
-    LEFT JOIN dosen ON u.user_id = dosen.user_id
+    LEFT JOIN dosen dos ON u.user_id = dos.user_id
     WHERE d.visibility = 'publik' OR d.uploader_by = $1
     ORDER BY d.tanggal_upload DESC
 ", [$user_id]);
@@ -54,6 +55,22 @@ if ($datasets === false) $datasets = [];
                                 <i class="fas fa-plus"></i> Tambah
                             </a>
                         </div>
+
+                        <?php
+                        // Notifikasi aksi
+                        if (isset($_GET['msg'])) {
+                            $msg = $_GET['msg'];
+                            if ($msg === 'created') {
+                                echo '<div class="alert alert-success">Dataset berhasil ditambahkan.</div>';
+                            } elseif ($msg === 'updated') {
+                                echo '<div class="alert alert-success">Dataset berhasil diupdate.</div>';
+                            } elseif ($msg === 'deleted') {
+                                echo '<div class="alert alert-success">Dataset berhasil dihapus.</div>';
+                            } elseif ($msg === 'error') {
+                                echo '<div class="alert alert-danger">Terjadi kesalahan.</div>';
+                            }
+                        }
+                        ?>
 
                         <div class="table-responsive">
                             <table class="table table-bordered" id="datasetTable" width="100%" cellspacing="0">
