@@ -4,7 +4,7 @@ include '../inc/koneksi.php';
 
 // Cek session
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'ketua') {
-    header('Location: ../login.php');
+    header('Location: ../index.php');
     exit;
 }
 
