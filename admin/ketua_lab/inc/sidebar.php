@@ -81,6 +81,12 @@ if (isset($koneksi)) {
     <!-- Publikasi -->
     <div class="sidebar-heading">Publikasi & Informasi</div>
     <li class="nav-item">
+        <a class="nav-link" href="dataset.php">
+            <i class="fas fa-newspaper"></i>
+            <span>Dataset</span>
+        </a>
+    </li>
+    <li class="nav-item">
         <a class="nav-link" href="berita.php">
             <i class="fas fa-newspaper"></i>
             <span>Berita</span>

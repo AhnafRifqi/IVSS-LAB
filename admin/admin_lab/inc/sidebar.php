@@ -61,6 +61,17 @@ if (isset($koneksi)) {
 
     <hr class="sidebar-divider d-none d-md-block">
 
+    <!-- Publikasi -->
+    <div class="sidebar-heading">Publikasi & Informasi</div>
+    <li class="nav-item">
+        <a class="nav-link" href="dataset.php">
+            <i class="fas fa-newspaper"></i>
+            <span>Dataset</span>
+        </a>
+    </li>
+
+    <hr class="sidebar-divider d-none d-md-block">
+
     <!-- List ACC -->
     <div class="sidebar-heading">Persetujuan Bimbingan</div>
     <li class="nav-item">
