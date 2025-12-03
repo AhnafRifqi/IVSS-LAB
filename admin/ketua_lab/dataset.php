@@ -9,11 +9,15 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 
-// Ambil semua dataset publik + privat milik sendiri
+// Ambil dataset publik + privat milik sendiri, gabungkan nama dari mahasiswa atau dosen
 $q = pg_query_params($koneksi, "
-    SELECT d.dataset_id, d.judul, d.deskripsi, d.file_path, u.username, d.tanggal_upload, d.visibility
+    SELECT 
+        d.dataset_id, d.judul, d.deskripsi, d.file_path, d.visibility, d.tanggal_upload, d.uploader_by,
+        COALESCE(m.nama, dosen.nama, u.username) AS uploader_name
     FROM dataset d
     LEFT JOIN users u ON d.uploader_by = u.user_id
+    LEFT JOIN mahasiswa m ON u.user_id = m.user_id
+    LEFT JOIN dosen ON u.user_id = dosen.user_id
     WHERE d.visibility = 'publik' OR d.uploader_by = $1
     ORDER BY d.tanggal_upload DESC
 ", [$user_id]);
@@ -67,7 +71,7 @@ if ($datasets === false) $datasets = [];
                                 </thead>
                                 <tbody>
                                 <?php if (empty($datasets)): ?>
-                                    <tr><td colspan="7" class="text-center text-muted">Belum ada dataset.</td></tr>
+                                    <tr><td colspan="8" class="text-center text-muted">Belum ada dataset.</td></tr>
                                 <?php else: foreach ($datasets as $i => $d): ?>
                                     <tr>
                                         <td class="text-center"><?= $i + 1 ?></td>
@@ -80,13 +84,17 @@ if ($datasets === false) $datasets = [];
                                                 <span class="text-muted">-</span>
                                             <?php endif; ?>
                                         </td>
-                                        <td><?= htmlspecialchars($d['username'] ?? '-') ?></td>
+                                        <td><?= htmlspecialchars($d['uploader_name']) ?></td>
                                         <td class="text-center"><?= htmlspecialchars($d['tanggal_upload']) ?></td>
                                         <td class="text-center"><?= htmlspecialchars($d['visibility']) ?></td>
                                         <td class="text-center">
                                             <?php if ($d['uploader_by'] == $user_id): ?>
-                                                <a href="edit_dataset.php?id=<?= $d['dataset_id'] ?>" class="btn btn-sm btn-primary"><i class="fas fa-edit"></i></a>
-                                                <a href="hapus_dataset.php?id=<?= $d['dataset_id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus dataset ini?')"><i class="fas fa-trash"></i></a>
+                                                <a href="edit_dataset.php?id=<?= $d['dataset_id'] ?>" class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-edit"></i> Edit
+                                                </a>
+                                                <a href="hapus_dataset.php?id=<?= $d['dataset_id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus dataset ini?')">
+                                                    <i class="fas fa-trash"></i> Hapus
+                                                </a>
                                             <?php else: ?>
                                                 <span class="text-muted">-</span>
                                             <?php endif; ?>
@@ -114,7 +122,7 @@ if ($datasets === false) $datasets = [];
 $(document).ready(function(){
     $('#datasetTable').DataTable({
         "columnDefs": [
-            { "orderable": false, "targets": [2,3] }
+            { "orderable": false, "targets": [2,3,7] }
         ]
     });
 });
