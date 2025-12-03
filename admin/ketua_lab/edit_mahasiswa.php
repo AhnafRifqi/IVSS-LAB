@@ -23,33 +23,23 @@ $users_list = pg_fetch_all(pg_query($koneksi, "SELECT user_id, username FROM use
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nama              = trim($_POST['nama'] ?? '');
-    $jenis_kelamin     = trim($_POST['jenis_kelamin'] ?? '');
     $no_telp           = trim($_POST['no_telp'] ?? '');
     $email             = trim($_POST['email'] ?? '');
     $keperluan         = trim($_POST['keperluan'] ?? '');
-    $dosen_pembimbing  = trim($_POST['dosen_pembimbing'] ?? '') ?: null;
     $status_mahasiswa  = trim($_POST['status_mahasiswa'] ?? '') ?: null;
-    $status_pendaftaran= trim($_POST['status_pendaftaran'] ?? '') ?: null;
-    $tanggal_daftar    = trim($_POST['tanggal_daftar'] ?? '') ?: null;
-    $user_id           = isset($_POST['user_id']) && $_POST['user_id'] !== '' ? (int)$_POST['user_id'] : null;
 
     if ($nama === '') {
         $error = 'Nama wajib diisi.';
     }
 
     if ($error === '') {
-        $sql = 'UPDATE mahasiswa SET nama=$1, jenis_kelamin=$2, no_telp=$3, email=$4, keperluan=$5, dosen_pembimbing=$6, status_mahasiswa=$7, status_pendaftaran=$8, tanggal_daftar=$9, user_id=$10 WHERE nim=$11';
+        $sql = 'UPDATE mahasiswa SET nama=$1, no_telp=$2, email=$3, keperluan=$4, status_mahasiswa=$5 WHERE nim=$6';
         $params = [
             $nama,
-            $jenis_kelamin !== '' ? $jenis_kelamin : null,
             $no_telp !== '' ? $no_telp : null,
             $email !== '' ? $email : null,
             $keperluan !== '' ? $keperluan : null,
-            $dosen_pembimbing,
-            $status_mahasiswa !== '' ? $status_mahasiswa : null,
-            $status_pendaftaran !== '' ? $status_pendaftaran : null,
-            $tanggal_daftar !== '' ? $tanggal_daftar : null,
-            $user_id,
+            $status_mahasiswa,
             $nim
         ];
         $res = pg_query_params($koneksi, $sql, $params);
@@ -97,11 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <div class="form-row">
                                 <div class="form-group col-md-4">
                                     <label>Jenis Kelamin</label>
-                                    <select name="jenis_kelamin" class="form-control">
-                                        <option value="">-- pilih --</option>
-                                        <option value="L" <?= ((($_POST['jenis_kelamin'] ?? $row['jenis_kelamin']) === 'L') ? 'selected':'') ?>>L</option>
-                                        <option value="P" <?= ((($_POST['jenis_kelamin'] ?? $row['jenis_kelamin']) === 'P') ? 'selected':'') ?>>P</option>
-                                    </select>
+                                    <input type="text" class="form-control" value="<?= htmlspecialchars($row['jenis_kelamin'] ?? '-') ?>" readonly>
                                 </div>
                                 <div class="form-group col-md-4">
                                     <label>No. Telp</label>
@@ -121,49 +107,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <div class="form-row">
                                 <div class="form-group col-md-6">
                                     <label>Dosen Pembimbing</label>
-                                    <select name="dosen_pembimbing" class="form-control">
-                                        <option value="">-- pilih pembimbing --</option>
-                                        <?php foreach ($dosen_list as $d): ?>
-                                            <?php $sel = (($_POST['dosen_pembimbing'] ?? $row['dosen_pembimbing']) == $d['nip']) ? 'selected' : ''; ?>
-                                            <option value="<?= htmlspecialchars($d['nip']) ?>" <?= $sel ?>><?= htmlspecialchars($d['nama'] . ' (' . $d['nip'] . ')') ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
+                                    <input type="text" class="form-control" 
+                                        value="<?= htmlspecialchars(($row['dosen_pembimbing'] && isset($dosen_list)) 
+                                            ? array_values(array_filter($dosen_list, fn($d)=>$d['nip']==$row['dosen_pembimbing']))[0]['nama'] . ' (' . $row['dosen_pembimbing'] . ')' 
+                                            : '-') ?>" readonly>
                                 </div>
 
                                 <div class="form-group col-md-3">
                                     <label>Status Mahasiswa</label>
                                     <select name="status_mahasiswa" class="form-control">
                                         <option value="">-- pilih --</option>
-                                        <option value="member" <?= ((($_POST['status_mahasiswa'] ?? $row['status_mahasiswa']) === 'member') ? 'selected':'') ?>>member</option>
-                                        <option value="alumni" <?= ((($_POST['status_mahasiswa'] ?? $row['status_mahasiswa']) === 'alumni') ? 'selected':'') ?>>alumni</option>
+                                        <option value="member" <?= (($row['status_mahasiswa'] ?? '')==='member')?'selected':'' ?>>member</option>
+                                        <option value="alumni" <?= (($row['status_mahasiswa'] ?? '')==='alumni')?'selected':'' ?>>alumni</option>
                                     </select>
                                 </div>
 
                                 <div class="form-group col-md-3">
-                                    <label>Status Pendaftaran</label>
-                                    <select name="status_pendaftaran" class="form-control">
-                                        <option value="">-- pilih --</option>
-                                        <option value="pending" <?= ((($_POST['status_pendaftaran'] ?? $row['status_pendaftaran']) === 'pending') ? 'selected':'') ?>>pending</option>
-                                        <option value="acc_dosen" <?= ((($_POST['status_pendaftaran'] ?? $row['status_pendaftaran']) === 'acc_dosen') ? 'selected':'') ?>>acc_dosen</option>
-                                        <option value="acc_ketua" <?= ((($_POST['status_pendaftaran'] ?? $row['status_pendaftaran']) === 'acc_ketua') ? 'selected':'') ?>>acc_ketua</option>
-                                    </select>
+                                    <label>Tanggal Daftar</label>
+                                    <input type="date" class="form-control" value="<?= htmlspecialchars($_POST['tanggal_daftar'] ?? $row['tanggal_daftar']) ?>" readonly>
                                 </div>
                             </div>
 
                             <div class="form-group">
-                                <label>Tanggal Daftar</label>
-                                <input type="date" name="tanggal_daftar" class="form-control" value="<?= htmlspecialchars($_POST['tanggal_daftar'] ?? $row['tanggal_daftar']) ?>">
-                            </div>
-
-                            <div class="form-group">
-                                <label>User Account (opsional)</label>
-                                <select name="user_id" class="form-control">
-                                    <option value="">-- pilih akun --</option>
-                                    <?php foreach ($users_list as $u): ?>
-                                        <?php $selu = ( (isset($_POST['user_id']) ? $_POST['user_id'] : $row['user_id']) == $u['user_id']) ? 'selected' : ''; ?>
-                                        <option value="<?= (int)$u['user_id'] ?>" <?= $selu ?>><?= htmlspecialchars($u['username']) ?></option>
-                                    <?php endforeach; ?>
-                                </select>
+                                <label>User Account</label>
+                                <input type="text" class="form-control" 
+                                    value="<?= htmlspecialchars(($row['user_id'] && isset($users_list)) 
+                                        ? array_values(array_filter($users_list, fn($u)=>$u['user_id']==$row['user_id']))[0]['username'] 
+                                        : '-') ?>" readonly>
                             </div>
 
                             <div class="d-flex gap-2">
