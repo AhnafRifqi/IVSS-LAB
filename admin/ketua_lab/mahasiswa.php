@@ -78,7 +78,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'ketua') {
                                 <th>No. Telp</th>
                                 <th>Pembimbing</th>
                                 <th>Status Mahasiswa</th>
-                                <th>Status Pendaftaran</th>
                                 <th>User</th>
                                 <th>Aksi</th>
                             </tr>
@@ -99,8 +98,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'ketua') {
                                 <td><?= htmlspecialchars($row['no_telp'] ?? '-') ?></td>
                                 <td><?= htmlspecialchars($row['pembimbing_nama'] ?? '-') ?></td>
                                 <td class="text-center"><?= htmlspecialchars($row['status_mahasiswa'] ?? '-') ?></td>
-                                <td class="text-center"><?= htmlspecialchars($row['status_pendaftaran'] ?? '-') ?></td>
-
                                 <td>
                                     <?= htmlspecialchars($row['username'] ?? ('user_id:' . ($row['user_id'] ?? '-'))) ?>
                                 </td>
