@@ -13,7 +13,6 @@ if ($id === '') {
     exit;
 }
 
-// ambil data existing
 $q = pg_query_params($koneksi, 'SELECT * FROM visimisi WHERE id = $1', array($id));
 if (!$q || pg_num_rows($q) === 0) {
     header('Location: visimisi.php?msg=notfound');
@@ -35,14 +34,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             array($nama, $isi, $id)
         );
         if ($res) {
-            // redirect ke halaman list dengan pesan sukses
             header('Location: visimisi.php?msg=updated');
             exit;
         } else {
             $alert = '<div class="alert alert-danger">Gagal mengupdate data. Cek koneksi / constraint.</div>';
         }
     }
-    // jika ada error, refresh $row agar form menampilkan nilai yang dikirim user
+
     $row['nama'] = $_POST['nama'] ?? $row['nama'];
     $row['isi']  = $_POST['isi'] ?? $row['isi'];
 }
@@ -54,6 +52,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Edit Visi & Misi - Admin</title>
     <link href="../assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
     <link href="../assets/css/sb-admin-2.min.css" rel="stylesheet">
+    <!-- Summernote CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.18/summernote-bs4.min.css" rel="stylesheet">
 </head>
 <body id="page-top">
 <div id="wrapper">
@@ -63,11 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div id="content-wrapper" class="d-flex flex-column">
         <div id="content">
 
-            <!-- Topbar -->
             <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
-                <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
-                    <i class="fa fa-bars"></i>
-                </button>
                 <span class="h5 mb-0 text-primary font-weight-bold">Edit Visi & Misi</span>
             </nav>
 
@@ -78,6 +74,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="card-body">
                         <?= $alert ?>
 
+                        <form method="POST">
+                            <div class="form-group">
+                                <label>ID (tidak bisa diubah)</label>
+                                <input type="text" class="form-control" value="<?= htmlspecialchars($row['id']) ?>" disabled>
+                            </div>
+
                             <div class="form-group">
                                 <label>Nama</label>
                                 <input type="text" name="nama" class="form-control" value="<?= htmlspecialchars($row['nama'] ?? '') ?>" required>
@@ -85,7 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                             <div class="form-group">
                                 <label>Isi</label>
-                                <textarea name="isi" class="form-control" rows="6" required><?= htmlspecialchars($row['isi'] ?? '') ?></textarea>
+                                <textarea id="summernote" name="isi" required><?= htmlspecialchars($row['isi'] ?? '') ?></textarea>
                             </div>
 
                             <div class="d-flex gap-2">
@@ -98,7 +100,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
             </div>
-            <!-- /.container-fluid -->
 
         </div>
         <?php include '../inc/footer.php'; ?>
@@ -108,5 +109,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <script src="../assets/vendor/jquery/jquery.min.js"></script>
 <script src="../assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script src="../assets/js/sb-admin-2.min.js"></script>
+
+<!-- Summernote JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.18/summernote-bs4.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    $('#summernote').summernote({
+        height: 250,
+        toolbar: [
+            ['style', ['bold', 'italic', 'underline', 'clear']],
+            ['font', ['fontsize', 'color']],
+            ['para', ['ul', 'ol', 'paragraph']],
+            ['insert', ['link']],
+            ['view', ['codeview']]
+        ]
+    });
+});
+</script>
+
 </body>
 </html>
