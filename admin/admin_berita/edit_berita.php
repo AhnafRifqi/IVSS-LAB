@@ -1,61 +1,58 @@
 <?php
-// edit_berita.php
-include '../inc/koneksi.php';
 session_start();
+include '../inc/koneksi.php';
+
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'berita') {
+    header('Location: ../login.php'); 
+    exit;
+}
+
+$id = $_GET['id'] ?? null;
+if (!$id) { header('Location: berita.php'); exit; }
+
+// ambil data lama
+$sql = 'SELECT * FROM berita WHERE berita_id=$1';
+$berita = pg_fetch_assoc(pg_query_params($koneksi, $sql, [$id]));
+if (!$berita) { header('Location: berita.php'); exit; }
 
 $error = '';
-$id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
-if ($id <= 0) { header('Location: berita.php'); exit; }
-
-$q = pg_query_params($koneksi, 'SELECT berita_id, judul, isi, gambar, penulis, tanggal FROM berita WHERE berita_id = $1', [$id]);
-if (!$q || pg_num_rows($q) === 0) { header('Location: berita.php'); exit; }
-$row = pg_fetch_assoc($q);
-pg_free_result($q);
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $judul   = trim($_POST['judul'] ?? '');
     $penulis = trim($_POST['penulis'] ?? '');
     $isi     = trim($_POST['isi'] ?? '');
-    $tanggal = trim($_POST['tanggal'] ?? '') ?: date('Y-m-d');
+    $tanggal = trim($_POST['tanggal'] ?? '');
+    if ($tanggal === '') $tanggal = null;
 
-    if ($judul === '') $error = 'Judul wajib diisi.';
-    if ($isi === '') $error = $error ? $error . ' Isi juga wajib.' : 'Isi wajib diisi.';
+    if (!$judul || !$isi) $error = 'Judul dan isi wajib diisi.';
 
-    $foto_saved = $row['gambar'];
+    $gambar_path = $berita['gambar']; // default pakai path lama
+
     if (empty($error) && !empty($_FILES['gambar_file']['name'])) {
-        $up = $_FILES['gambar_file'];
-        $maxBytes = 3 * 1024 * 1024;
-        if ($up['error'] !== UPLOAD_ERR_OK) {
-            $error = 'Gagal upload file.';
-        } elseif ($up['size'] > $maxBytes) {
-            $error = 'Ukuran file terlalu besar (maks 3MB).';
+        $file = $_FILES['gambar_file'];
+        $targetFile = '../assets/img/' . basename($file['name']);
+
+        if (move_uploaded_file($file['tmp_name'], $targetFile)) {
+            $gambar_path = $file['name']; // simpan nama asli ke DB
         } else {
-            $imgInfo = @getimagesize($up['tmp_name']);
-            if ($imgInfo === false) {
-                $error = 'File bukan gambar valid.';
-            } else {
-                $raw = file_get_contents($up['tmp_name']);
-                $foto_saved = 'data:' . $imgInfo['mime'] . ';base64,' . base64_encode($raw);
-            }
+            $error = 'Gagal upload gambar.';
         }
     }
 
     if (empty($error)) {
-        $sql = 'UPDATE berita_id SET judul=$1, isi=$2, gambar=$3, penulis=$4, tanggal=$5 WHERE berita_id=$6';
+        $sql = 'UPDATE berita SET judul=$1, isi=$2, gambar=$3, penulis=$4, tanggal=$5 WHERE berita_id=$6';
         $res = pg_query_params($koneksi, $sql, [
             $judul,
-            $isi !== '' ? $isi : null,
-            $foto_saved !== '' ? $foto_saved : null,
-            $penulis !== '' ? $penulis : null,
-            $tanggal,
+            $isi,
+            $gambar_path,
+            $penulis ?: null,
+            $tanggal ?: null,
             $id
         ]);
         if ($res) {
-            pg_free_result($res);
             header('Location: berita.php?msg=updated');
             exit;
         } else {
-            $error = 'Gagal mengupdate data.';
+            $error = 'Gagal menyimpan berita.';
         }
     }
 }
@@ -63,71 +60,71 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="utf-8">
-    <title>Edit Berita</title>
-    <link href="../assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
-    <link href="../assets/css/sb-admin-2.min.css" rel="stylesheet">
-    <style>.img-thumb{ width:180px; height:auto; border-radius:6px; object-fit:cover; display:block; margin-bottom:8px; }</style>
+<meta charset="utf-8">
+<title>Edit Berita</title>
+<link href="../assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link href="../assets/css/sb-admin-2.min.css" rel="stylesheet">
+<style>.img-thumb{ width:180px; height:auto; border-radius:6px; object-fit:cover; display:block; margin-bottom:8px; }</style>
 </head>
 <body id="page-top">
 <div id="wrapper">
-    <?php include 'inc/sidebar.php'; ?>
-    <div id="content-wrapper" class="d-flex flex-column">
-        <div id="content">
-            <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 shadow">
-                <span class="h5 mb-0 text-primary">Edit Berita</span>
-            </nav>
+<?php include 'inc/sidebar.php'; ?>
+<div id="content-wrapper" class="d-flex flex-column">
+    <div id="content">
+        <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 shadow">
+            <span class="h5 mb-0 text-primary">Edit Berita</span>
+        </nav>
+        <div class="container-fluid">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <?php if ($error): ?>
+                        <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
+                    <?php endif; ?>
 
-            <div class="container-fluid">
-                <div class="card shadow-sm">
-                    <div class="card-body">
-                        <?php if ($error): ?><div class="alert alert-danger"><?= htmlspecialchars($error) ?></div><?php endif; ?>
+                    <form method="POST" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label>Judul</label>
+                            <input type="text" name="judul" class="form-control" value="<?= htmlspecialchars($_POST['judul'] ?? $berita['judul']) ?>" required>
+                        </div>
 
-                        <form method="POST" enctype="multipart/form-data">
-                            <div class="form-group">
-                                <label>Judul</label>
-                                <input type="text" name="judul" class="form-control" value="<?= htmlspecialchars($_POST['judul'] ?? $row['judul']) ?>" required>
-                            </div>
+                        <div class="form-group">
+                            <label>Penulis</label>
+                            <input type="text" name="penulis" class="form-control" value="<?= htmlspecialchars($_POST['penulis'] ?? $berita['penulis']) ?>">
+                        </div>
 
-                            <div class="form-group">
-                                <label>Penulis</label>
-                                <input type="text" name="penulis" class="form-control" value="<?= htmlspecialchars($_POST['penulis'] ?? $row['penulis']) ?>">
-                            </div>
+                        <div class="form-group">
+                            <label>Gambar (opsional)</label>
+                            <input type="file" name="gambar_file" class="form-control-file mb-2" accept="image/*" onchange="previewFile(event,'preview')">
+                            <small class="form-text text-muted">jpg/jpeg/png/gif/webp — max 3MB.</small>
+                            <?php if($berita['gambar']): ?>
+                                <img src="../assets/img/<?= htmlspecialchars($berita['gambar']) ?>" class="img-thumb" alt="gambar">
+                            <?php else: ?>
+                                <img id="preview" class="img-thumb" style="display:none;" alt="preview">
+                            <?php endif; ?>
+                        </div>
 
-                            <div class="form-group">
-                                <label>Gambar</label><br>
-                                <?php if (!empty($row['gambar'])): ?>
-                                    <img id="preview" src="<?= htmlspecialchars($row['gambar'], ENT_QUOTES) ?>" class="img-thumb" alt="gambar">
-                                <?php else: ?>
-                                    <img id="preview" class="img-thumb" style="display:none;" alt="preview">
-                                <?php endif; ?>
-                                <input type="file" name="gambar_file" class="form-control-file mt-2" accept="image/*" onchange="previewFile(event,'preview')">
-                                <small class="form-text text-muted">Kosongi untuk mempertahankan gambar lama.</small>
-                            </div>
+                        <div class="form-group">
+                            <label>Isi</label>
+                            <textarea name="isi" rows="8" class="form-control"><?= htmlspecialchars($_POST['isi'] ?? $berita['isi']) ?></textarea>
+                        </div>
 
-                            <div class="form-group">
-                                <label>Isi</label>
-                                <textarea name="isi" rows="8" class="form-control"><?= htmlspecialchars($_POST['isi'] ?? $row['isi']) ?></textarea>
-                            </div>
+                        <div class="form-group">
+                            <label>Tanggal</label>
+                            <input type="date" name="tanggal" class="form-control" value="<?= htmlspecialchars($_POST['tanggal'] ?? $berita['tanggal']) ?>">
+                        </div>
 
-                            <div class="form-group">
-                                <label>Tanggal</label>
-                                <input type="date" name="tanggal" class="form-control" value="<?= htmlspecialchars($_POST['tanggal'] ?? $row['tanggal'] ?? date('Y-m-d')) ?>">
-                            </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-success" type="submit"><i class="fas fa-save"></i> Simpan</button>
+                            <a href="berita.php" class="btn btn-secondary">Batal</a>
+                        </div>
+                    </form>
 
-                            <div class="d-flex gap-2">
-                                <button class="btn btn-primary" type="submit"><i class="fas fa-save"></i> Update</button>
-                                <a href="berita.php" class="btn btn-secondary">Kembali</a>
-                            </div>
-                        </form>
-
-                    </div>
                 </div>
             </div>
-
         </div>
-        <?php include '../inc/footer.php'; ?>
     </div>
+<?php include '../inc/footer.php'; ?>
+</div>
 </div>
 
 <script>
