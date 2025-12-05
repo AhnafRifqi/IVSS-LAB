@@ -7,28 +7,28 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'ketua') {
     exit;
 }
 
-$error = '';
-$nip = $_GET['nip'] ?? '';
-if ($nip === '') { header('Location: dosen.php'); exit; }
+$nip = isset($_GET['nip']) ? trim($_GET['nip']) : '';
+if ($nip === '') {
+    header('Location: dosen.php');
+    exit;
+}
 
-// ambil data dosen
+// ambil data existing
 $q = pg_query_params($koneksi, 'SELECT * FROM dosen WHERE nip=$1', [$nip]);
-if (!$q || pg_num_rows($q) === 0) { header('Location: dosen.php'); exit; }
+if (!$q || pg_num_rows($q) === 0) {
+    header('Location: dosen.php');
+    exit;
+}
 $row = pg_fetch_assoc($q);
 pg_free_result($q);
 
-// ambil username terkait (read-only)
-$current_user = null;
-if (!empty($row['user_id'])) {
-    $u_q = pg_query_params($koneksi, 'SELECT username FROM users WHERE user_id=$1', [$row['user_id']]);
-    if ($u_q && pg_num_rows($u_q)) $current_user = pg_fetch_assoc($u_q)['username'];
-    if ($u_q) pg_free_result($u_q);
-}
+$error = '';
+$success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $nama    = trim($_POST['nama'] ?? '');
-    $nidn    = trim($_POST['nidn'] ?? '');
-    $email   = trim($_POST['email'] ?? '');
+    $nama = trim($_POST['nama'] ?? '');
+    $nidn = trim($_POST['nidn'] ?? '');
+    $email = trim($_POST['email'] ?? '');
     $jabatan = trim($_POST['jabatan'] ?? '');
     $pendidikan = trim($_POST['pendidikan'] ?? '');
     $linkedin = trim($_POST['linkedin'] ?? '');
@@ -36,45 +36,65 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $sinta = trim($_POST['sinta'] ?? '');
     $scopus = trim($_POST['scopus'] ?? '');
 
-    if ($nama === '' || $email === '') $error = 'Nama dan Email wajib diisi.';
+    if ($nama === '' || $email === '') {
+        $error = 'Nama dan Email wajib diisi.';
+    }
 
-    // handle upload foto base64
+    // default tetap nama file lama
     $foto_saved = $row['foto'];
+
     if ($error === '' && !empty($_FILES['foto_file']['name'])) {
         $up = $_FILES['foto_file'];
         $ext = strtolower(pathinfo($up['name'], PATHINFO_EXTENSION));
-        if (!in_array($ext, ['jpg','jpeg','png'])) $error = 'Tipe file foto tidak diperbolehkan.';
-        else {
-            $bin = @file_get_contents($up['tmp_name']);
-            if ($bin === false) $error = 'Gagal membaca file foto.';
-            else $foto_saved = 'data:image/'.$ext.';base64,'.base64_encode($bin);
+        $allowed = ['jpg','jpeg','png'];
+        if (!in_array($ext, $allowed)) {
+            $error = 'Tipe file foto tidak diperbolehkan. (jpg, jpeg, png)';
+        } else {
+            $targetDir = '../assets/img/';
+            if (!is_dir($targetDir)) mkdir($targetDir, 0755, true);
+            $filename = basename($up['name']);
+            $targetFile = $targetDir . $filename;
+
+            if (move_uploaded_file($up['tmp_name'], $targetFile)) {
+                $foto_saved = $filename; // tetap nama file asli untuk db
+            } else {
+                $error = 'Gagal mengunggah foto.';
+            }
         }
     }
 
     if ($error === '') {
-        $sql = 'UPDATE dosen SET nama=$1, nidn=$2, email=$3, jabatan=$4, foto=$5, pendidikan=$6, linkedin=$7, google_scholar=$8, sinta=$9, scopus=$10 WHERE nip=$11';
+        $sql = 'UPDATE dosen SET nama=$1, nidn=$2, email=$3, jabatan=$4, foto=$5, linkedin=$6, google_scholar=$7, sinta=$8, scopus=$9, pendidikan=$10
+                WHERE nip=$11';
         $params = [
             $nama,
-            $nidn ?: null,
+            $nidn !== '' ? $nidn : null,
             $email,
-            $jabatan ?: null,
-            $foto_saved ?: null,
-            $pendidikan ?: null,
-            $linkedin ?: null,
-            $google_scholar ?: null,
-            $sinta ?: null,
-            $scopus ?: null,
+            $jabatan !== '' ? $jabatan : null,
+            $foto_saved !== '' ? $foto_saved : null,
+            $linkedin !== '' ? $linkedin : null,
+            $google_scholar !== '' ? $google_scholar : null,
+            $sinta !== '' ? $sinta : null,
+            $scopus !== '' ? $scopus : null,
+            $pendidikan !== '' ? $pendidikan : null,
             $nip
         ];
+
         $res = pg_query_params($koneksi, $sql, $params);
         if ($res) {
             pg_free_result($res);
-            header('Location: dosen.php?msg=updated');
-            exit;
-        } else $error = 'Gagal mengupdate data dosen.';
+            $success = 'Data dosen berhasil diperbarui.';
+            // refresh data
+            $q2 = pg_query_params($koneksi, 'SELECT * FROM dosen WHERE nip=$1', [$nip]);
+            $row = pg_fetch_assoc($q2);
+            pg_free_result($q2);
+        } else {
+            $error = 'Gagal mengupdate data.';
+        }
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -82,7 +102,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <title>Edit Dosen</title>
 <link href="../assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
 <link href="../assets/css/sb-admin-2.min.css" rel="stylesheet">
-<style>.img-thumb { width:100px; height:auto; border-radius:6px; object-fit:cover; }</style>
+<link href="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote.min.css" rel="stylesheet">
+<style>.img-thumb { width:100px; height:auto; border-radius:6px; object-fit:cover; margin-bottom:8px; }</style>
 </head>
 <body id="page-top">
 <div id="wrapper">
@@ -96,50 +117,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="card shadow-sm">
         <div class="card-body">
             <?php if ($error): ?><div class="alert alert-danger"><?= htmlspecialchars($error) ?></div><?php endif; ?>
+            <?php if ($success): ?><div class="alert alert-success"><?= htmlspecialchars($success) ?></div><?php endif; ?>
+
             <form method="POST" enctype="multipart/form-data">
-                <div class="form-group">
-                    <label>NIP (tidak bisa diubah)</label>
-                    <input type="text" class="form-control" value="<?= htmlspecialchars($row['nip']) ?>" disabled>
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label>NIP</label>
+                        <input type="text" class="form-control" value="<?= htmlspecialchars($row['nip']) ?>" readonly>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label>NIDN</label>
+                        <input type="text" name="nidn" class="form-control" value="<?= htmlspecialchars($_POST['nidn'] ?? $row['nidn']) ?>">
+                    </div>
                 </div>
+
                 <div class="form-group">
                     <label>Nama</label>
                     <input type="text" name="nama" class="form-control" value="<?= htmlspecialchars($_POST['nama'] ?? $row['nama']) ?>" required>
                 </div>
+
                 <div class="form-row">
-                    <div class="form-group col-md-6"><label>NIDN</label><input type="text" name="nidn" class="form-control" value="<?= htmlspecialchars($_POST['nidn'] ?? $row['nidn']) ?>"></div>
-                    <div class="form-group col-md-6"><label>Email</label><input type="email" name="email" class="form-control" value="<?= htmlspecialchars($_POST['email'] ?? $row['email']) ?>" required></div>
+                    <div class="form-group col-md-6">
+                        <label>Email</label>
+                        <input type="email" name="email" class="form-control" value="<?= htmlspecialchars($_POST['email'] ?? $row['email']) ?>" required>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label>Jabatan</label>
+                        <input type="text" name="jabatan" class="form-control" value="<?= htmlspecialchars($_POST['jabatan'] ?? $row['jabatan']) ?>">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Jabatan</label>
-                    <input type="text" name="jabatan" class="form-control" value="<?= htmlspecialchars($_POST['jabatan'] ?? $row['jabatan']) ?>">
-                </div>
+
                 <div class="form-group">
                     <label>Foto</label><br>
                     <?php if (!empty($row['foto'])): ?>
-                        <img src="<?= htmlspecialchars($row['foto'], ENT_QUOTES) ?>" class="img-thumb" alt="foto" style="display:block;margin-bottom:8px;">
+                        <img id="preview" src="../assets/img/<?= htmlspecialchars($row['foto']) ?>" class="img-thumb" alt="foto">
+                    <?php else: ?>
+                        <img id="preview" src="" class="img-thumb" style="display:none;">
                     <?php endif; ?>
-                    <input type="file" name="foto_file" class="form-control mt-2" accept=".jpg,.jpeg,.png">
-                    <small class="form-text text-muted">Upload akan menggantikan foto saat ini. Foto disimpan sebagai base64 di DB.</small>
+                    <input type="file" name="foto_file" class="form-control mt-2" accept=".jpg,.jpeg,.png" onchange="previewFile(event,'preview')">
+                    <small class="form-text text-muted">Kosongi untuk mempertahankan foto lama.</small>
                 </div>
+
                 <div class="form-group">
                     <label>Pendidikan</label>
-                    <textarea name="pendidikan" class="form-control" rows="3"><?= htmlspecialchars($_POST['pendidikan'] ?? $row['pendidikan']) ?></textarea>
+                    <textarea name="pendidikan" id="pendidikan" class="form-control"><?=($_POST['pendidikan'] ?? $row['pendidikan']) ?></textarea>
                 </div>
                 <div class="form-row">
                     <div class="form-group col-md-6"><label>LinkedIn</label><input type="text" name="linkedin" class="form-control" value="<?= htmlspecialchars($_POST['linkedin'] ?? $row['linkedin']) ?>"></div>
                     <div class="form-group col-md-6"><label>Google Scholar</label><input type="text" name="google_scholar" class="form-control" value="<?= htmlspecialchars($_POST['google_scholar'] ?? $row['google_scholar']) ?>"></div>
                 </div>
+
                 <div class="form-row">
                     <div class="form-group col-md-6"><label>Sinta</label><input type="text" name="sinta" class="form-control" value="<?= htmlspecialchars($_POST['sinta'] ?? $row['sinta']) ?>"></div>
                     <div class="form-group col-md-6"><label>Scopus</label><input type="text" name="scopus" class="form-control" value="<?= htmlspecialchars($_POST['scopus'] ?? $row['scopus']) ?>"></div>
                 </div>
-                <div class="form-group">
-                    <label>User Account</label>
-                    <input type="text" class="form-control" value="<?= htmlspecialchars($current_user ?? '-') ?>" readonly>
-                </div>
+
                 <div class="d-flex gap-2">
                     <button class="btn btn-primary" type="submit"><i class="fas fa-save"></i> Update</button>
-                    <a href="dosen.php" class="btn btn-light">Batal</a>
+                    <a href="dosen.php" class="btn btn-secondary">Batal</a>
                 </div>
             </form>
         </div>
@@ -149,7 +184,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <?php include '../inc/footer.php'; ?>
 </div>
 </div>
+
 <script src="../assets/vendor/jquery/jquery.min.js"></script>
 <script src="../assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('#pendidikan').summernote({
+        height: 150,
+        placeholder: 'Isi pendidikan dosen...',
+        toolbar: [
+            ['style', ['bold','italic','underline','clear']],
+            ['para', ['ul','ol','paragraph']],
+            ['insert', ['link']],
+            ['view', ['fullscreen','codeview']]
+        ]
+    });
+});
+
+function previewFile(e, id) {
+    const file = e.target.files[0];
+    const img = document.getElementById(id);
+    if (!file) { img.style.display='none'; return; }
+    const reader = new FileReader();
+    reader.onload = function(ev){ img.src = ev.target.result; img.style.display='block'; }
+    reader.readAsDataURL(file);
+}
+</script>
 </body>
 </html>
