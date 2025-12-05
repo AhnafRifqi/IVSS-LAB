@@ -78,8 +78,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'ketua') {
                                     <tr>
                                         <td class="text-center"><?= $no++; ?></td>
                                         <td><?= htmlspecialchars($row['nama']); ?></td>
-                                        <td class="truncate" title="<?= htmlspecialchars($row['isi']); ?>">
-                                            <?= htmlspecialchars($row['isi']); ?>
+                                        <td class="truncate"><?= ($row['isi']); ?>
                                         </td>
                                         <td class="text-center">
 
