@@ -12,7 +12,9 @@ $user_id = $_SESSION['user_id'];
 
 // Ambil data user + dosen
 $query = '
-    SELECT u.username, u.role, d.nama, d.nip, d.jabatan, d.email, d.foto, d.linkedin, d.google_scholar, d.sinta, d.pendidikan
+    SELECT u.username, u.role,
+           d.nama, d.nip, d.jabatan, d.email, d.foto,
+           d.linkedin, d.google_scholar, d.sinta, d.scopus, d.pendidikan
     FROM users u
     LEFT JOIN dosen d ON d.user_id = u.user_id
     WHERE u.user_id = $1
@@ -23,15 +25,21 @@ if ($result && pg_num_rows($result) === 1) {
     $admin = pg_fetch_assoc($result);
 } else {
     $admin = [
-        'username' => $_SESSION['username'],
-        'role' => $_SESSION['role'],
-        'nama' => $_SESSION['username'],
+        'username' => $_SESSION['username'] ?? '',
+        'role'     => $_SESSION['role'] ?? '',
+        'nama'     => $_SESSION['username'] ?? '',
+        'foto'     => null
     ];
 }
-
 if ($result) pg_free_result($result);
-?>
 
+$profile_img_src = '';
+
+if (!empty($admin['foto'])) {
+    $profile_img_src = '../assets/img/' . $admin['foto'];
+}
+
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -83,9 +91,15 @@ if ($result) pg_free_result($result);
                     <div class="col-lg-4">
                         <div class="card mb-4 shadow-sm">
                             <div class="card-body text-center">
-                                <img src="<?= htmlspecialchars($admin['foto']) ?>" alt="Foto Admin" class="profile-img mb-3">
-                                <h5 class="card-title mb-0"><?= htmlspecialchars($admin['nama']) ?></h5>
-                                <p class="text-muted small">Anda login sebagai <?= htmlspecialchars($admin['role']) ?>.</p>
+
+                                <?php if (!empty($profile_img_src)) : ?>
+                                    <img src="<?= htmlspecialchars($profile_img_src) ?>" class="profile-img mb-3">
+                                <?php else: ?>
+                                    <div class="mb-3" style="width:150px; height:150px; border-radius:8px; background:#eee;"></div>
+                                <?php endif; ?>
+
+                                <h5 class="card-title mb-0"><?= htmlspecialchars($admin['nama'] ?? '') ?></h5>
+                                <p class="text-muted small">Anda login sebagai <?= htmlspecialchars($admin['role'] ?? '') ?>.</p>
 
                                 <a href="ubah_password.php?id=<?= urlencode($user_id) ?>" class="btn btn-secondary btn-sm mt-2">
                                     <i class="fas fa-key mr-1"></i> Ubah Password
@@ -94,55 +108,38 @@ if ($result) pg_free_result($result);
                         </div>
                     </div>
 
-                    <!-- Profil Akun -->
+                    <!-- Profil Info -->
                     <div class="col-lg-8">
                         <div class="card shadow-sm">
-                            <div class="card-header">
-                                <strong>Profil Akun</strong>
-                            </div>
+                            <div class="card-header"><strong>Profil Akun</strong></div>
                             <div class="card-body">
+
                                 <p><span class="info-label">NIP:</span> <?= htmlspecialchars($admin['nip'] ?? '-') ?></p>
                                 <p><span class="info-label">Jabatan:</span> <?= htmlspecialchars($admin['jabatan'] ?? '-') ?></p>
                                 <p><span class="info-label">Email:</span> <?= htmlspecialchars($admin['email'] ?? '-') ?></p>
+
                                 <p><span class="info-label">LinkedIn:</span>
-                                    <?php if (!empty($admin['linkedin'])): ?>
-                                        <a href="<?= htmlspecialchars($admin['linkedin']) ?>" target="_blank">Klik di sini</a>
-                                    <?php else: ?>
-                                        -
-                                    <?php endif; ?>
+                                    <?= !empty($admin['linkedin']) ? '<a target="_blank" href="'.htmlspecialchars($admin['linkedin']).'">Klik di sini</a>' : '-' ?>
                                 </p>
 
                                 <p><span class="info-label">Google Scholar:</span>
-                                    <?php if (!empty($admin['google_scholar'])): ?>
-                                        <a href="<?= htmlspecialchars($admin['google_scholar']) ?>" target="_blank">Klik di sini</a>
-                                    <?php else: ?>
-                                        -
-                                    <?php endif; ?>
+                                    <?= !empty($admin['google_scholar']) ? '<a target="_blank" href="'.htmlspecialchars($admin['google_scholar']).'">Klik di sini</a>' : '-' ?>
                                 </p>
 
                                 <p><span class="info-label">Sinta:</span>
-                                    <?php if (!empty($admin['sinta'])): ?>
-                                        <a href="<?= htmlspecialchars($admin['sinta']) ?>" target="_blank">Klik di sini</a>
-                                    <?php else: ?>
-                                        -
-                                    <?php endif; ?>
+                                    <?= !empty($admin['sinta']) ? '<a target="_blank" href="'.htmlspecialchars($admin['sinta']).'">Klik di sini</a>' : '-' ?>
                                 </p>
 
                                 <p><span class="info-label">Scopus:</span>
-                                    <?php if (!empty($admin['scopus'])): ?>
-                                        <a href="<?= htmlspecialchars($admin['scopus']) ?>" target="_blank">Klik di sini</a>
-                                    <?php else: ?>
-                                        -
-                                    <?php endif; ?>
+                                    <?= !empty($admin['scopus']) ? '<a target="_blank" href="'.htmlspecialchars($admin['scopus']).'">Klik di sini</a>' : '-' ?>
                                 </p>
-                                </p>
+
                             </div>
                         </div>
                     </div>
                 </div>
 
             </div>
-            <!-- /.container-fluid -->
         </div>
 
         <?php include '../inc/footer.php'; ?>
