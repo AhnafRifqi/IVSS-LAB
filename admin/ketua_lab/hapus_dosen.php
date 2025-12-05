@@ -9,7 +9,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'ketua') {
 }
 
 $nip = isset($_GET['nip']) ? trim($_GET['nip']) : '';
-if ($nip === '') { header('Location: dashboard_dosen.php?msg=error'); exit; }
+if ($nip === '') { header('Location: dosen.php?msg=error'); exit; }
 
 // ambil foto supaya bisa dihapus jika tersimpan sebagai file
 $q = pg_query_params($koneksi, 'SELECT foto FROM dosen WHERE nip = $1', array($nip));
@@ -27,9 +27,9 @@ if ($q && pg_num_rows($q) === 1) {
 $res = pg_query_params($koneksi, 'DELETE FROM dosen WHERE nip = $1', array($nip));
 if ($res && pg_affected_rows($res) > 0) {
     pg_free_result($res);
-    header('Location: dashboard_dosen.php?msg=deleted');
+    header('Location: dosen.php?msg=deleted');
     exit;
 } else {
-    header('Location: dashboard_dosen.php?msg=error');
+    header('Location: dosen.php?msg=error');
     exit;
 }
