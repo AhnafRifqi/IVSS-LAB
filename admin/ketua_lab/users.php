@@ -169,7 +169,7 @@ if ($users === false) $users = [];
                                     <div class="form-group">
                                         <label>Password</label>
                                         <input name="password" type="password" class="form-control" required>
-                                        <small class="form-text text-muted">Plain password (untuk produksi, gunakan password_hash)</small>
+                                        <small class="form-text text-muted"><strong>Plain password</strong> (User disarankan login agar berubah menjadi Hash+salt dan ubah password pada halaman profil)</small>
                                     </div>
 
                                     <div class="form-group">
