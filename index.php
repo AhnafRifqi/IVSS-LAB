@@ -55,21 +55,28 @@ $batas_karakter = 150;
     <?php include('inc/navbar.php');?>
 
     <section id="hero-area" class="header-area header-eight" style="background-color: #1A1A37;">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-lg-6 col-md-12 col-12">
-                    <div class="header-content">
-                        <h1 style="color: #ffffff;"> Selamat Datang di Laboratorium Visi Cerdas dan Sistem Cerdas</h1>
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 col-md-12 col-12">
+                <div class="header-content">
+                    <h1 style="color: #ffffff;"> Selamat Datang di Laboratorium Visi Cerdas dan Sistem Cerdas</h1>
+                    
+                    <div class="button mt-4">
+                        <a href="admin/index.php" class="btn btn-primary me-3 fw-bold" 
+                            style="background-color: #FFBC3B; border-color: #FFBC3B; color: #1A1A37;">
+                            LOGIN
+                        </a>
                     </div>
-                </div>
-                <div class="col-lg-6 col-md-12 col-12">
-                    <div class="header-image">
-                        <img src="assets/images/header/gambar1.jpg" alt="#" />
                     </div>
+            </div>
+            <div class="col-lg-6 col-md-12 col-12">
+                <div class="header-image">
+                    <img src="assets/images/header/gambar1.jpg" alt="#" />
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
     <section id="fokus-riset" class="py-5 bg-light">
         <div class="container">
             <div class="row">
