@@ -1,40 +1,30 @@
 <?php
-// Pastikan file koneksi.php ada dan koneksi ke PostgreSQL berhasil dibuat
 require_once 'inc/koneksi.php';
 
 // 1. Inisialisasi variabel pencarian
 $search_query = "";
 $where_clause = "";
 
-// Cek apakah ada input pencarian (keyword) dari URL (GET request)
 if (isset($_GET['keyword']) && !empty($_GET['keyword'])) {
     $search_query = pg_escape_string($koneksi, $_GET['keyword']); // Bersihkan input dari SQL Injection
-    
-    // PERBAIKAN: HANYA MENCARI DI KOLOM BERTIPE STRING (judul dan isi). 
-    // Kolom 'penulis' (integer) dihilangkan dari pencarian ILIKE.
     $where_clause = " WHERE 
         judul ILIKE '%{$search_query}%' OR 
         isi ILIKE '%{$search_query}%'
     ";
 }
 
-// 2. Query untuk mengambil semua berita terbaru, diurutkan berdasarkan tanggal, dengan filter pencarian
 $sql = "SELECT * FROM berita {$where_clause} ORDER BY tanggal DESC";
 
 $result = pg_query($koneksi, $sql);
 
-// 3. Simpan hasil ke array
 $news_items = [];
 if ($result) {
     while ($row = pg_fetch_assoc($result)) {
-        // Tambahkan kolom tanggal yang sudah diformat untuk mempermudah tampilan
         $row['tanggal_formatted'] = date('d M Y', strtotime($row['tanggal']));
         $news_items[] = $row;
     }
 } else {
-    // Handle error jika query gagal
     error_log("Database Query Error: " . pg_last_error($koneksi));
-    // Anda bisa menampilkan pesan error yang lebih user-friendly di halaman web
 }
 ?>
 
@@ -101,7 +91,7 @@ if ($result) {
                             <div class="row g-0">
                                 <div class="col-lg-6">
                                     <div class="position-relative overflow-hidden" style="height: 400px;">
-                                        <img src="<?= htmlspecialchars($featured['gambar']); ?>" alt="<?= htmlspecialchars($featured['judul']); ?>"
+                                        <img src="admin/assets/img/<?php echo htmlspecialchars($featured['gambar']); ?>" alt="<?= htmlspecialchars($featured['judul']); ?>"
                                             class="w-100 h-100 object-fit-cover">
                                     </div>
                                 </div>

@@ -7,7 +7,7 @@
                     <div class="footer-about">
                         <div class="d-flex align-items-center gap-2 mb-2">
                             <div class="logo">
-                                <img src="assets/images/logo_polinema.png" alt="Logo Polinema"
+                                <img src="admin/assets/img/Polinema_logo.png" alt="Logo Polinema"
                                     style="max-width: 60px; height: auto;" />
                             </div>
 
@@ -51,11 +51,11 @@
                         </p>
 
                         <div class="social-links mt-3 d-flex gap-2">
-                            <a href="#" class="d-inline-block rounded-circle text-center"
+                            <a href="https://www.youtube.com/@jtipolinema367" class="d-inline-block rounded-circle text-center"
                                 style="background-color: white; width: 40px; height: 40px; line-height: 40px; color: #1A1A37;">
                                 <i class="lni lni-youtube fw-bold" style="font-size: 1.2rem;"></i>
                             </a>
-                            <a href="#" class="d-inline-block rounded-circle text-center"
+                            <a href="https://www.instagram.com/jtipolinema/" class="d-inline-block rounded-circle text-center"
                                 style="background-color: white; width: 40px; height: 40px; line-height: 40px; color: #1A1A37;">
                                 <i class="lni lni-instagram fw-bold" style="font-size: 1.2rem;"></i>
                             </a>

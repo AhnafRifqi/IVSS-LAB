@@ -1,22 +1,14 @@
 <?php
-// Pastikan file koneksi.php ada dan koneksi ke PostgreSQL berhasil dibuat
 require_once 'inc/koneksi.php';
 
-// 1. Ambil ID Berita dari URL
 $berita_id = null;
 if (isset($_GET['id']) && is_numeric($_GET['id'])) {
     $berita_id = (int)$_GET['id'];
 }
 
-// Inisialisasi variabel untuk detail berita
 $berita_detail = null;
 
 if ($berita_id) {
-    // 2. Query untuk Mengambil Detail Berita dan Nama Penulis
-    // ASUMSI: Nama penulis ada di tabel 'penulis' dengan kolom 'nama_penulis'
-    // dan terhubung ke tabel 'berita' melalui 'penulis_id'.
-    
-    // Gunakan JOIN untuk menggabungkan data berita dan data penulis
     $sql = "SELECT 
                 *
             FROM 
@@ -33,11 +25,7 @@ if ($berita_id) {
     }
 }
 
-// 3. Handle jika berita tidak ditemukan
 if (!$berita_detail) {
-    // Anda bisa mengarahkan ke halaman 404 atau menampilkan pesan error
-    // header("Location: news.php?status=notfound");
-    // exit;
     $berita_detail = [
         'judul' => 'Berita Tidak Ditemukan', 
         'nama_penulis' => 'System', 
@@ -84,7 +72,7 @@ if (!$berita_detail) {
                         <div class="border-top border-dark pt-2 mb-4"></div>
 
                         <div class="mb-4 shadow-sm rounded-3 overflow-hidden">
-                            <img src="<?php echo htmlspecialchars($berita_detail['gambar']); ?>" 
+                            <img src="admin/assets/img/<?php echo htmlspecialchars($berita_detail['gambar']); ?>" 
                                 alt="<?php echo htmlspecialchars($berita_detail['judul']); ?>" 
                                 class="img-fluid w-100 rounded-3" 
                                 style="max-height: 400px; object-fit: cover;">
@@ -93,7 +81,7 @@ if (!$berita_detail) {
                         <div class="d-flex justify-content-start align-items-center mb-5 text-muted gap-5">
                             <span class="d-flex align-items-center me-3">
                                 <i class="lni lni-pencil me-2 text-dark"></i> 
-                                <?php echo htmlspecialchars($berita_detail['penulis_id']); ?>
+                                <?php echo htmlspecialchars($berita_detail['penulis']); ?>
                             </span>
                             <span class="d-flex align-items-center">
                                 <i class="lni lni-calendar me-2 text-dark"></i> 

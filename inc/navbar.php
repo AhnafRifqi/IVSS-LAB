@@ -11,7 +11,7 @@ $logo_data = pg_fetch_assoc($result);
             <div class="col-lg-12">
                 <nav class="navbar navbar-expand-lg">
                     <a class="navbar-brand" href="index.php">
-                        <img src="<?= htmlspecialchars($logo_data['logo']); ?>" alt="Logo IVSS" style="max-width: 100px; height: 100px;" /> 
+                        <img src="admin/assets/img/<?php echo $logo_data['logo'] ?>" alt="Logo IVSS" style="max-width: 100px; height: 100px;" /> 
                     </a>
                     
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse"

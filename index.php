@@ -2,15 +2,29 @@
 include 'inc/koneksi.php';
 $query_visi = "SELECT isi FROM visimisi WHERE nama = 'visi' LIMIT 1";
 $query_misi = "SELECT isi FROM visimisi WHERE nama = 'misi' LIMIT 1";
+$query_dosen = "SELECT * FROM dosen";
+$query_peralatan_lab = "SELECT gambar, nama FROM fasilitas 
+                        WHERE nama NOT IN ('Area Mushola', 'AC', 'Whiteboard', 'Locker')";
+$query_fasilitas_umum = "SELECT gambar, nama FROM fasilitas WHERE nama = 'Area Mushola' OR nama = 'AC' OR nama = 'Whiteboard' OR nama = 'Locker'";
+$query_berita_terbaru = "SELECT * FROM berita ORDER BY tanggal DESC LIMIT 3";
+
+
 
 $result_visi = pg_query($koneksi, $query_visi);
 $result_misi = pg_query($koneksi, $query_misi);
+$result_dosen = pg_query($koneksi, $query_dosen);
+$result_peralatan_lab = pg_query($koneksi, $query_peralatan_lab);
+$result_fasilitas_umum = pg_query($koneksi, $query_fasilitas_umum);
+$result_berita_terbaru = pg_query($koneksi, $query_berita_terbaru);
 
 $data_visi = pg_fetch_assoc($result_visi);
 $data_misi = pg_fetch_assoc($result_misi);
+$data_dosen = pg_fetch_assoc($result_dosen);
+$dosen_id_url = $data_dosen['nip'];
 
 $isi_visi = $data_visi['isi'] ?? "Visi belum tersedia di database.";
 $isi_misi = $data_misi['isi'] ?? "Misi belum tersedia di database.";
+$batas_karakter = 150;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -108,21 +122,22 @@ $isi_misi = $data_misi['isi'] ?? "Misi belum tersedia di database.";
                     style="background-color: #FFBC3B; color: #000000; border-top-right-radius: 5px; height: 50vh; border-bottom-right-radius: 5px;">
 
                     <div class="fw-bold fs-5 pb-2 mb-3 border-bottom border-dark w-100"
-                        style="border-width: 3px !important;">
+                        style="border-width: 3px !important; color: #ffffff">
                         Ketua Lab
                     </div>
 
-                    <img src="assets/images/about/ketua_lab.jpg" alt="Foto Dr. Ulla Delfana Rosiani"
+                    <img src="assets/img/<?php echo $data_dosen["foto"] ?>" alt="Foto Dr. Ulla Delfana Rosiani"
                         class="img-fluid rounded-1 mb-3 border border-3 border-dark"
                         style="width: 100%; max-width: 120px; height: auto;" />
 
                     <div class="mb-auto">
-                        <p class="mb-1 small fw-bold">Dr. Ulla Delfana Rosiani, ST., MT.</p>
-                        <p class="mb-0 small">Email: rosiani@polinema.ac.id</p>
+                        <p class="mb-1 small fw-bold" style="color: black;"><?php echo $data_dosen["nama"] ?></p>
+                        <p class="mb-0 small" style="color: black;">Email: <?php echo $data_dosen["email"] ?></p>
                     </div>
 
-                    <a href="javascript:void(0)" class="btn btn-sm rounded-pill mt-3 text-white"
-                        style="background-color: #1D264A;">Detail</a>
+                    <a href="detailDosen.php?id=<?php echo htmlspecialchars($dosen_id_url); ?>"
+                        class="btn btn-sm rounded-pill text-white"
+                        style="background-color: #1D264A; padding: 2px 8px; font-size: 0.75rem; margin-top:5px;">Detail</a>
                 </div>
             </div>
 
@@ -157,7 +172,7 @@ $isi_misi = $data_misi['isi'] ?? "Misi belum tersedia di database.";
             <div class="row align-items-center">
                 <div class="col-lg-6 col-12">
                     <div class="about-image-five">
-                        <img src="assets/images/about/about-img1.jpg" alt="about" />
+                        <img src="assets/img/html-css-collage-concept-with-person-2-2048x1341.png" alt="about" />
                     </div>
                 </div>
                 <div class="col-lg-6 col-12">
@@ -218,40 +233,37 @@ $isi_misi = $data_misi['isi'] ?? "Misi belum tersedia di database.";
         <div class="container">
 
             <div class="row">
-                <div class="col-12 text-center mb-5">
+                <div class="col-12 text-center my-5 pt-4">
                     <h2 class="fw-bold">Fasilitas Laboratorium</h2>
                     <div style="width: 500px; height: 3px; background-color: #FFBC3B; margin: 0 auto 30px;"></div>
                 </div>
             </div>
 
             <div class="row justify-content-center g-4 mb-5">
-
-                <div class="col-lg-3 col-md-6 col-sm-12">
+                <?php
+    while ($data_fasilitas = pg_fetch_assoc($result_fasilitas_umum)) {
+    ?>
+                <div class="col-lg-3 col-md-4 col-6">
                     <div class="card p-2 rounded-3 shadow-sm h-100 border-0"
                         style="background-color: #1A1A37; color: #ffffff;">
-                        <img src="assets/images/fasilitas/musholla.jpg" alt="Musholla Laboratorium"
-                            class="img-fluid rounded-3 mb-2" style="border: 2px solid #ccc;">
+
+                        <img src="admin/assets/img/<?php echo $data_fasilitas['gambar']; ?>"
+                            alt="<?php echo $data_fasilitas['nama']; ?>" class="img-fluid rounded-3 mb-2"
+                            style="border: 2px solid #ccc; height: 150px; object-fit: cover;">
+
                         <div class="text-center">
-                            <span class="badge rounded-pill text-dark px-3 py-2"
-                                style="background-color: #FFBC3B; font-size: 1rem;">Musholla</span>
+                            <span class="badge rounded-pill text-dark px-3 py-2" style="background-color: #FFBC3B;">
+                                <?php echo $data_fasilitas['nama']; ?>
+                            </span>
                         </div>
                     </div>
                 </div>
-
-                <div class="col-lg-3 col-md-6 col-sm-12">
-                    <div class="card p-2 rounded-3 shadow-sm h-100 border-0"
-                        style="background-color: #1A1A37; color: #ffffff;">
-                        <img src="assets/images/fasilitas/loker.jpg" alt="Loker Laboratorium"
-                            class="img-fluid rounded-3 mb-2" style="border: 2px solid #ccc;">
-                        <div class="text-center">
-                            <span class="badge rounded-pill text-dark px-3 py-2"
-                                style="background-color: #FFBC3B; font-size: 1rem;">Loker</span>
-                        </div>
-                    </div>
-                </div>
-
+                <?php
+    }
+    ?>
             </div>
 
+            <hr style="border-top: 3px solid #FFBC3B; opacity: 1;">
 
             <div class="row">
                 <div class="col-12 text-center my-5 pt-4">
@@ -261,103 +273,27 @@ $isi_misi = $data_misi['isi'] ?? "Misi belum tersedia di database.";
             </div>
 
             <div class="row justify-content-center g-4">
-
+                <?php
+    while ($data_alat = pg_fetch_assoc($result_peralatan_lab)) {
+    ?>
                 <div class="col-lg-3 col-md-4 col-6">
                     <div class="card p-2 rounded-3 shadow-sm h-100 border-0"
                         style="background-color: #1A1A37; color: #ffffff;">
-                        <img src="assets/images/peralatan/alat1.jpg" alt="Peralatan Lab 1"
-                            class="img-fluid rounded-3 mb-2" style="border: 2px solid #ccc;">
+
+                        <img src="admin/assets/img/<?php echo $data_alat['gambar']; ?>"
+                            alt="<?php echo $data_alat['nama']; ?>" class="img-fluid rounded-3 mb-2"
+                            style="border: 2px solid #ccc; height: 150px; object-fit: cover;">
+
                         <div class="text-center">
-                            <span class="badge rounded-pill text-dark px-3 py-2" style="background-color: #FFBC3B;">Nama
-                                Alat</span>
+                            <span class="badge rounded-pill text-dark px-3 py-2" style="background-color: #FFBC3B;">
+                                <?php echo $data_alat['nama']; ?>
+                            </span>
                         </div>
                     </div>
                 </div>
-
-                <div class="col-lg-3 col-md-4 col-6">
-                    <div class="card p-2 rounded-3 shadow-sm h-100 border-0"
-                        style="background-color: #1A1A37; color: #ffffff;">
-                        <img src="assets/images/peralatan/alat2.jpg" alt="Peralatan Lab 2"
-                            class="img-fluid rounded-3 mb-2" style="border: 2px solid #ccc;">
-                        <div class="text-center">
-                            <span class="badge rounded-pill text-dark px-3 py-2" style="background-color: #FFBC3B;">Nama
-                                Alat</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-3 col-md-4 col-6">
-                    <div class="card p-2 rounded-3 shadow-sm h-100 border-0"
-                        style="background-color: #1A1A37; color: #ffffff;">
-                        <img src="assets/images/peralatan/alat3.jpg" alt="Peralatan Lab 3"
-                            class="img-fluid rounded-3 mb-2" style="border: 2px solid #ccc;">
-                        <div class="text-center">
-                            <span class="badge rounded-pill text-dark px-3 py-2" style="background-color: #FFBC3B;">Nama
-                                Alat</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-3 col-md-4 col-6">
-                    <div class="card p-2 rounded-3 shadow-sm h-100 border-0"
-                        style="background-color: #1A1A37; color: #ffffff;">
-                        <img src="assets/images/peralatan/alat4.jpg" alt="Peralatan Lab 4"
-                            class="img-fluid rounded-3 mb-2" style="border: 2px solid #ccc;">
-                        <div class="text-center">
-                            <span class="badge rounded-pill text-dark px-3 py-2" style="background-color: #FFBC3B;">Nama
-                                Alat</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-3 col-md-4 col-6">
-                    <div class="card p-2 rounded-3 shadow-sm h-100 border-0"
-                        style="background-color: #1A1A37; color: #ffffff;">
-                        <img src="assets/images/peralatan/alat5.jpg" alt="Peralatan Lab 5"
-                            class="img-fluid rounded-3 mb-2" style="border: 2px solid #ccc;">
-                        <div class="text-center">
-                            <span class="badge rounded-pill text-dark px-3 py-2" style="background-color: #FFBC3B;">Nama
-                                Alat</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-3 col-md-4 col-6">
-                    <div class="card p-2 rounded-3 shadow-sm h-100 border-0"
-                        style="background-color: #1A1A37; color: #ffffff;">
-                        <img src="assets/images/peralatan/alat6.jpg" alt="Peralatan Lab 6"
-                            class="img-fluid rounded-3 mb-2" style="border: 2px solid #ccc;">
-                        <div class="text-center">
-                            <span class="badge rounded-pill text-dark px-3 py-2" style="background-color: #FFBC3B;">Nama
-                                Alat</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-3 col-md-4 col-6">
-                    <div class="card p-2 rounded-3 shadow-sm h-100 border-0"
-                        style="background-color: #1A1A37; color: #ffffff;">
-                        <img src="assets/images/peralatan/alat7.jpg" alt="Peralatan Lab 7"
-                            class="img-fluid rounded-3 mb-2" style="border: 2px solid #ccc;">
-                        <div class="text-center">
-                            <span class="badge rounded-pill text-dark px-3 py-2" style="background-color: #FFBC3B;">Nama
-                                Alat</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-3 col-md-4 col-6">
-                    <div class="card p-2 rounded-3 shadow-sm h-100 border-0"
-                        style="background-color: #1A1A37; color: #ffffff;">
-                        <img src="assets/images/peralatan/alat8.jpg" alt="Peralatan Lab 8"
-                            class="img-fluid rounded-3 mb-2" style="border: 2px solid #ccc;">
-                        <div class="text-center">
-                            <span class="badge rounded-pill text-dark px-3 py-2" style="background-color: #FFBC3B;">Nama
-                                Alat</span>
-                        </div>
-                    </div>
-                </div>
-
+                <?php
+    }
+    ?>
             </div>
 
         </div>
@@ -572,8 +508,7 @@ $isi_misi = $data_misi['isi'] ?? "Misi belum tersedia di database.";
                 </div>
             </div>
     </section>
-
-    <section id="publikasi" class="py-5" style="background-color: #ffffff; color: #1A1A37;">
+    <section id="publikasi" class="pt-5 pb-0" style="background-color: #ffffff; color: #1A1A37;">
         <div class="container">
 
             <div class="row">
@@ -599,69 +534,52 @@ $isi_misi = $data_misi['isi'] ?? "Misi belum tersedia di database.";
                             </thead>
 
                             <tbody style="background-color: #ffffff;">
+                                <?php
+                            if (isset($result_dosen) && pg_num_rows($result_dosen) > 0) {
+                                $no = 1;
+                                pg_result_seek($result_dosen, 0); 
+                                while ($data_dosen = pg_fetch_assoc($result_dosen)) {
+                                    $link_scopus = $data_dosen['scopus'] ?? '#';
+                                    $link_scholar = $data_dosen['google_scholar'] ?? '#';
+                                    $link_sinta = $data_dosen['sinta'] ?? '#';
+                            ?>
                                 <tr>
-                                    <td class="text-start">1. Dr. Ulla Delfana Rosiani, ST., MT.</td>
-                                    <td><a href="#" class="btn btn-sm text-dark fw-bold"
-                                            style="background-color: #FFBC3B;">Detail</a></td>
-                                    <td><a href="#" class="btn btn-sm text-dark fw-bold"
-                                            style="background-color: #FFBC3B;">Detail</a></td>
-                                    <td><a href="#" class="btn btn-sm text-dark fw-bold"
-                                            style="background-color: #FFBC3B;">Detail</a></td>
+                                    <td class="text-start">
+                                        <?php 
+                                    echo $no++ . ". " . ($data_dosen['nama'] ?? 'Nama Dosen Tidak Ada'); 
+                                    ?>
+                                    </td>
+
+                                    <td>
+                                        <a href="<?php echo $link_scopus; ?>" target="_blank" class="btn btn-sm text-dark fw-bold 
+                                        <?php echo ($link_scopus === '#') ? 'disabled' : ''; ?>"
+                                            style="background-color: #FFBC3B;">
+                                            Detail
+                                        </a>
+                                    </td>
+
+                                    <td>
+                                        <a href="<?php echo $link_scholar; ?>" target="_blank" class="btn btn-sm text-dark fw-bold 
+                                        <?php echo ($link_scholar === '#') ? 'disabled' : ''; ?>"
+                                            style="background-color: #FFBC3B;">
+                                            Detail
+                                        </a>
+                                    </td>
+
+                                    <td>
+                                        <a href="<?php echo $link_sinta; ?>" target="_blank" class="btn btn-sm text-dark fw-bold 
+                                        <?php echo ($link_sinta === '#') ? 'disabled' : ''; ?>"
+                                            style="background-color: #FFBC3B;">
+                                            Detail
+                                        </a>
+                                    </td>
                                 </tr>
-                                <tr>
-                                    <td class="text-start">2. Mamluatul Han'ah, S.Kom., M.Kom</td>
-                                    <td><a href="#" class="btn btn-sm text-dark fw-bold"
-                                            style="background-color: #FFBC3B;">Detail</a></td>
-                                    <td><a href="#" class="btn btn-sm text-dark fw-bold"
-                                            style="background-color: #FFBC3B;">Detail</a></td>
-                                    <td><a href="#" class="btn btn-sm text-dark fw-bold"
-                                            style="background-color: #FFBC3B;">Detail</a></td>
-                                </tr>
-                                <tr>
-                                    <td class="text-start">3. Mungki Astiningrum, ST., M.Kom.</td>
-                                    <td><a href="#" class="btn btn-sm text-dark fw-bold"
-                                            style="background-color: #FFBC3B;">Detail</a></td>
-                                    <td><a href="#" class="btn btn-sm text-dark fw-bold"
-                                            style="background-color: #FFBC3B;">Detail</a></td>
-                                    <td><a href="#" class="btn btn-sm text-dark fw-bold"
-                                            style="background-color: #FFBC3B;">Detail</a></td>
-                                </tr>
-                                <tr>
-                                    <td class="text-start">4. Prof. Dr. Eng. Rosa Andrie Asmara, ST., MT.</td>
-                                    <td><a href="#" class="btn btn-sm text-dark fw-bold"
-                                            style="background-color: #FFBC3B;">Detail</a></td>
-                                    <td><a href="#" class="btn btn-sm text-dark fw-bold"
-                                            style="background-color: #FFBC3B;">Detail</a></td>
-                                    <td><a href="#" class="btn btn-sm text-dark fw-bold"
-                                            style="background-color: #FFBC3B;">Detail</a></td>
-                                </tr>
-                                <tr>
-                                    <td class="text-start">5. Vivi Nur Wijayaningrum, S.Kom, M.Kom</td>
-                                    <td><a href="#" class="btn btn-sm text-dark fw-bold"
-                                            style="background-color: #FFBC3B;">Detail</a></td>
-                                    <td><a href="#" class="btn btn-sm text-dark fw-bold"
-                                            style="background-color: #FFBC3B;">Detail</a></td>
-                                    <td><a href="#" class="btn btn-sm text-dark fw-bold"
-                                            style="background-color: #FFBC3B;">Detail</a></td>
-                                </tr>
-                                <tr>
-                                    <td class="text-start">6. Wilda Imama Sabiila, S.Kom., M.Kom.</td>
-                                    <td><a href="#" class="btn btn-sm text-dark fw-bold"
-                                            style="background-color: #FFBC3B;">Detail</a></td>
-                                    <td><a href="#" class="btn btn-sm text-dark fw-bold"
-                                            style="background-color: #FFBC3B;">Detail</a></td>
-                                    <td><a href="#" class="btn btn-sm text-dark fw-bold"
-                                            style="background-color: #FFBC3B;">Detail</a></td>
-                                </tr>
-                                <tr>
-                                    <td class="text-start">7. Dr. Ely Setya Astuti, ST., MT.</td>
-                                    <td><a href="#" class="btn btn-sm text-dark fw-bold"
-                                            style="background-color: #FFBC3B;">Detail</a></td>
-                                    <td><a href="#" class="btn btn-sm text-dark fw-bold"
-                                            style="background-color: #FFBC3B;">Detail</a></td>
-                                    <td><a href="#" class="btn btn-sm text-dark fw-bold"
-                                            style="background-color: #FFBC3B;">Detail</a></td>
-                                </tr>
+                                <?php
+                                }
+                            } else {
+                                echo '<tr><td colspan="4" class="text-center text-secondary py-3">Data dosen tidak ditemukan di database.</td></tr>';
+                            }
+                            ?>
                             </tbody>
                         </table>
                     </div>
@@ -669,15 +587,17 @@ $isi_misi = $data_misi['isi'] ?? "Misi belum tersedia di database.";
             </div>
         </div>
     </section>
-    <section>
-        <div id="blog" class="latest-news-area section">
-            <div class="section-title-five">
+
+    <section class="pt-2 pb-3 mt-4">
+        <div id="blog" class="latest-news-area pt-0 pb-3">
+
+            <div class="section-title-five py-0">
                 <div class="container">
                     <div class="row">
                         <div class="col-12">
-                            <div class="content">
-                                <h6 style="color: #FFBC3B; border: 2px solid #FFBC3B">Berita</h6>
-                                <h2 class="fw-bold">Berita terbaru</h2>
+                            <div class="content mb-0">
+                                <h6 style="color: #FFBC3B; border: 2px solid #FFBC3B" class="mb-1">Berita</h6>
+                                <h2 class="fw-bold mb-1">Berita terbaru</h2>
                                 <p>
                                     Baca berita terbaru dari Laboratorium Visi Cerdas dan Sistem Cerdas.
                                 </p>
@@ -686,66 +606,88 @@ $isi_misi = $data_misi['isi'] ?? "Misi belum tersedia di database.";
                     </div>
                 </div>
             </div>
+
             <div class="container">
-                <div class="row">
-                    <div class="col-lg-4 col-md-6 col-12">
+                <div class="row mt-n3">
+
+                    <?php
+                if ($result_berita_terbaru) {
+                    if (isset($result_berita_terbaru)) { pg_result_seek($result_berita_terbaru, 0); }
+                    
+                    while ($data_berita = pg_fetch_assoc($result_berita_terbaru)) {
+                        $berita_id = $data_berita['berita_id']; 
+                        $berita_link = "detailBerita.php?id=" . htmlspecialchars($berita_id);
+                        $tanggal_format = date('d F Y', strtotime($data_berita['tanggal']));
+                        
+                        $isi_lengkap = $data_berita['isi']; 
+                        
+                        if (strlen($isi_lengkap) > $batas_karakter) {
+                            $potongan_isi = substr($isi_lengkap, 0, $batas_karakter);
+                            $potongan_isi = substr($potongan_isi, 0, strrpos($potongan_isi, ' '));
+                            $isi_tampilan = $potongan_isi . '...';
+                            $show_button = true;
+                        } else {
+                            $isi_tampilan = $isi_lengkap;
+                            $show_button = false;
+                        }
+                ?>
+                    <div class="col-lg-4 col-md-6 col-12 mb-4">
                         <div class="single-news">
                             <div class="image">
-                                <a href="javascript:void(0)"><img class="thumb" src="assets/images/blog/1.jpg"
-                                        alt="Blog" /></a>
+                                <a href="<?php echo $berita_link; ?>">
+                                    <img class="thumb"
+                                        src="admin/assets/img/<?php echo htmlspecialchars($data_berita['gambar']); ?>"
+                                        alt="<?php echo htmlspecialchars($data_berita['judul']); ?>" />
+                                </a>
                             </div>
+
                             <div class="content-body">
-                                <h4 class="title">
-                                    <a href="javascript:void(0)"> Make your team a Design driven company </a>
-                                </h4>
-                                <p>
-                                    Lorem Ipsum is simply dummy text of the printing and
-                                    typesetting industry. Lorem Ipsum has been the industry's
-                                    standard.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4 col-md-6 col-12">
-                        <div class="single-news">
-                            <div class="image">
-                                <a href="javascript:void(0)"><img class="thumb" src="assets/images/blog/2.jpg"
-                                        alt="Blog" /></a>
-                            </div>
-                            <div class="content-body">
-                                <h4 class="title">
-                                    <a href="javascript:void(0)">
-                                        The newest web framework that changed the world
+
+                                <div class="meta-info mb-3 d-flex align-items-center">
+                                    <p class="date me-3 mb-0 py-2" style="color: #6c757d; font-size: 0.9rem;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                            fill="currentColor" class="bi bi-calendar me-1" viewBox="0 0 16 16">
+                                            <path
+                                                d="M4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm0 1h8a1 1 0 0 1 1 1v1H3V2a1 1 0 0 1 1-1m1 3h6a.5.5 0 0 1 0 1H5a.5.5 0 0 1 0-1m-2 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5m3-2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5m3-2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5" />
+                                        </svg>
+                                        <?php echo $tanggal_format; ?>
+                                    </p>
+
+                                    <p class="author mb-0" style="color: #6c757d; font-size: 0.9rem;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                            fill="currentColor" class="bi bi-pencil me-1" viewBox="0 0 16 16">
+                                            <path
+                                                d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.105L.82 15.75l-.75-.75L.146 12.146a.5.5 0 0 1 .105-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.793 4.793 9.5 3.5 9.5 3.5 11.207 9.207 5.5z" />
+                                        </svg>
+                                        penulis: -
+                                    </p>
+                                </div>
+                                <h3 class="title fw-bold" style="font-size: 1.5rem; line-height: 1.2;">
+                                    <a href="<?php echo $berita_link; ?>" style="color: #1A1A37;">
+                                        <?php echo htmlspecialchars($data_berita['judul']); ?>
                                     </a>
-                                </h4>
-                                <p>
-                                    Lorem Ipsum is simply dummy text of the printing and
-                                    typesetting industry. Lorem Ipsum has been the industry's
-                                    standard.
+                                </h3>
+
+                                <p style="color: #495057;">
+                                    <?php echo htmlspecialchars($isi_tampilan); ?>
                                 </p>
+
+                                <?php if ($show_button): ?>
+                                <a href="<?php echo $berita_link; ?>" class="more-btn fw-bold"
+                                    style="color: #FFBC3B; text-decoration: none;">
+                                    Baca Selengkapnya &rarr;
+                                </a>
+                                <?php endif; ?>
+
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-4 col-md-6 col-12">
-                        <div class="single-news">
-                            <div class="image">
-                                <a href="javascript:void(0)"><img class="thumb" src="assets/images/blog/3.jpg"
-                                        alt="Blog" /></a>
-                            </div>
-                            <div class="content-body">
-                                <h4 class="title">
-                                    <a href="javascript:void(0)">
-                                        5 ways to improve user retention for your startup
-                                    </a>
-                                </h4>
-                                <p>
-                                    Lorem Ipsum is simply dummy text of the printing and
-                                    typesetting industry. Lorem Ipsum has been the industry's
-                                    standard.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
+                    <?php
+                    }
+                } else {
+                    echo "<div class='col-12'><p class='text-center'>Tidak ada berita terbaru yang tersedia.</p></div>";
+                }
+                ?>
                 </div>
             </div>
         </div>
