@@ -1,53 +1,18 @@
 <?php
-include '../inc/koneksi.php';
+include 'inc/koneksi.php';
 
-$member_lab_items = [
-    [
-        'name'      => "Mamluaul Hani'ah, S.Kom., M.Kom",
-        'image_url' => 'assets/images/dosen-mamlua.png',
-        'role'      => 'Member Lab', 
-        'detail_link' => 'detail-dosen-mamlua.php'
-    ],
-    [
-        'name'      => "Dr. Ely Setya Asluti, ST., MT.",
-        'image_url' => 'assets/images/dosen-ely.png',
-        'role'      => 'Member Lab',
-        'detail_link' => 'detail-dosen-ely.php'
-    ],
-    [
-        'name'      => "Mungki Astiningrum, ST., M.Kom.",
-        'image_url' => 'assets/images/dosen-mungki.png',
-        'role'      => 'Member Lab',
-        'detail_link' => 'detail-dosen-mungki.php'
-    ],
-    [
-        'name'      => "Prof. Dr. Eng. Rosa Andrie Asmara, ST., MT.",
-        'image_url' => 'assets/images/dosen-rosa.png',
-        'role'      => 'Member Lab',
-        'detail_link' => 'detail-dosen-rosa.php'
-    ],
-    [
-        'name'      => "Vivi Nur Wijayaningrum, S.Kom., M.Kom",
-        'image_url' => 'assets/images/dosen-vivi.png',
-        'role'      => 'Member Lab',
-        'detail_link' => 'detail-dosen-vivi.php'
-    ],
-    [
-        'name'      => "Wilda Imama Sabilla, S.Kom., M.Kom.",
-        'image_url' => 'assets/images/dosen-wilda.png',
-        'role'      => 'Member Lab',
-        'detail_link' => 'detail-dosen-wilda.php'
-    ],
-];
-
+// Ambil data Member Lab 
+$member_lab_res = pg_query($koneksi, "SELECT * FROM dosen WHERE jabatan!='Kepala Lab' ORDER BY nama ASC");
+$member_lab_items = [];
+while ($row = pg_fetch_assoc($member_lab_res)) {
+    $member_lab_items[] = $row;
+}
 // Data untuk Ketua Lab (dipisahkan untuk mempermudah tata letak)
-$ketua_lab = [
-    'name'      => "Dr. Ulla Delfana Rosiani, ST., MT.",
-    'image_url' => 'assets/images/dosen-ulla.png',
-    'role'      => 'Ketua Lab',
-    'detail_link' => 'detail-dosen-ulla.php'
-];
+$result = pg_query($koneksi, "SELECT * FROM dosen WHERE jabatan='Kepala Lab' LIMIT 1");
+$ketua_lab = pg_fetch_assoc($result);
+
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -82,47 +47,78 @@ $ketua_lab = [
                 Daftar Dosen Laboratorium Visi Cerdas dan Sistem Cerdas
             </h2>
             
-            <h3 class="text-center mb-4" style="color: black;"">Ketua Laboratorium</h3>
+            <h3 class="text-center mb-4 text-dark fw-normal"><i class="bi bi-person-badge-fill me-2 text-warning"></i> Ketua Laboratorium</h3>
             <div class="row justify-content-center mb-5">
-                <div class="col-12 col-md-5 col-lg-3 mb-4">
-                    <div class="card border-0 shadow-sm overflow-hidden text-center h-100 transition-hover-up" 
-                         style="border-radius: 15px; transition: transform 0.2s; cursor: pointer;"
-                         onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 6px 12px rgba(0,0,0,0.1)'"
-                         onmouseout="this.style.transform='none'; this.style.boxShadow='0 .125rem .25rem rgba(0,0,0,.075)'">
+                <div class="col-12 col-md-8 col-lg-4 mb-4 d-flex">
+                    <div class="card border-0 shadow-lg overflow-hidden text-center flex-fill transition-hover-up"
+                         style="border-radius: 20px; transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out; cursor: pointer;"
+                         onmouseover="this.style.transform='translateY(-12px)'; this.style.boxShadow='0 20px 40px rgba(0,0,0,0.25)'"
+                         onmouseout="this.style.transform='none'; this.style.boxShadow='0 .5rem 1rem rgba(0,0,0,.15)!important'">
                         
-                        <div class="overflow-hidden" style="height: 250px;">
-                            <img src="<?php echo $ketua_lab['image_url']; ?>" alt="<?php echo $ketua_lab['name']; ?>"
-                                class="w-100 h-100 p-3" style="object-fit: cover;">
+                        <div class="overflow-hidden bg-white" 
+                             style="height: 350px; display:flex; align-items:center; justify-content:center; border-top-left-radius: 20px; border-top-right-radius: 20px;">
+                            <img src="admin/assets/img/<?php echo htmlspecialchars($ketua_lab['foto'] ?? 'default.png'); ?>" 
+                                alt="<?php echo htmlspecialchars($ketua_lab['nama'] ?? 'Ketua Lab'); ?>"
+                                class="w-100 h-100"
+                                style="object-fit: contain; padding: 20px;">
                         </div>
                         
-                        <div class="card-body bg-white p-3">
-                            <p class="text-secondary text-uppercase mb-1" style="font-size: 0.9rem;"><?php echo $ketua_lab['role']; ?></p>
-                            <p class="fw-bold text-dark mb-2" style="min-height: 40px;"><?php echo $ketua_lab['name']; ?></p>
-                            <a href="<?php echo $ketua_lab['detail_link']; ?>" class="btn btn-warning btn-sm fw-bold text-dark" style="padding: 5px 20px; font-size: 0.85rem; border-radius: 5px; text-transform: uppercase;">Detail</a>
+                        <div class="card-body d-flex flex-column p-4 text-white" 
+                             style="background-color: #14123A; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px;">
+                            <p class="text-warning text-uppercase mb-1 fw-bold text-start" style="font-size: 0.95rem;">
+                                <?php echo htmlspecialchars($ketua_lab['jabatan']); ?>
+                            </p>
+                            <h4 class="fw-bolder mb-3 mt-1 text-white text-start" style="min-height: 40px;">
+                                <?php echo htmlspecialchars($ketua_lab['nama']); ?>
+                            </h4>
+                            <div class="text-center mt-auto pt-2">
+                                <a href="<?php echo htmlspecialchars($ketua_lab['detail_link'] ?? '#'); ?>"
+                                    class="btn btn-warning fw-bold text-dark shadow"
+                                    style="padding: 8px 35px; font-size: 0.9rem; border-radius: 50px; text-transform: uppercase; transition: background-color 0.2s;">
+                                    DETAIL PROFIL
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <h3 class="text-center mb-4" style="color: black;"">Anggota Laboratorium</h3>
+            <hr class="my-5 border-secondary opacity-25">
+
+            <h3 class="text-center mb-4 text-dark fw-normal"><i class="bi bi-people-fill me-2 text-warning"></i> Anggota Laboratorium</h3>
             <div class="row justify-content-center">
                 <?php foreach ($member_lab_items as $item): ?>
                 <div class="col-6 col-sm-6 col-md-4 col-lg-3 mb-4 d-flex">
-                    <div class="card border-0 shadow-sm overflow-hidden text-center flex-fill transition-hover-up"
-                         style="border-radius: 15px; transition: transform 0.2s; cursor: pointer;"
-                         onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 12px rgba(0,0,0,0.1)'"
+                    <div class="card border-0 shadow overflow-hidden text-center flex-fill transition-hover-up"
+                         style="border-radius: 15px; transition: transform 0.2s ease-out, box-shadow 0.2s ease-out; cursor: pointer;"
+                         onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.1)'"
                          onmouseout="this.style.transform='none'; this.style.boxShadow='0 .125rem .25rem rgba(0,0,0,.075)'">
                         
-                        <div class="overflow-hidden" style="height: 200px;">
-                            <img src="<?php echo $item['image_url']; ?>" alt="<?php echo $item['name']; ?>"
-                                class="w-100 h-100 p-2" style="object-fit: cover;">
+                        <div class="overflow-hidden bg-white" 
+                             style="height: 350px; display:flex; align-items:center; justify-content:center; border-top-left-radius: 15px; border-top-right-radius: 15px;">
+                            <img src="admin/assets/img/<?php echo htmlspecialchars($item['foto'] ?? 'default.png'); ?>" 
+                                alt="<?php echo htmlspecialchars($item['nama'] ?? 'Anggota Lab'); ?>"
+                                class="w-100 h-100 p-0"
+                                style="object-fit: cover; border-top-left-radius: 15px; border-top-right-radius: 15px;">
                         </div>
                         
-                        <div class="card-body bg-light p-3">
-                            <p class="text-secondary text-uppercase mb-1" style="font-size: 0.9rem;"><?php echo $item['role']; ?></p>
-                            <p class="fw-bold text-dark mb-2" style="min-height: 40px;"><?php echo $item['name']; ?></p>
-                            <a href="<?php echo $item['detail_link']; ?>" class="btn btn-warning btn-sm fw-bold text-dark" style="padding: 5px 20px; font-size: 0.85rem; border-radius: 5px; text-transform: uppercase;">Detail</a>
+                        <div class="card-body d-flex flex-column p-4 text-white" 
+                             style="background-color: #14123A; border-bottom-left-radius: 15px; border-bottom-right-radius: 15px;">
+                            <p class="text-warning text-uppercase mb-1 fw-bold text-start" style="font-size: 0.9rem;">
+                                <?php echo htmlspecialchars($item['jabatan']); ?>
+                            </p>
+                            <p class="fw-bolder mb-2 text-white text-start" style="min-height: 40px;">
+                                <?php echo htmlspecialchars($item['nama']); ?>
+                            </p>
+                            <div class="text-center mt-auto pt-2">
+                                <a href="<?php echo htmlspecialchars($item['detail_link'] ?? '#'); ?>"
+                                    class="btn btn-warning fw-bold text-dark"
+                                    style="padding: 8px 35px; font-size: 0.9rem; border-radius: 50px; text-transform: uppercase; width: auto;">
+                                    DETAIL PROFIL
+                                </a>
+                            </div>
                         </div>
+
                     </div>
                 </div>
                 <?php endforeach; ?>
