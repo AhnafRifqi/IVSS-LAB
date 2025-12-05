@@ -2,14 +2,13 @@
 session_start();
 include '../inc/koneksi.php';
 
-// akses ketua saja (sesuaikan kebutuhanmu)
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'ketua') {
-    header('Location: ../index.php'); 
+    header('Location: ../index.php');
     exit;
 }
 
 // Ambil semua data view user_info
-$q = pg_query($koneksi, "SELECT * FROM user_info ORDER BY username ASC");
+$q = pg_query($koneksi, "SELECT * FROM user_info");
 $users = $q ? pg_fetch_all($q) : [];
 if ($users === false) $users = [];
 ?>
