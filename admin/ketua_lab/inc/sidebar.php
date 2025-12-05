@@ -111,6 +111,12 @@ if (isset($koneksi)) {
             <span>Users</span>
         </a>
     </li>
+    <li class="nav-item">
+        <a class="nav-link" href="usermember.php">
+            <i class="fas fa-users-cog"></i>
+            <span>Users & Members</span>
+        </a>
+    </li>
 
         <hr class="sidebar-divider d-none d-md-block">
 
