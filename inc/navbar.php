@@ -28,9 +28,6 @@ $logo_data = pg_fetch_assoc($result);
                                 <a href="index.php" style="color: #1A1A37; font-weight: bold;">Beranda</a>
                             </li>
                             <li class="nav-item">
-                                <a href="aboutUs.php" style="color: #1A1A37; font-weight: bold;">Tentang Kami</a>
-                            </li>
-                            <li class="nav-item">
                                 <a href="news.php" style="color: #1A1A37; font-weight: bold;">Berita</a>
                             </li>
                             <li class="nav-item">
