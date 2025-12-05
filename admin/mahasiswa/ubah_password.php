@@ -11,16 +11,23 @@ $error = '';
 $success = '';
 $user_id = $_SESSION['user_id'];
 
-// ambil password lama user dari DB
-$q = pg_query_params($koneksi, 'SELECT password FROM users WHERE user_id = $1', [$user_id]);
+// ambil password lama + salt dari DB
+$q = pg_query_params($koneksi, 'SELECT password, salt FROM users WHERE user_id = $1', [$user_id]);
 if (!$q || pg_num_rows($q) === 0) {
     header('Location: profil.php?msg=user_not_found');
     exit;
 }
 $row = pg_fetch_assoc($q);
+$stored_password = $row['password'];
+$salt = $row['salt'] ?? '';
 pg_free_result($q);
 
-// handle form submit
+// fungsi hash password + salt
+function hashPassword($password, $salt) {
+    return hash('sha256', $salt . $password);
+}
+
+// handle submit
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $old_password     = trim($_POST['old_password'] ?? '');
     $new_password     = trim($_POST['new_password'] ?? '');
@@ -28,14 +35,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($new_password !== $confirm_password) {
         $error = 'Password baru dan konfirmasi tidak sama.';
-    } elseif ($old_password !== $row['password']) { // kalo pake plain text, kalau hash pakai password_verify
-        $error = 'Password lama salah.';
+    } elseif (strlen($new_password) < 6) {
+        $error = 'Password baru minimal 6 karakter.';
     } else {
-        $update = pg_query_params($koneksi, 'UPDATE users SET password = $1 WHERE user_id = $2', [$new_password, $user_id]);
-        if ($update) {
-            $success = 'Password berhasil diubah.';
+        // verifikasi password lama
+        $valid_old = false;
+
+        if ($salt) {
+            // password sudah hash
+            if (hashPassword($old_password, $salt) === $stored_password) {
+                $valid_old = true;
+            }
         } else {
-            $error = 'Gagal mengubah password.';
+            // password masih plain
+            if (hash_equals($stored_password, $old_password)) {
+                $valid_old = true;
+            }
+        }
+
+        if (!$valid_old) {
+            $error = 'Password lama salah.';
+        } else {
+            // generate salt baru + hash password baru
+            $new_salt = bin2hex(random_bytes(8)); // 16 karakter hex
+            $new_hash = hashPassword($new_password, $new_salt);
+
+            $update = pg_query_params($koneksi,
+                'UPDATE users SET password = $1, salt = $2 WHERE user_id = $3',
+                [$new_hash, $new_salt, $user_id]
+            );
+
+            if ($update) {
+                $success = 'Password berhasil diubah.';
+                $salt = $new_salt; // update variabel lokal biar konsisten
+            } else {
+                $error = 'Gagal mengubah password.';
+            }
         }
     }
 }
