@@ -1,6 +1,5 @@
 <?php
 session_start();
-
 include '../inc/koneksi.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'ketua') {
@@ -11,14 +10,14 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'ketua') {
 $error = '';
 $success = '';
 
-$id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
+$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 if ($id <= 0) {
     header('Location: fasilitas.php');
     exit;
 }
 
 // ambil data existing
-$q = pg_query_params($koneksi, 'SELECT id, nama, gambar, isi FROM fasilitas WHERE id = $1', [$id]);
+$q = pg_query_params($koneksi, 'SELECT id, nama, gambar, isi FROM fasilitas WHERE id=$1', [$id]);
 if (!$q || pg_num_rows($q) === 0) {
     header('Location: fasilitas.php');
     exit;
@@ -30,33 +29,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nama = trim($_POST['nama'] ?? '');
     $isi  = trim($_POST['isi'] ?? '');
 
-    if ($nama === '') {
-        $error = 'Nama fasilitas wajib diisi.';
-    }
+    if ($nama === '') $error = 'Nama fasilitas wajib diisi.';
 
     // foto: default tetap data lama
     $foto_saved = $row['gambar'];
 
     if (empty($error) && !empty($_FILES['foto_file']['name'])) {
         $up = $_FILES['foto_file'];
-        $maxBytes = 3 * 1024 * 1024;
+        $allowed = ['jpg','jpeg','png','gif','webp'];
+        $ext = strtolower(pathinfo($up['name'], PATHINFO_EXTENSION));
+        $targetDir = '../assets/img/';
+
         if ($up['error'] !== UPLOAD_ERR_OK) {
             $error = 'Gagal upload file.';
-        } elseif ($up['size'] > $maxBytes) {
-            $error = 'Ukuran file terlalu besar (maks 3MB).';
+        } elseif (!in_array($ext, $allowed)) {
+            $error = 'Tipe file tidak diperbolehkan.';
         } else {
-            $ext = strtolower(pathinfo($up['name'], PATHINFO_EXTENSION));
-            $allowed = ['jpg','jpeg','png','gif','webp'];
-            if (!in_array($ext, $allowed)) {
-                $error = 'Tipe file tidak diperbolehkan.';
-            } else {
-                $imgInfo = @getimagesize($up['tmp_name']);
-                if ($imgInfo === false) {
-                    $error = 'File bukan gambar valid.';
-                } else {
-                    $raw = file_get_contents($up['tmp_name']);
-                    $foto_saved = 'data:' . $imgInfo['mime'] . ';base64,' . base64_encode($raw);
+            if (!is_dir($targetDir)) mkdir($targetDir, 0755, true);
+            $targetFile = $targetDir . $up['name'];
+
+            if (move_uploaded_file($up['tmp_name'], $targetFile)) {
+                // hapus file lama kalau ada
+                if ($foto_saved && is_file($targetDir . $foto_saved)) {
+                    @unlink($targetDir . $foto_saved);
                 }
+                $foto_saved = $up['name']; // nama file asli
+            } else {
+                $error = 'Gagal menyimpan file.';
             }
         }
     }
@@ -69,11 +68,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $isi !== '' ? $isi : null,
             $id
         ]);
+
         if ($res) {
             pg_free_result($res);
             $success = 'Data berhasil diupdate.';
             // refresh data
-            $q2 = pg_query_params($koneksi, 'SELECT id, nama, gambar, isi FROM fasilitas WHERE id = $1', [$id]);
+            $q2 = pg_query_params($koneksi, 'SELECT id, nama, gambar, isi FROM fasilitas WHERE id=$1', [$id]);
             $row = pg_fetch_assoc($q2);
             pg_free_result($q2);
         } else {
@@ -85,67 +85,68 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="utf-8">
-    <title>Edit Fasilitas</title>
-    <link href="../assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
-    <link href="../assets/css/sb-admin-2.min.css" rel="stylesheet">
-    <style>.img-thumb { width:140px; height:auto; border-radius:6px; object-fit:cover; display:block; margin-bottom:8px; }</style>
+<meta charset="utf-8">
+<title>Edit Fasilitas</title>
+<link href="../assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link href="../assets/css/sb-admin-2.min.css" rel="stylesheet">
+<style>
+.img-thumb { width:140px; height:auto; border-radius:6px; object-fit:cover; display:block; margin-bottom:8px; }
+</style>
 </head>
 <body id="page-top">
 <div id="wrapper">
-    <?php include 'inc/sidebar.php'; ?>
+<?php include 'inc/sidebar.php'; ?>
 
-    <div id="content-wrapper" class="d-flex flex-column">
-        <div id="content">
-            <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 shadow">
-                <span class="h5 mb-0 text-primary">Edit Fasilitas</span>
-            </nav>
+<div id="content-wrapper" class="d-flex flex-column">
+<div id="content">
+    <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 shadow">
+        <span class="h5 mb-0 text-primary">Edit Fasilitas</span>
+    </nav>
 
-            <div class="container-fluid">
-                <div class="card shadow-sm">
-                    <div class="card-body">
-                        <?php if ($error): ?>
-                            <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
-                        <?php endif; ?>
-                        <?php if ($success): ?>
-                            <div class="alert alert-success"><?= htmlspecialchars($success) ?></div>
-                        <?php endif; ?>
+    <div class="container-fluid">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <?php if ($error): ?>
+                    <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
+                <?php endif; ?>
+                <?php if ($success): ?>
+                    <div class="alert alert-success"><?= htmlspecialchars($success) ?></div>
+                <?php endif; ?>
 
-                        <form method="POST" enctype="multipart/form-data">
-                            <div class="form-group">
-                                <label>Nama</label>
-                                <input type="text" name="nama" class="form-control" value="<?= htmlspecialchars($_POST['nama'] ?? $row['nama']) ?>" required>
-                            </div>
-
-                            <div class="form-group">
-                                <label>Foto</label><br>
-                                <?php if (!empty($row['gambar'])): ?>
-                                    <img id="preview" src="<?= htmlspecialchars($row['gambar']) ?>" class="img-thumb" alt="foto">
-                                <?php else: ?>
-                                    <img id="preview" src="" class="img-thumb" style="display:none;" alt="preview">
-                                <?php endif; ?>
-
-                                <input type="file" name="foto_file" class="form-control-file mt-2" accept="image/*" onchange="previewFile(event,'preview')">
-                                <small class="form-text text-muted">Kosongi jika ingin mempertahankan foto lama.</small>
-                            </div>
-
-                            <div class="form-group">
-                                <label>Isi</label>
-                                <textarea name="isi" rows="6" class="form-control"><?= htmlspecialchars($_POST['isi'] ?? $row['isi']) ?></textarea>
-                            </div>
-
-                            <div class="d-flex gap-2">
-                                <button class="btn btn-primary" type="submit"><i class="fas fa-save"></i> Update</button>
-                                <a href="fasilitas.php" class="btn btn-secondary">Kembali</a>
-                            </div>
-                        </form>
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label>Nama</label>
+                        <input type="text" name="nama" class="form-control" value="<?= htmlspecialchars($_POST['nama'] ?? $row['nama']) ?>" required>
                     </div>
-                </div>
-            </div>
 
+                    <div class="form-group">
+                        <label>Foto</label><br>
+                        <?php if (!empty($row['gambar'])): ?>
+                            <img id="preview" src="../assets/img/<?= htmlspecialchars($row['gambar']) ?>" class="img-thumb" alt="foto">
+                        <?php else: ?>
+                            <img id="preview" src="" class="img-thumb" style="display:none;" alt="preview">
+                        <?php endif; ?>
+
+                        <input type="file" name="foto_file" class="form-control-file mt-2" accept="image/*" onchange="previewFile(event,'preview')">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Isi</label>
+                        <textarea name="isi" rows="6" class="form-control"><?= htmlspecialchars($_POST['isi'] ?? $row['isi']) ?></textarea>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary" type="submit"><i class="fas fa-save"></i> Update</button>
+                        <a href="fasilitas.php" class="btn btn-secondary">Kembali</a>
+                    </div>
+                </form>
+            </div>
         </div>
-        <?php include '../inc/footer.php'; ?>
     </div>
+
+</div>
+<?php include '../inc/footer.php'; ?>
+</div>
 </div>
 
 <script>
