@@ -2,100 +2,103 @@
 session_start();
 include '../inc/koneksi.php';
 
-if (!isset($_SESSION['user_id'])) {
-    header('Location: ..index.php');
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'ketua') {
+    header('Location: ../index.php');
     exit;
 }
 
-$error = '';
-$success = '';
-$user_id = $_SESSION['user_id'];
+$id = isset($_GET['id']) ? trim($_GET['id']) : '';
+if ($id === '') {
+    header('Location: visimisi.php');
+    exit;
+}
 
-// ambil password lama user dari DB
-$q = pg_query_params($koneksi, 'SELECT password FROM users WHERE user_id = $1', [$user_id]);
+// ambil data existing
+$q = pg_query_params($koneksi, 'SELECT * FROM visimisi WHERE id = $1', array($id));
 if (!$q || pg_num_rows($q) === 0) {
-    header('Location: profil.php?msg=user_not_found');
+    header('Location: visimisi.php?msg=notfound');
     exit;
 }
 $row = pg_fetch_assoc($q);
 pg_free_result($q);
 
-// handle form submit
+$alert = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $old_password     = trim($_POST['old_password'] ?? '');
-    $new_password     = trim($_POST['new_password'] ?? '');
-    $confirm_password = trim($_POST['confirm_password'] ?? '');
+    $nama = trim($_POST['nama'] ?? '');
+    $isi  = trim($_POST['isi'] ?? '');
 
-    if ($new_password !== $confirm_password) {
-        $error = 'Password baru dan konfirmasi tidak sama.';
-    } elseif ($old_password !== $row['password']) { // kalo pake plain text, kalau hash pakai password_verify
-        $error = 'Password lama salah.';
+    if ($nama === '' || $isi === '') {
+        $alert = '<div class="alert alert-danger">Nama dan Isi wajib diisi.</div>';
     } else {
-        $update = pg_query_params($koneksi, 'UPDATE users SET password = $1 WHERE user_id = $2', [$new_password, $user_id]);
-        if ($update) {
-            $success = 'Password berhasil diubah.';
+        $res = pg_query_params($koneksi,
+            'UPDATE visimisi SET nama = $1, isi = $2 WHERE id = $3',
+            array($nama, $isi, $id)
+        );
+        if ($res) {
+            // redirect ke halaman list dengan pesan sukses
+            header('Location: visimisi.php?msg=updated');
+            exit;
         } else {
-            $error = 'Gagal mengubah password.';
+            $alert = '<div class="alert alert-danger">Gagal mengupdate data. Cek koneksi / constraint.</div>';
         }
     }
+    // jika ada error, refresh $row agar form menampilkan nilai yang dikirim user
+    $row['nama'] = $_POST['nama'] ?? $row['nama'];
+    $row['isi']  = $_POST['isi'] ?? $row['isi'];
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="utf-8">
-    <title>Ubah Password</title>
+    <title>Edit Visi & Misi - Admin</title>
     <link href="../assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
     <link href="../assets/css/sb-admin-2.min.css" rel="stylesheet">
 </head>
 <body id="page-top">
 <div id="wrapper">
+
     <?php include 'inc/sidebar.php'; ?>
 
     <div id="content-wrapper" class="d-flex flex-column">
         <div id="content">
-            <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 shadow">
-                <span class="h5 mb-0 text-primary font-weight-bold">Ubah Password</span>
+
+            <!-- Topbar -->
+            <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                    <i class="fa fa-bars"></i>
+                </button>
+                <span class="h5 mb-0 text-primary font-weight-bold">Edit Visi & Misi</span>
             </nav>
 
             <div class="container-fluid">
-                <div class="card shadow-sm">
-                    <div class="card-header"><strong>Ganti Password</strong></div>
+                <h1 class="h3 mb-4 text-gray-800">Edit Visi & Misi</h1>
+
+                <div class="card shadow-sm mb-4">
                     <div class="card-body">
+                        <?= $alert ?>
 
-                        <?php if ($error): ?>
-                            <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
-                        <?php endif; ?>
-                        <?php if ($success): ?>
-                            <div class="alert alert-success"><?= htmlspecialchars($success) ?></div>
-                        <?php endif; ?>
-
-                        <form method="POST" action="">
                             <div class="form-group">
-                                <label>Password Lama</label>
-                                <input type="password" name="old_password" class="form-control" required>
+                                <label>Nama</label>
+                                <input type="text" name="nama" class="form-control" value="<?= htmlspecialchars($row['nama'] ?? '') ?>" required>
                             </div>
 
                             <div class="form-group">
-                                <label>Password Baru</label>
-                                <input type="password" name="new_password" class="form-control" required>
-                            </div>
-
-                            <div class="form-group">
-                                <label>Konfirmasi Password Baru</label>
-                                <input type="password" name="confirm_password" class="form-control" required>
+                                <label>Isi</label>
+                                <textarea name="isi" class="form-control" rows="6" required><?= htmlspecialchars($row['isi'] ?? '') ?></textarea>
                             </div>
 
                             <div class="d-flex gap-2">
-                                <button class="btn btn-primary" type="submit"><i class="fas fa-save"></i> Update</button>
-                                <a href="visimisi.php" class="btn btn-light"><i class="fas fa-arrow-left"></i> Kembali</a>
+                                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Update</button>
+                                <a href="visimisi.php" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Kembali</a>
                             </div>
                         </form>
 
                     </div>
                 </div>
+
             </div>
+            <!-- /.container-fluid -->
 
         </div>
         <?php include '../inc/footer.php'; ?>
@@ -104,5 +107,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <script src="../assets/vendor/jquery/jquery.min.js"></script>
 <script src="../assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/sb-admin-2.min.js"></script>
 </body>
 </html>
