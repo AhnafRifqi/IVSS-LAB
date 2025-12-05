@@ -89,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                             <div class="d-flex gap-2">
                                 <button class="btn btn-primary" type="submit"><i class="fas fa-save"></i> Update</button>
-                                <a href="profil.php" class="btn btn-light"><i class="fas fa-arrow-left"></i> Kembali</a>
+                                <a href="visimisi.php" class="btn btn-light"><i class="fas fa-arrow-left"></i> Kembali</a>
                             </div>
                         </form>
 
