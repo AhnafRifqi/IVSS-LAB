@@ -1,20 +1,14 @@
 <?php
 include '../inc/koneksi.php';
 
-// ambil logo dari DB
-if (isset($koneksi)) {
-    $q = @pg_query($koneksi, "SELECT logo FROM logo ORDER BY id DESC LIMIT 1");
-    if ($q && pg_num_rows($q) > 0) {
-        $r = pg_fetch_assoc($q);
-        $val = trim($r['logo'] ?? '');
-        if ($val !== '') {
-            if (stripos($val, 'data:') === 0) {
-                $logo_src = $val;
-            }
-
-        }
-        pg_free_result($q);
+$q = @pg_query($koneksi, "SELECT logo FROM logo ORDER BY id DESC LIMIT 1");
+if ($q && pg_num_rows($q) > 0) {
+    $r = pg_fetch_assoc($q);
+    $val = trim($r['logo'] ?? '');
+    if ($val !== '') {
+        $logo_src = $val; // nama file
     }
+    pg_free_result($q);
 }
 ?>
 
@@ -24,8 +18,11 @@ if (isset($koneksi)) {
     <!-- Sidebar - Brand -->
     <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.php">
         <div class="sidebar-brand-icon">
-            <img src="<?= htmlspecialchars($logo_src ?? '') ?>" alt="Logo IVSS"
-                style="width:40px; height:40px; object-fit:cover; border-radius:6px;">
+            <?php if ($logo_src): ?>
+                <img src="../../assets/img/<?= htmlspecialchars($logo_src) ?>" alt="Logo IVSS"style="width:40px; height:40px; object-fit:cover; border-radius:6px;">
+            <?php else: ?>
+                <div style="width:40px; height:40px; background:#ccc; border-radius:6px;"></div>
+            <?php endif; ?>
         </div>
         <div class="sidebar-brand-text mx-3">Lab IVSS Admin</div>
     </a>
