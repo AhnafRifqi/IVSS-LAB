@@ -10,16 +10,14 @@ $error = '';
 $logo_src = '';
 
 // Ambil logo dari DB
-if (isset($koneksi)) {
-    $q = @pg_query($koneksi, "SELECT logo FROM logo ORDER BY id DESC LIMIT 1");
-    if ($q && pg_num_rows($q) > 0) {
-        $r = pg_fetch_assoc($q);
-        $val = trim($r['logo'] ?? '');
-        if ($val !== '' && stripos($val, 'data:') === 0) {
-            $logo_src = $val;
-        }
-        pg_free_result($q);
+$q = @pg_query($koneksi, "SELECT logo FROM logo ORDER BY id DESC LIMIT 1");
+if ($q && pg_num_rows($q) > 0) {
+    $r = pg_fetch_assoc($q);
+    $val = trim($r['logo'] ?? '');
+    if ($val !== '') {
+        $logo_src = $val; // nama file
     }
+    pg_free_result($q);
 }
 
 // Proses login
@@ -66,10 +64,9 @@ if (isset($_POST['username'], $_POST['password'], $_POST['role'])) {
     <link href="assets/css/sb-admin-2.min.css" rel="stylesheet">
     <style>
         .login-logo {
-            width: 100px;
-            height: 100px;
+            width: 180px;
+            height: 180px;
             object-fit: contain;
-            margin-top: 1rem;
         }
     </style>
 </head>
@@ -83,7 +80,7 @@ if (isset($_POST['username'], $_POST['password'], $_POST['role'])) {
                     <div class="text-center">
                         <h1 class="h4 text-gray-900 mb-4">Login Panel Lab IVSS</h1>
                         <?php if ($logo_src): ?>
-                            <img src="<?= htmlspecialchars($logo_src) ?>" alt="Logo Lab IVSS" class="login-logo">
+                            <img src="assets/img/<?=htmlspecialchars($logo_src) ?>" alt="Logo Lab IVSS" class="login-logo">
                         <?php endif; ?>
                     </div>
 
