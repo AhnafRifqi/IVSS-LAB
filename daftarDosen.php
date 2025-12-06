@@ -72,7 +72,7 @@ $ketua_lab = pg_fetch_assoc($result);
                                 <?php echo htmlspecialchars($ketua_lab['nama']); ?>
                             </h4>
                             <div class="text-center mt-auto pt-2">
-                                <a href="<?php echo htmlspecialchars($ketua_lab['detail_link'] ?? '#'); ?>"
+                                <a href="detailDosen.php?nidn=<?php echo urlencode($ketua_lab['nidn']); ?>"
                                     class="btn btn-warning fw-bold text-dark shadow"
                                     style="padding: 8px 35px; font-size: 0.9rem; border-radius: 50px; text-transform: uppercase; transition: background-color 0.2s;">
                                     DETAIL PROFIL
@@ -111,7 +111,7 @@ $ketua_lab = pg_fetch_assoc($result);
                                 <?php echo htmlspecialchars($item['nama']); ?>
                             </p>
                             <div class="text-center mt-auto pt-2">
-                                <a href="<?php echo htmlspecialchars($item['detail_link'] ?? '#'); ?>"
+                                <a href="detailDosen.php?nidn=<?php echo urlencode($item['nidn']); ?>"
                                     class="btn btn-warning fw-bold text-dark"
                                     style="padding: 8px 35px; font-size: 0.9rem; border-radius: 50px; text-transform: uppercase; width: auto;">
                                     DETAIL PROFIL
