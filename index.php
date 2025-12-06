@@ -20,7 +20,7 @@ $result_berita_terbaru = pg_query($koneksi, $query_berita_terbaru);
 $data_visi = pg_fetch_assoc($result_visi);
 $data_misi = pg_fetch_assoc($result_misi);
 $data_dosen = pg_fetch_assoc($result_dosen);
-$dosen_id_url = $data_dosen['nip'];
+$dosen_id_url = $data_dosen['nidn'];
 
 $isi_visi = $data_visi['isi'] ?? "Visi belum tersedia di database.";
 $isi_misi = $data_misi['isi'] ?? "Misi belum tersedia di database.";
@@ -146,7 +146,7 @@ $batas_karakter = 300;
                         <p class="mb-0 small" style="color: black;">Email: <?php echo $data_dosen["email"] ?></p>
                     </div>
 
-                    <a href="detailDosen.php?id=<?php echo htmlspecialchars($dosen_id_url); ?>"
+                    <a href="detailDosen.php?nidn=<?php echo htmlspecialchars($dosen_id_url); ?>"
                         class="btn btn-sm rounded-pill text-white"
                         style="background-color: #1D264A; padding: 2px 8px; font-size: 0.75rem; margin-top:5px;">Detail</a>
                 </div>
