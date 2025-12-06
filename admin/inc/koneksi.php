@@ -1,8 +1,8 @@
 <?php
 $host = "localhost";
 $user = "postgres"; // default user PostgreSQL
-$pass = "nauraPostgreSQL"; // ganti dengan password PostgreSQL kamu
-$db   = "pbl_ivss";
+$pass = "1234"; // ganti dengan password PostgreSQL kamu
+$db   = "pbl_ivss"; // ganti dengan nama database kamu
 $port = "5432"; // port default PostgreSQL
 
 // Membuat koneksi ke PostgreSQL
@@ -12,6 +12,6 @@ $koneksi = pg_connect("host=$host port=$port dbname=$db user=$user password=$pas
 if (!$koneksi) {
     die("Koneksi ke PostgreSQL gagal: " . pg_last_error());
 } else {
-    // echo "Koneksi berhasil"; // opsional, untuk uji koneksi
+    // echo "Koneksi berhasil"; // untuk uji koneksi
 }
 ?>
