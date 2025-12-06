@@ -146,7 +146,7 @@ $batas_karakter = 300;
                         <p class="mb-0 small" style="color: black;">Email: <?php echo $data_dosen["email"] ?></p>
                     </div>
 
-                    <a href="detailDosen.php?nidn=<?php echo htmlspecialchars($dosen_id_url); ?>"
+                    <a href="detailDosen.php?nidn=<?php echo urlencode($data_dosen['nidn']); ?>"
                         class="btn btn-sm rounded-pill text-white"
                         style="background-color: #1D264A; padding: 2px 8px; font-size: 0.75rem; margin-top:5px;">Detail</a>
                 </div>
