@@ -2,24 +2,19 @@
 include '../inc/koneksi.php';
 
 // Data detail dosen yang akan ditampilkan di halaman ini
-$dosen_detail = [
-    'name'          => "Dr. Ulla Delfana Rosiani, ST., MT.",
-    'image_url'     => 'assets/images/dosen-ulla.png', 
-    'nip'           => '19780327200312200',
-    'nidn'          => '4314058001',
-    'program_studi' => 'Rekayasa Teknologi Informasi',
-    'jabatan'       => 'Tenaga Pengajar',
-    'email'         => 'ulla.rosiani@polinema.ac.id', 
-    'linkedin'      => 'linkedin.com/in/ullarosiani', 
-    'pendidikan'    => [
-        'S3 - Doktor Teknik, Universitas Brawijaya (2020)',
-        'S2 - Magister Teknik, Institut Teknologi Sepuluh Nopember (2005)',
-        'S1 - Sarjana Teknik, Institut Teknologi Sepuluh Nopember (2002)',
-    ],
-    'scopus_profile'      => '#', 
-    'google_scholar_profile' => '#', 
-    'sinta_profile'       => '#', 
-];
+// AMBIL ID DARI URL
+$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+
+if ($id <= 0) {
+    die("ID dosen tidak valid");
+}
+
+
+// QUERY DOSEN
+$stmt = $conn->prepare("SELECT * FROM dosen WHERE id = ?");
+$stmt->execute([$id]);
+$dosen_detail = $stmt->fetch(PDO::FETCH_ASSOC);
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -30,7 +25,7 @@ $dosen_detail = [
     <meta name="description" content="" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
-    <title>Detail Dosen | <?php echo $dosen_detail['name']; ?></title>
+    <title>Detail Dosen | <?= htmlspecialchars($dosen_detail['name']) ?></title>
 
     <link rel="shortcut icon" href="../assets/images/favicon.svg" type="image/svg" />
 
@@ -53,10 +48,16 @@ $dosen_detail = [
         <div class="container mt-4 pb-5">
             <div class="row">
                 
+                <!-- FOTO DOSEN -->
                 <div class="col-md-4 d-flex flex-column align-items-center align-items-md-start">
                     
-                    <div class="mb-4 shadow-sm rounded overflow-hidden bg-white" style="width: 200px; height: 250px;">
-                        <img src="<?php echo $dosen_detail['image_url']; ?>" alt="<?php echo $dosen_detail['name']; ?>" class="img-fluid w-100 h-100" style="object-fit: cover;">
+                    <div class="mb-4 shadow-sm rounded overflow-hidden bg-white"
+                        style="width: 200px; height: 250px; display:flex; justify-content:center; align-items:center;">
+                        
+                        <img src="admin/assets/img/<?= htmlspecialchars($dosen_detail['foto']); ?>"
+                            alt="<?= htmlspecialchars($dosen_detail['name']); ?>"
+                            class="w-100 h-100"
+                            style="object-fit: contain; padding: 15px;">
                     </div>
                     
                     <div class="mt-2 text-center text-md-start">

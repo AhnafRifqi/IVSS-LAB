@@ -11,7 +11,7 @@ $logo_data = pg_fetch_assoc($result);
             <div class="col-lg-12">
                 <nav class="navbar navbar-expand-lg">
                     <a class="navbar-brand" href="index.php">
-                        <img src="<?= htmlspecialchars($logo_data['logo']); ?>" alt="Logo IVSS" style="max-width: 100px; height: 100px;" /> 
+                        <img src="admin/assets/img/<?php echo $logo_data['logo'] ?>" alt="Logo IVSS" style="max-width: 100px; height: 100px;" /> 
                     </a>
                     
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
@@ -26,9 +26,6 @@ $logo_data = pg_fetch_assoc($result);
                         <ul class="navbar-nav ms-auto mb-2 mb-lg-0"> 
                             <li class="nav-item">
                                 <a href="index.php" style="color: #1A1A37; font-weight: bold;">Beranda</a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="aboutUs.php" style="color: #1A1A37; font-weight: bold;">Tentang Kami</a>
                             </li>
                             <li class="nav-item">
                                 <a href="news.php" style="color: #1A1A37; font-weight: bold;">Berita</a>
