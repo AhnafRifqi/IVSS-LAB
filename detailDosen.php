@@ -1,25 +1,25 @@
 <?php
-include '../inc/koneksi.php';
+include 'inc/koneksi.php';
 
 // Data detail dosen yang akan ditampilkan di halaman ini
-$dosen_detail = [
-    'name'          => "Dr. Ulla Delfana Rosiani, ST., MT.",
-    'image_url'     => 'assets/images/dosen-ulla.png', 
-    'nip'           => '19780327200312200',
-    'nidn'          => '4314058001',
-    'program_studi' => 'Rekayasa Teknologi Informasi',
-    'jabatan'       => 'Tenaga Pengajar',
-    'email'         => 'ulla.rosiani@polinema.ac.id', 
-    'linkedin'      => 'linkedin.com/in/ullarosiani', 
-    'pendidikan'    => [
-        'S3 - Doktor Teknik, Universitas Brawijaya (2020)',
-        'S2 - Magister Teknik, Institut Teknologi Sepuluh Nopember (2005)',
-        'S1 - Sarjana Teknik, Institut Teknologi Sepuluh Nopember (2002)',
-    ],
-    'scopus_profile'      => '#', 
-    'google_scholar_profile' => '#', 
-    'sinta_profile'       => '#', 
-];
+// AMBIL ID DARI URL
+$nidn = isset($_GET['nidn']) ? $_GET['nidn'] : '';
+
+if (empty($nidn)) {
+    die("NIDN dosen tidak valid");
+}
+
+
+$sql = "SELECT * FROM dosen WHERE nidn = $1";
+$result = pg_query_params($koneksi, $sql, [$nidn]);
+
+if (!$result) {
+    die("Query error: " . pg_last_error($koneksi));
+}
+
+// Ambil data
+$dosen_detail = pg_fetch_assoc($result);
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -30,12 +30,12 @@ $dosen_detail = [
     <meta name="description" content="" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
-    <title>Detail Dosen | <?php echo $dosen_detail['name']; ?></title>
+    <title>Detail Dosen | <?= htmlspecialchars($dosen_detail['name'] ?? 'Detail Dosen') ?></title>
 
     <link rel="shortcut icon" href="../assets/images/favicon.svg" type="image/svg" />
 
     <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"> 
     <link rel="stylesheet" href="assets/css/lineicons.css" />
 
     <link rel="stylesheet" href="assets/css/tiny-slider.css" />
@@ -49,85 +49,135 @@ $dosen_detail = [
 
     <?php include('inc/navbar.php')?>
 
-    <section class="blank-section pt-5" style="min-height: 100vh; margin-top: 100px">
-        <div class="container mt-4 pb-5">
-            <div class="row">
+    <section class="blank-section pt-5" style="min-height: 100vh; margin-top: 100px; background-color: #f8f9fa;">
+        <div class="container mt-5 pb-5">
+            
+            <?php if (!$dosen_detail): ?>
+                <div class="alert alert-danger text-center fw-bold" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i> Data dosen tidak ditemukan.
+                </div>
+            <?php else: ?>
+            
+            <div class="row g-5">
                 
-                <div class="col-md-4 d-flex flex-column align-items-center align-items-md-start">
-                    
-                    <div class="mb-4 shadow-sm rounded overflow-hidden bg-white" style="width: 200px; height: 250px;">
-                        <img src="<?php echo $dosen_detail['image_url']; ?>" alt="<?php echo $dosen_detail['name']; ?>" class="img-fluid w-100 h-100" style="object-fit: cover;">
-                    </div>
-                    
-                    <div class="mt-2 text-center text-md-start">
-                        <h5 class="fw-bold text-dark mb-2">Informasi Kontak</h5>
-                        <ul class="list-unstyled">
-                            <?php if (!empty($dosen_detail['email'])): ?>
-                            <li class="d-flex align-items-center mb-1">
-                                <i class="lni lni-envelope me-2 text-dark"></i> Email: 
-                                <a href="mailto:<?php echo $dosen_detail['email']; ?>" class="text-dark ms-1" style="text-decoration: none;"><?php echo $dosen_detail['email']; ?></a>
-                            </li>
-                            <?php endif; ?>
-                            <?php if (!empty($dosen_detail['linkedin'])): ?>
-                            <li class="d-flex align-items-center">
-                                <i class="lni lni-linkedin me-2 text-dark"></i> LinkedIn: 
-                                <a href="https://<?php echo $dosen_detail['linkedin']; ?>" target="_blank" class="text-dark ms-1" style="text-decoration: none;"><?php echo $dosen_detail['linkedin']; ?></a>
-                            </li>
-                            <?php endif; ?>
-                        </ul>
+                <div class="col-md-4">
+                    <div class="card shadow-lg border-0 h-100" style="border-radius: 15px;">
+                        
+                        <div class="bg-light p-4 rounded-top" style="border-radius: 15px 15px 0 0; text-align: center;">
+                            <div class="mb-4 shadow-sm rounded-3 overflow-hidden d-inline-flex"
+                                 style="width: 250px; height: 300px; justify-content:center; align-items:center; border: 3px solid #dee2e6;">
+                                
+                                <img src="admin/assets/img/<?php echo htmlspecialchars($dosen_detail['foto'] ?? 'default.png'); ?>" 
+                                    alt="<?php echo htmlspecialchars($dosen_detail['nama'] ?? 'Dosen'); ?>"
+                                    class="w-100 h-100"
+                                    style="object-fit: contain; padding: 15px;">
+                            </div>
+                        </div>
+
+                        <div class="card-body bg-white p-4">
+                            <h5 class="fw-bold text-dark mb-3 border-bottom pb-2">
+                                <i class="bi bi-person-lines-fill me-2 text-warning"></i> Kontak
+                            </h5>
+                            <ul class="list-unstyled mb-0">
+                                <?php if (!empty($dosen_detail['email'])): ?>
+                                <li class="d-flex align-items-center mb-2">
+                                    <i class="bi bi-envelope-fill me-3 text-secondary fs-5"></i> 
+                                    <div class="flex-grow-1">
+                                        <small class="text-muted d-block">Email</small>
+                                        <a href="mailto:<?php echo htmlspecialchars($dosen_detail['email']); ?>" class="text-dark fw-bold" style="text-decoration: none; word-break: break-all;">
+                                            <?php echo htmlspecialchars($dosen_detail['email']); ?>
+                                        </a>
+                                    </div>
+                                </li>
+                                <?php endif; ?>
+                                <?php if (!empty($dosen_detail['linkedin'])): ?>
+                                <li class="d-flex align-items-center mb-2">
+                                    <i class="bi bi-linkedin me-3 text-secondary fs-5"></i> 
+                                    <div class="flex-grow-1">
+                                        <small class="text-muted d-block">LinkedIn</small>
+                                        <a href="https://<?php echo htmlspecialchars($dosen_detail['linkedin']); ?>" 
+                                            target="_blank" 
+                                            class="btn btn-primary btn-sm rounded-pill fw-bold" 
+                                            style="background-color: #14123A; color: #fff; text-transform: uppercase; padding: 4px 20px; font-size: 0.8rem;">
+                                            Kunjungi Profil
+                                        </a>
+                                    </div>
+                                </li>
+                                <?php endif; ?>
+                            </ul>
+                        </div>
                     </div>
                 </div>
 
-                <div class="col-md-8 mt-4 mt-md-0">
+                <div class="col-md-8">
                     
-                    <h1 class="fw-bold text-dark border-bottom border-dark pb-2 mb-4" style="font-size: 2rem;"><?php echo $dosen_detail['name']; ?></h1>
+                    <h1 class="fw-bolder text-dark mb-2" style="font-size: 2.5rem;">
+                        <?php echo htmlspecialchars($dosen_detail['nama']); ?>
+                    </h1>
+                    <p class="lead text-secondary mb-4"><?php echo htmlspecialchars($dosen_detail['jabatan']); ?></p>
+                    
+                    <hr class="mt-0 mb-4 border-warning opacity-100" style="border-width: 3px !important;">
 
-                    <h4 class="fw-bold text-dark">Profil Dosen</h4>
-                    <hr class="mt-0 mb-4 border-dark" style="border-width: 2px !important;">
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="d-flex mb-1">
-                                <span class="fw-normal text-dark" style="width: 150px;">NIP</span>: 
-                                <span class="fw-bold text-dark ms-1"><?php echo $dosen_detail['nip']; ?></span>
-                            </div>
-                            <div class="d-flex mb-1">
-                                <span class="fw-normal text-dark" style="width: 150px;">NIDN</span>: 
-                                <span class="fw-bold text-dark ms-1"><?php echo $dosen_detail['nidn']; ?></span>
-                            </div>
-                            <div class="d-flex mb-1">
-                                <span class="fw-normal text-dark" style="width: 150px;">Program Studi</span>: 
-                                <span class="fw-bold text-dark ms-1"><?php echo $dosen_detail['program_studi']; ?></span>
-                            </div>
-                            <div class="d-flex mb-1">
-                                <span class="fw-normal text-dark" style="width: 150px;">Jabatan</span>: 
-                                <span class="fw-bold text-dark ms-1"><?php echo $dosen_detail['jabatan']; ?></span>
+                    <div class="mb-5 p-4 bg-white rounded shadow-sm">
+                        <h4 class="fw-bold text-dark mb-3"><i class="bi bi-info-circle-fill me-2 text-warning"></i> Profil Dosen</h4>
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex align-items-center px-0">
+                                        <span class="fw-medium text-dark me-3" style="min-width: 120px;">NIP</span>: 
+                                        <span class="fw-bold ms-1" style="color: #14123A;"><?php echo htmlspecialchars($dosen_detail['nip']); ?></span>
+                                    </li>
+                                    <li class="list-group-item d-flex align-items-center px-0">
+                                        <span class="fw-medium text-dark me-3" style="min-width: 120px;">NIDN</span>: 
+                                        <span class="fw-bold ms-1" style="color: #14123A;"><?php echo htmlspecialchars($dosen_detail['nidn']); ?></span>
+                                    </li>
+                                    <li class="list-group-item d-flex align-items-center px-0">
+                                        <span class="fw-medium text-dark me-3" style="min-width: 120px;">Jabatan</span>: 
+                                        <span class="fw-bold ms-1" style="color: #14123A;"><?php echo htmlspecialchars($dosen_detail['jabatan']); ?></span>
+                                    </li>
+                                </ul>
                             </div>
                         </div>
                     </div>
+                    
+                    <div class="mb-5 p-4 bg-white rounded shadow-sm">
+                        <h4 class="fw-bold text-dark mb-3">
+                            <i class="bi bi-mortarboard-fill me-2 text-warning"></i> Pendidikan</h4>
+                        <p class="text-dark">
+                            <div class="row">
+                                <span class="fw-bold text-dark ms-1"><?php echo $dosen_detail['pendidikan']; ?></span>
+                            </div>
+                        </p>
+                    </div>
 
-                    <h4 class="fw-bold text-dark mt-4">Pendidikan</h4>
-                    <hr class="mt-0 mb-4 border-dark" style="border-width: 2px !important;">
-                    <ul class="list-unstyled ps-3">
-                        <?php foreach ($dosen_detail['pendidikan'] as $edu): ?>
-                        <li class="mb-1" style="text-indent: -1em;"><span class="me-2">&bullet;</span><?php echo $edu; ?></li>
-                        <?php endforeach; ?>
-                    </ul>
-
-                    <h4 class="fw-bold text-dark mt-4">Sorotan Publikasi</h4>
-                    <hr class="mt-0 mb-4 border-dark" style="border-width: 2px !important;">
-                    <div class="d-flex flex-wrap">
-                        <?php if (!empty($dosen_detail['scopus_profile'])): ?>
-                        <a href="<?php echo $dosen_detail['scopus_profile']; ?>" target="_blank" class="btn btn-warning rounded-pill fw-bold me-2 mb-2">Scopus Profile</a>
-                        <?php endif; ?>
-                        <?php if (!empty($dosen_detail['google_scholar_profile'])): ?>
-                        <a href="<?php echo $dosen_detail['google_scholar_profile']; ?>" target="_blank" class="btn btn-warning rounded-pill fw-bold me-2 mb-2">Google Scholar Profile</a>
-                        <?php endif; ?>
-                        <?php if (!empty($dosen_detail['sinta_profile'])): ?>
-                        <a href="<?php echo $dosen_detail['sinta_profile']; ?>" target="_blank" class="btn btn-warning rounded-pill fw-bold me-2 mb-2">Sinta Profile</a>
-                        <?php endif; ?>
+                    <div class="mb-5 p-4 bg-white rounded shadow-sm">
+                        <h4 class="fw-bold text-dark mb-3">
+                            <i class="bi bi-journals me-2 text-warning"></i> Sorotan Publikasi</h4>
+                        <div class="d-flex flex-wrap gap-2">
+                            <?php if (!empty($dosen_detail['scopus'])): ?>
+                            <a href="<?php echo htmlspecialchars($dosen_detail['scopus']); ?>" target="_blank" class="btn rounded-pill fw-bold"
+                            style="background-color: #14123A; color: #fff; border: none; pointer-events: auto; text-decoration: none; font-size: 0.85rem; padding: 4px 18px;">
+                                <i class="bi bi-link-45deg me-1"></i> Scopus Profile
+                            </a>
+                            <?php endif; ?>
+                            <?php if (!empty($dosen_detail['google_scholar'])): ?>
+                            <a href="<?php echo htmlspecialchars($dosen_detail['google_scholar']); ?>" target="_blank" class="btn rounded-pill fw-bold"
+                            style="background-color: #14123A; color: #fff; border: none; pointer-events: auto; text-decoration: none; font-size: 0.85rem; padding: 4px 18px;">
+                                <i class="bi bi-link-45deg me-1"></i> Google Scholar Profile
+                            </a>
+                            <?php endif; ?>
+                            <?php if (!empty($dosen_detail['sinta'])): ?>
+                            <a href="<?php echo htmlspecialchars($dosen_detail['sinta']); ?>" target="_blank" class="btn rounded-pill fw-bold"
+                            style="background-color: #14123A; color: #fff; border: none; pointer-events: auto; text-decoration: none; font-size: 0.85rem; padding: 4px 18px;">
+                                <i class="bi bi-link-45deg me-1"></i> Sinta Profile
+                            </a>
+                            <?php endif; ?>
+                        </div>
                     </div>
                 </div>
             </div>
+            
+            <?php endif; ?>
         </div>
     </section>
 
