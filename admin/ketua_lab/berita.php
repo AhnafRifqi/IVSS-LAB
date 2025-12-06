@@ -8,9 +8,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'ketua') {
     exit;
 }
 
-
-
-// ambil semua berita dari table berita_id
+// ambil berita
 $q = pg_query($koneksi, 'SELECT berita_id, judul, isi, gambar, penulis, tanggal FROM berita ORDER BY berita_id DESC');
 $beritas = $q ? pg_fetch_all($q) : [];
 if ($beritas === false) $beritas = [];
@@ -39,9 +37,13 @@ if ($beritas === false) $beritas = [];
             </nav>
 
             <div class="container-fluid">
+
                 <div class="card shadow mb-4">
-                    <div class="card-header py-3"><h6 class="m-0 font-weight-bold text-primary">Daftar Berita</h6></div>
+                    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Daftar Berita</h6>
+                </div>
                     <div class="card-body">
+
                         <div class="table-responsive">
                             <table class="table table-bordered" id="beritaTable" width="100%" cellspacing="0">
                                 <thead class="table-primary text-center">
@@ -53,37 +55,43 @@ if ($beritas === false) $beritas = [];
                                         <th>Penulis</th>
                                         <th>Tanggal</th>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                <?php if (empty($beritas)): ?>
-                                    <tr><td colspan="7" class="text-center text-muted">Belum ada data berita.</td></tr>
-                                <?php else: foreach ($beritas as $i => $b): ?>
+                                    </thead>
+
+                                    <tbody>
+                                    <?php if (empty($beritas)): ?>
+                                        <tr><td colspan="7" class="text-center text-muted">Belum ada data berita.</td></tr>
+                                    <?php else: foreach ($beritas as $i => $b): ?>
                                     <tr>
                                         <td class="text-center"><?= $i + 1 ?></td>
                                         <td><?= htmlspecialchars($b['judul']) ?></td>
                                         <td class="text-center">
                                             <?php if (!empty($b['gambar'])): ?>
-                                                <img src="<?= htmlspecialchars($b['gambar'], ENT_QUOTES) ?>" class="img-thumb" alt="gambar">
+                                                <img src="../assets/img/<?= htmlspecialchars($b['gambar']) ?>" class="img-thumb" alt="gambar">
                                             <?php else: ?>
                                                 <span class="text-muted small">-</span>
                                             <?php endif; ?>
                                         </td>
-                                        <td class="truncate" title="<?= htmlspecialchars($b['isi']) ?>"><?= htmlspecialchars(mb_strimwidth($b['isi'],0,120,'...')) ?></td>
+                                        <td class="truncate" title="<?= htmlspecialchars($b['isi']) ?>">
+                                            <?= htmlspecialchars(mb_strimwidth($b['isi'],0,120,'...')) ?>
+                                        </td>
                                         <td><?= htmlspecialchars($b['penulis'] ?? '-') ?></td>
                                         <td class="text-center"><?= htmlspecialchars($b['tanggal']) ?></td>
                                     </tr>
-                                <?php endforeach; endif; ?>
+                                    <?php endforeach; endif; ?>
                                 </tbody>
                             </table>
                         </div>
+
                     </div>
                 </div>
 
             </div><!-- /.container -->
+
         </div><!-- /#content -->
 
         <?php include '../inc/footer.php'; ?>
     </div>
+
 </div>
 
 <!-- scripts -->
@@ -92,14 +100,16 @@ if ($beritas === false) $beritas = [];
 <script src="../assets/vendor/datatables/jquery.dataTables.min.js"></script>
 <script src="../assets/vendor/datatables/dataTables.bootstrap4.min.js"></script>
 <script src="../assets/js/sb-admin-2.min.js"></script>
+
 <script>
 $(document).ready(function(){
     $('#beritaTable').DataTable({
         "columnDefs": [
-            { "orderable": false, "targets": [2,3,6] }
+            { "orderable": false, "targets": [2,3] }
         ]
     });
 });
 </script>
+
 </body>
 </html>
