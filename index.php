@@ -20,7 +20,7 @@ $result_berita_terbaru = pg_query($koneksi, $query_berita_terbaru);
 $data_visi = pg_fetch_assoc($result_visi);
 $data_misi = pg_fetch_assoc($result_misi);
 $data_dosen = pg_fetch_assoc($result_dosen);
-$dosen_id_url = $data_dosen['nip'];
+$dosen_id_url = $data_dosen['nidn'];
 
 $isi_visi = $data_visi['isi'] ?? "Visi belum tersedia di database.";
 $isi_misi = $data_misi['isi'] ?? "Misi belum tersedia di database.";
@@ -65,6 +65,10 @@ $batas_karakter = 300;
                             <a href="admin/index.php" class="btn btn-primary me-3 fw-bold"
                                 style="background-color: #FFBC3B; border-color: #FFBC3B; color: #1A1A37;">
                                 LOGIN
+                            </a>
+                            <a href="register_mahasiswa.php" class="btn btn-primary fw-bold"
+                                style="background-color: #1A1A37; border-color: #FFBC3B; color: #ffffff;">
+                                REGISTER
                             </a>
                         </div>
                     </div>
@@ -142,7 +146,7 @@ $batas_karakter = 300;
                         <p class="mb-0 small" style="color: black;">Email: <?php echo $data_dosen["email"] ?></p>
                     </div>
 
-                    <a href="detailDosen.php?id=<?php echo htmlspecialchars($dosen_id_url); ?>"
+                    <a href="detailDosen.php?nidn=<?php echo htmlspecialchars($dosen_id_url); ?>"
                         class="btn btn-sm rounded-pill text-white"
                         style="background-color: #1D264A; padding: 2px 8px; font-size: 0.75rem; margin-top:5px;">Detail</a>
                 </div>
@@ -616,7 +620,7 @@ $batas_karakter = 300;
 
             <div class="container">
                 <div class="row mt-n3">
-                <?php
+                    <?php
                     if ($result_berita_terbaru) {
                         if (isset($result_berita_terbaru)) { pg_result_seek($result_berita_terbaru, 0); }
                         
@@ -640,7 +644,8 @@ $batas_karakter = 300;
                             }
                 ?>
                     <div class="col-lg-4 col-md-6 col-12 mb-4">
-                        <div class="single news card border-0 shadow-sm rounded-4 overflow-hidden d-flex flex-column" style="height: 100vh;">
+                        <div class="single news card border-0 shadow-sm rounded-4 overflow-hidden d-flex flex-column"
+                            style="height: 100vh;">
                             <div class="position-relative overflow-hidden" style="height: 250px;">
                                 <img src="admin/assets/img/<?php echo htmlspecialchars($data_berita['gambar']); ?>"
                                     alt="<?= htmlspecialchars($data_berita['judul']); ?>"
