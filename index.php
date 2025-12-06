@@ -6,7 +6,9 @@ $query_dosen = "SELECT * FROM dosen";
 $query_peralatan_lab = "SELECT gambar, nama FROM fasilitas 
                         WHERE nama NOT IN ('Area Mushola', 'AC', 'Whiteboard', 'Locker')";
 $query_fasilitas_umum = "SELECT gambar, nama FROM fasilitas WHERE nama = 'Area Mushola' OR nama = 'AC' OR nama = 'Whiteboard' OR nama = 'Locker'";
-$query_berita_terbaru = "SELECT * FROM berita ORDER BY tanggal DESC LIMIT 3";
+$query_berita_terbaru = "SELECT * FROM berita ORDER BY berita_id DESC LIMIT 3";
+
+
 
 $result_visi = pg_query($koneksi, $query_visi);
 $result_misi = pg_query($koneksi, $query_misi);
@@ -18,11 +20,11 @@ $result_berita_terbaru = pg_query($koneksi, $query_berita_terbaru);
 $data_visi = pg_fetch_assoc($result_visi);
 $data_misi = pg_fetch_assoc($result_misi);
 $data_dosen = pg_fetch_assoc($result_dosen);
-$dosen_id_url = $data_dosen['nip'];
+$dosen_id_url = $data_dosen['nidn'];
 
 $isi_visi = $data_visi['isi'] ?? "Visi belum tersedia di database.";
 $isi_misi = $data_misi['isi'] ?? "Misi belum tersedia di database.";
-$batas_karakter = 150;
+$batas_karakter = 300;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -53,28 +55,32 @@ $batas_karakter = 150;
     <?php include('inc/navbar.php');?>
 
     <section id="hero-area" class="header-area header-eight" style="background-color: #1A1A37;">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-6 col-md-12 col-12">
-                <div class="header-content">
-                    <h1 style="color: #ffffff;"> Selamat Datang di Laboratorium Visi Cerdas dan Sistem Cerdas</h1>
-                    
-                    <div class="button mt-4">
-                        <a href="admin/index.php" class="btn btn-primary me-3 fw-bold" 
-                            style="background-color: #FFBC3B; border-color: #FFBC3B; color: #1A1A37;">
-                            LOGIN
-                        </a>
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6 col-md-12 col-12">
+                    <div class="header-content">
+                        <h1 style="color: #ffffff;"> Selamat Datang di Laboratorium Visi Cerdas dan Sistem Cerdas</h1>
+
+                        <div class="button mt-4">
+                            <a href="admin/index.php" class="btn btn-primary me-3 fw-bold"
+                                style="background-color: #FFBC3B; border-color: #FFBC3B; color: #1A1A37;">
+                                LOGIN
+                            </a>
+                            <a href="register_mahasiswa.php" class="btn btn-primary fw-bold"
+                                style="background-color: #1A1A37; border-color: #FFBC3B; color: #ffffff;">
+                                REGISTER
+                            </a>
+                        </div>
                     </div>
+                </div>
+                <div class="col-lg-6 col-md-12 col-12">
+                    <div class="header-image">
+                        <img src="assets/images/header/gambar1.jpg" alt="#" />
                     </div>
-            </div>
-            <div class="col-lg-6 col-md-12 col-12">
-                <div class="header-image">
-                    <img src="assets/images/header/gambar1.jpg" alt="#" />
                 </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
     <section id="fokus-riset" class="py-5 bg-light">
         <div class="container">
             <div class="row">
@@ -614,40 +620,39 @@ $batas_karakter = 150;
 
             <div class="container">
                 <div class="row mt-n3">
-
                     <?php
-                if ($result_berita_terbaru) {
-                    if (isset($result_berita_terbaru)) { pg_result_seek($result_berita_terbaru, 0); }
-                    
-                    while ($data_berita = pg_fetch_assoc($result_berita_terbaru)) {
-                        $berita_id = $data_berita['berita_id']; 
-                        $berita_link = "detailBerita.php?id=" . htmlspecialchars($berita_id);
-                        $tanggal_format = date('d F Y', strtotime($data_berita['tanggal']));
+                    if ($result_berita_terbaru) {
+                        if (isset($result_berita_terbaru)) { pg_result_seek($result_berita_terbaru, 0); }
                         
-                        $isi_lengkap = $data_berita['isi']; 
-                        
-                        if (strlen($isi_lengkap) > $batas_karakter) {
-                            $potongan_isi = substr($isi_lengkap, 0, $batas_karakter);
-                            $potongan_isi = substr($potongan_isi, 0, strrpos($potongan_isi, ' '));
-                            $isi_tampilan = $potongan_isi . '...';
-                            $show_button = true;
-                        } else {
-                            $isi_tampilan = $isi_lengkap;
-                            $show_button = false;
-                        }
+                        while ($data_berita = pg_fetch_assoc($result_berita_terbaru)) {
+                            $berita_id = $data_berita['berita_id']; 
+                            $berita_link = "detailBerita.php?id=" . htmlspecialchars($berita_id);
+                            $tanggal_format = date('d F Y', strtotime($data_berita['tanggal']));
+                            
+                            $isi_lengkap = $data_berita['isi']; 
+                            
+                            $batas_karakter = isset($batas_karakter) ? $batas_karakter : 500; 
+                            
+                            if (strlen($isi_lengkap) > $batas_karakter) {
+                                $potongan_isi = substr($isi_lengkap, 0, $batas_karakter);
+                                $potongan_isi = substr($potongan_isi, 0, strrpos($potongan_isi, ' '));
+                                $isi_tampilan = $potongan_isi . '...';
+                                $show_button = true;
+                            } else {
+                                $isi_tampilan = $isi_lengkap;
+                                $show_button = false;
+                            }
                 ?>
                     <div class="col-lg-4 col-md-6 col-12 mb-4">
-                        <div class="single-news">
-                            <div class="image">
-                                <a href="<?php echo $berita_link; ?>">
-                                    <img class="thumb"
-                                        src="admin/assets/img/<?php echo htmlspecialchars($data_berita['gambar']); ?>"
-                                        alt="<?php echo htmlspecialchars($data_berita['judul']); ?>" />
-                                </a>
+                        <div class="single news card border-0 shadow-sm rounded-4 overflow-hidden d-flex flex-column"
+                            style="height: 100vh;">
+                            <div class="position-relative overflow-hidden" style="height: 250px;">
+                                <img src="admin/assets/img/<?php echo htmlspecialchars($data_berita['gambar']); ?>"
+                                    alt="<?= htmlspecialchars($data_berita['judul']); ?>"
+                                    class="w-100 h-100 object-fit-cover">
                             </div>
 
-                            <div class="content-body">
-
+                            <div class="content-body d-flex flex-column flex-grow-1">
                                 <div class="meta-info mb-3 d-flex align-items-center">
                                     <p class="date me-3 mb-0 py-2" style="color: #6c757d; font-size: 0.9rem;">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
@@ -667,18 +672,19 @@ $batas_karakter = 150;
                                         penulis: -
                                     </p>
                                 </div>
+
                                 <h3 class="title fw-bold" style="font-size: 1.5rem; line-height: 1.2;">
                                     <a href="<?php echo $berita_link; ?>" style="color: #1A1A37;">
                                         <?php echo htmlspecialchars($data_berita['judul']); ?>
                                     </a>
                                 </h3>
 
-                                <p style="color: #495057;">
+                                <p style="color: #495057; padding-top: 20px">
                                     <?php echo htmlspecialchars($isi_tampilan); ?>
                                 </p>
 
                                 <?php if ($show_button): ?>
-                                <a href="<?php echo $berita_link; ?>" class="more-btn fw-bold"
+                                <a href="<?php echo $berita_link; ?>" class="more-btn fw-bold mt-auto"
                                     style="color: #FFBC3B; text-decoration: none;">
                                     Baca Selengkapnya &rarr;
                                 </a>

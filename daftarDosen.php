@@ -27,13 +27,9 @@ $ketua_lab = pg_fetch_assoc($result);
     <link rel="shortcut icon" href="../assets/images/favicon.svg" type="image/svg" />
 
     <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
-
     <link rel="stylesheet" href="assets/css/lineicons.css" />
-
     <link rel="stylesheet" href="assets/css/tiny-slider.css" />
-
     <link rel="stylesheet" href="assets/css/glightbox.min.css" />
-
     <link rel="stylesheet" href="style.css" />
 </head>
 

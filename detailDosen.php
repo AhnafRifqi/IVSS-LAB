@@ -37,11 +37,8 @@ $dosen_detail = pg_fetch_assoc($result);
     <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"> 
     <link rel="stylesheet" href="assets/css/lineicons.css" />
-
     <link rel="stylesheet" href="assets/css/tiny-slider.css" />
-
     <link rel="stylesheet" href="assets/css/glightbox.min.css" />
-
     <link rel="stylesheet" href="style.css" />
 </head>
 

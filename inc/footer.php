@@ -7,7 +7,7 @@
                     <div class="footer-about">
                         <div class="d-flex align-items-center gap-2 mb-2">
                             <div class="logo">
-                                <img src="admin/assets/img/Polinema_logo.png" alt="Logo Polinema"
+                                <img src="assets/img/Polinema_logo.png" alt="Logo Polinema"
                                     style="max-width: 60px; height: auto;" />
                             </div>
 
