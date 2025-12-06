@@ -66,6 +66,10 @@ $batas_karakter = 300;
                                 style="background-color: #FFBC3B; border-color: #FFBC3B; color: #1A1A37;">
                                 LOGIN
                             </a>
+                            <a href="register_mahasiswa.php" class="btn btn-primary fw-bold"
+                                style="background-color: #1A1A37; border-color: #FFBC3B; color: #ffffff;">
+                                REGISTER
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -616,7 +620,7 @@ $batas_karakter = 300;
 
             <div class="container">
                 <div class="row mt-n3">
-                <?php
+                    <?php
                     if ($result_berita_terbaru) {
                         if (isset($result_berita_terbaru)) { pg_result_seek($result_berita_terbaru, 0); }
                         
@@ -640,7 +644,8 @@ $batas_karakter = 300;
                             }
                 ?>
                     <div class="col-lg-4 col-md-6 col-12 mb-4">
-                        <div class="single news card border-0 shadow-sm rounded-4 overflow-hidden d-flex flex-column" style="height: 100vh;">
+                        <div class="single news card border-0 shadow-sm rounded-4 overflow-hidden d-flex flex-column"
+                            style="height: 100vh;">
                             <div class="position-relative overflow-hidden" style="height: 250px;">
                                 <img src="admin/assets/img/<?php echo htmlspecialchars($data_berita['gambar']); ?>"
                                     alt="<?= htmlspecialchars($data_berita['judul']); ?>"
