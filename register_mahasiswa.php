@@ -6,8 +6,8 @@ $sql = "SELECT * FROM logo LIMIT 1";
 $result = pg_query($koneksi, $sql);
 $logo_data = pg_fetch_assoc($result);
 
-// Query untuk mengambil daftar dosen
-$sql_dosen = "SELECT nama FROM dosen ORDER BY nama ASC";
+// ambil daftar dosen - ambil nip & nama (value = nip)
+$sql_dosen = "SELECT nip, nama FROM dosen ORDER BY nama ASC";
 $result_dosen = pg_query($koneksi, $sql_dosen);
 
 // Proses form
@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Validasi sederhana
     if ($namaLengkap && $nim && $jenisKelamin && $noTelp && $email && $keperluan && $dosenPembimbing) {
-        $sql_insert = "INSERT INTO mahasiswa 
+        $sql_insert = "INSERT INTO mahasiswa
             (nama, nim, jenis_kelamin, no_telp, email, keperluan, dosen_pembimbing, tanggal_daftar, status_pendaftaran)
             VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_DATE, $8)";
         $result_insert = pg_query_params($koneksi, $sql_insert, [
@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ]);
 
         if ($result_insert) {
-            echo "<script>alert('Data berhasil disimpan!'); window.location='registrasi.php';</script>";
+            echo "<script>alert('Data berhasil disimpan!'); window.location='index.php';</script>";
             exit;
         } else {
             echo "<script>alert('Terjadi kesalahan saat menyimpan data.');</script>";
@@ -77,29 +77,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="row justify-content-center">
             <div class="col-lg-10">
                 <div class="card shadow-lg border-0 p-4 p-md-5" style="border-radius: 20px;">
-                    
-                   <div class="text-center mb-5">
+
+                    <div class="text-center mb-5">
                         <h2 class="fw-bold text-dark mb-3" style="font-size: 1.8rem;">
                             Registrasi Akun Mahasiswa & Member Laboratorium
                         </h2>
                         <div class="mx-auto" style="width: 900px; height: 4px; background-color: #FFBC3B; margin: 15px auto 0;"></div>
                     </div>
-
                     <div class="row g-4">
                         <div class="col-md-7">
                             <form action="#" method="POST">
                                 <div class="mb-4">
                                     <label for="namaLengkap" class="form-label fw-bold text-dark">Nama Lengkap</label>
                                     <input type="text" name="nama" class="form-control form-control-lg border-0 shadow-sm" id="namaLengkap" 
-                                           placeholder="Masukkan Nama Lengkap" required
-                                           style="background-color: #e9ecef;  font-size: 0.9rem;">
+                                            placeholder="Masukkan Nama Lengkap" required
+                                            style="background-color: #e9ecef;  font-size: 0.9rem;">
                                 </div>
 
                                 <div class="mb-4">
                                     <label for="nim" class="form-label fw-bold text-dark">NIM</label>
                                     <input type="text" name="nim" class="form-control form-control-lg border-0 shadow-sm" id="nim" 
-                                           placeholder="Masukkan NIM" required
-                                           style="background-color: #e9ecef;  font-size: 0.9rem;">
+                                            placeholder="Masukkan NIM" required
+                                            style="background-color: #e9ecef;  font-size: 0.9rem;">
                                 </div>
 
                                 <div class="row g-3 mb-4">
@@ -115,23 +114,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <div class="col-md-8">
                                         <label for="email" class="form-label fw-bold text-dark">Email</label>
                                         <input type="email" name="email" class="form-control form-control-lg border-0 shadow-sm" id="email" 
-                                               placeholder="Masukkan Email" required
-                                               style="background-color: #e9ecef;  font-size: 0.9rem;">
+                                                placeholder="Masukkan Email" required
+                                                style="background-color: #e9ecef;  font-size: 0.9rem;">
                                     </div>
                                 </div>
-                                
+
                                 <div class="mb-4">
                                     <label for="noTelp" class="form-label fw-bold text-dark">No. Telp</label>
                                     <input type="tel" name="no_telp" class="form-control form-control-lg border-0 shadow-sm" id="noTelp" 
-                                           placeholder="Masukkan No. Telp" required
-                                           style="background-color: #e9ecef;  font-size: 0.9rem;">
+                                            placeholder="Masukkan No. Telp" required
+                                            style="background-color: #e9ecef;  font-size: 0.9rem;">
                                 </div>
 
                                 <div class="mb-4">
                                     <label for="keperluan" class="form-label fw-bold text-dark">Keperluan yang Ingin Diajukan</label>
                                     <textarea name="keperluan" class="form-control border-0 shadow-sm" id="keperluan" rows="5" 
-                                              placeholder="Deskripsi keperluan" required
-                                              style="background-color: #e9ecef;  font-size: 0.9rem;"></textarea>
+                                                placeholder="Deskripsi keperluan" required
+                                                style="background-color: #e9ecef;  font-size: 0.9rem;"></textarea>
                                 </div>
 
                                 <div class="mb-5">
@@ -140,13 +139,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                             style="background-color: #e9ecef; font-size: 0.9rem;">
                                         <option selected disabled value="">Pilih Dosen Pembimbing</option>
                                         <?php
-                                        if ($result_dosen && pg_num_rows($result_dosen) > 0) {
-                                            while ($dosen = pg_fetch_assoc($result_dosen)) {
-                                                $nama_dosen = htmlspecialchars($dosen['nama']);
-                                                echo "<option value=\"$nama_dosen\">$nama_dosen</option>";
+                                            if ($result_dosen && pg_num_rows($result_dosen) > 0) {
+                                                while ($dosen = pg_fetch_assoc($result_dosen)) {
+                                                    $nip = htmlspecialchars($dosen['nip']);
+                                                    $nama_dosen = htmlspecialchars($dosen['nama']);
+                                                    echo "<option value=\"$nip\">$nama_dosen ($nip)</option>";
+                                                }
                                             }
-                                        }
-                                        ?>
+                                            ?>
                                     </select>
                                 </div>
 
@@ -163,10 +163,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </div>
                             </form>
                         </div>
-                        
+
                         <div class="col-md-5 d-flex flex-column align-items-center justify-content-center text-center">
-                            <img src="admin/assets/img/<?php echo $logo_data['logo'] ?>" 
-                             alt="Logo IVSS" class="img-fluid mb-3" style="max-width: 400px;">
+                            <img src="admin/assets/img/<?php echo $logo_data['logo'] ?>"
+                                alt="Logo IVSS" class="img-fluid mb-3" style="max-width: 400px;">
                         </div>
 
                     </div>
@@ -175,7 +175,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 </section>
-    
+
 <?php include('inc/footer.php')?>
 
 </body>
