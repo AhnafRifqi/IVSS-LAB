@@ -150,6 +150,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     </select>
                                 </div>
 
+                                <div class="card shadow-lg border-0 p-4 mt-5" style="border-radius: 20px;">
+                                    <div class="p-3">
+                                        <div class="d-flex align-items-start mb-3">
+                                            <span class="icon-warning me-3" style="font-size: 1.3rem; color: #FFBC3B;">
+                                                <i class="lni lni-warning"></i>
+                                            </span>
+                                            <h5 class="fw-bold text-dark m-0">Proses Persetujuan Keanggotaan:</h5>
+                                        </div>
+                                        
+                                        <ol style="padding-left: 20px;">
+                                            <li class="mb-2">1. Pendaftaran Anda akan direview oleh <b>Dosen Pembimbing</b> yang telah Anda pilih.</li>
+                                            <li class="mb-2">2. Setelah disetujui oleh Dosen Pembimbing, pengajuan akan dilanjutkan untuk direview oleh <b>Ketua Laboratorium</b> </li>
+                                            <li>3. Setelah mendapatkan persetujuan dari kedua pihak, akun Anda akan diaktifkan sehingga Anda dapat melakukan <b>login</b>.</li>
+                                        </ol>
+
+                                    </div>
+                                </div>
+                                
+                                <p class="mt-4 mb-3">
+                                Sudah Registrasi? Silahkan cek status registrasi anda
+                                <a href="cekRegistrasi.php">disini</a>.
+                                </p>
+                                
                                 <div class="d-flex justify-content-start gap-3">
                                     <button type="button" class="btn btn-sm fw-bold text-white shadow"
                                             style="background-color: #1A1A37; border-radius: 10px;"
