@@ -36,9 +36,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'ketua') {
             <div class="container-fluid">
                 <h1 class="h3 mb-4 text-gray-800">Manajemen Mahasiswa</h1>
                 <div class="mb-3 text-right">
-                    <a href="tambah_mahasiswa.php" class="btn btn-success btn-sm">
-                        <i class="fas fa-plus mr-1"></i> Tambah Mahasiswa
-                    </a>
                 </div>
 
                 <?php
