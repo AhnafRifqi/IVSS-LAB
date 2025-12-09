@@ -1,7 +1,7 @@
 <?php
 include '../inc/koneksi.php';
 
-$q = @pg_query($koneksi, "SELECT logo FROM logo ORDER BY id DESC LIMIT 1");
+$q = @pg_query($koneksi, "SELECT logo FROM logo ORDER BY id DESC");
 if ($q && pg_num_rows($q) > 0) {
     $r = pg_fetch_assoc($q);
     $val = trim($r['logo'] ?? '');
@@ -54,6 +54,13 @@ if ($q && pg_num_rows($q) > 0) {
         <a class="nav-link" href="dosen.php">
             <i class="fas fa-chalkboard-teacher"></i>
             <span>Data Dosen / Member Lab</span>
+        </a>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link" href="member_dosen.php">
+            <i class="fas fa-user"></i>
+            <span>Data Member dan Dosen</span>
         </a>
     </li>
 
