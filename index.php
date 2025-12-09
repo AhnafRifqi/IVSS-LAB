@@ -75,7 +75,7 @@ $batas_karakter = 300;
                 </div>
                 <div class="col-lg-6 col-md-12 col-12">
                     <div class="header-image">
-                        <img src="assets/images/header/gambar1.jpg" alt="#" />
+                        <img src="assets/images/header/gambar1.png" alt="#" />
                     </div>
                 </div>
             </div>
