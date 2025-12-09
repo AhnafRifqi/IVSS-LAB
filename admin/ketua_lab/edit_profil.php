@@ -257,7 +257,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <script src="../assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote.min.js"></script>
 <script>
-$('#pendidikan').summernote({ height:150 });
+$(document).ready(function() {
+    $('#pendidikan').summernote({
+        height: 150,
+        placeholder: 'Isi pendidikan dosen...',
+        toolbar: [
+            ['style', ['bold','italic','underline','clear']],
+            ['para', ['ul','ol','paragraph']],
+            ['insert', ['link']],
+            ['view', ['fullscreen','codeview']]
+        ]
+    });
+});
 
 function previewFile(e,id){
     let file = e.target.files[0];
