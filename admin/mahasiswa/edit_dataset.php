@@ -78,10 +78,13 @@ if (isset($_POST['submit'])) {
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Visibility</label>
-                                <select name="visibility" class="form-control">
-                                    <option value="publik" <?= $dataset['visibility']=='publik'?'selected':'' ?>>Publik</option>
-                                    <option value="privat" <?= $dataset['visibility']=='privat'?'selected':'' ?>>Privat</option>
-                                </select>
+                                <input type="text" class="form-control"
+                                    value="<?= ucfirst(htmlspecialchars($dataset['visibility'])) ?>" 
+                                    readonly>
+
+                                <!-- value tetap ikut visibility dataset -->
+                                <input type="hidden" name="visibility"
+                                    value="<?= htmlspecialchars($dataset['visibility']) ?>">
                             </div>
                             <button type="submit" name="submit" class="btn btn-primary"><i class="fas fa-save"></i> Update</button>
                             <a href="dataset.php" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Kembali</a>
