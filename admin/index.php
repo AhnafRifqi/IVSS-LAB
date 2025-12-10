@@ -24,7 +24,7 @@ if (isset($_POST['username'], $_POST['password'], $_POST['role'])) {
     $password = trim($_POST['password']);
     $role     = trim($_POST['role']);
 
-    $query = 'SELECT user_id, username, password, salt, role FROM users WHERE username=$1 AND role=$2';
+    $query = 'SELECT user_id, username, password, role FROM users WHERE username=$1 AND role=$2';
     $result = pg_query_params($koneksi, $query, [$username, $role]);
 
     if ($result && pg_num_rows($result) === 1) {
