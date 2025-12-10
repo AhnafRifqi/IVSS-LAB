@@ -27,6 +27,13 @@ if ($q && pg_num_rows($q) > 0) {
         <div class="sidebar-brand-text mx-3">Lab IVSS Admin</div>
     </a>
 
+    <li class="nav-item">
+    <a class="nav-link" href="riset.php">
+        <i class="fas fa-flask"></i>
+        <span>Riset Saya</span>
+    </a>
+</li>
+
     <hr class="sidebar-divider d-none d-md-block">
 
     <!-- Beranda -->

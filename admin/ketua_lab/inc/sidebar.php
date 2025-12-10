@@ -27,6 +27,19 @@ if ($q && pg_num_rows($q) > 0) {
         <div class="sidebar-brand-text mx-3">Lab IVSS Admin</div>
     </a>
 
+      <li class="nav-item">
+        <a class="nav-link" href="acc_riset.php">
+            <i class="fas fa-clipboard-check"></i>
+            <span>Review Riset</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="riset.php">
+            <i class="fas fa-flask"></i>
+            <span>Semua Riset</span>
+        </a>
+    </li>
+
 
     <hr class="sidebar-divider d-none d-md-block">
 
@@ -69,7 +82,7 @@ if ($q && pg_num_rows($q) > 0) {
     </li>
 
     <li class="nav-item">
-        <a class="nav-link" href="acc_riset.php">
+        <a class="nav-link" href="list_riset.php">
             <i class="fas fa-tasks"></i>
             <span>Daftar ACC Riset</span>
         </a>
