@@ -55,13 +55,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
-// ---------- Ambil daftar dataset yang tampil di list ----------
-// Ketentuan tampilan:
 // - Untuk ketua: semua publik OR privat yg diunggah oleh mahasiswa
 // - Untuk user lain: publik OR milik user itu sendiri
 if ($role === 'ketua') {
     $q = pg_query($koneksi, "
-        SELECT 
+        SELECT
             d.dataset_id,
             d.judul,
             d.deskripsi,
@@ -83,12 +81,12 @@ if ($role === 'ketua') {
         LEFT JOIN mahasiswa m ON u.user_id = m.user_id
         LEFT JOIN dosen dos ON u.user_id = dos.user_id
         WHERE d.visibility = 'publik'
-           OR (d.visibility = 'privat' AND m.user_id IS NOT NULL)
+            OR (d.visibility = 'privat' AND m.user_id IS NOT NULL)
         ORDER BY d.tanggal_upload DESC
     ");
 } else {
     $q = pg_query_params($koneksi, "
-        SELECT 
+        SELECT
             d.dataset_id,
             d.judul,
             d.deskripsi,
@@ -100,7 +98,7 @@ if ($role === 'ketua') {
             m.nama AS mahasiswa_nama,
             dos.nama AS dosen_nama,
             COALESCE(m.nama, dos.nama, u.username) AS uploader_name,
-            CASE 
+            CASE
                 WHEN m.user_id IS NOT NULL THEN 'mahasiswa'
                 WHEN dos.user_id IS NOT NULL THEN 'dosen'
                 ELSE 'user'
