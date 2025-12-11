@@ -51,7 +51,7 @@ if (isset($_POST['submit'])) {
         ", [$judul, $deskripsi, $user_id, $tanggal_mulai_val, $tanggal_selesai_val, $dosen_user_id]);
 
         if ($insert) {
-            header('Location: list_riset.php?msg=created');
+            header('Location: riset.php?msg=created');
             exit;
         } else {
             $error_msg = pg_last_error($koneksi);
@@ -196,7 +196,7 @@ if (isset($_POST['submit'])) {
                                                 <button type="submit" name="submit" class="btn btn-success">
                                                     <i class="fas fa-paper-plane mr-1"></i> Ajukan Riset
                                                 </button>
-                                                <a href="list_riset.php" class="btn btn-secondary">
+                                                <a href="riset.php" class="btn btn-secondary">
                                                     <i class="fas fa-arrow-left mr-1"></i> Kembali
                                                 </a>
                                             </div>
