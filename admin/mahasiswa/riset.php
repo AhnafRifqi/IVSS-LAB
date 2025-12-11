@@ -15,10 +15,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['ris
     $riset_id = intval($_POST['riset_id']);
 
     if ($_POST['action'] === 'delete') {
-        // Hanya bisa hapus jika status masih pending
+        // Bisa hapus status apapun
         $del = pg_query_params($koneksi, "
             DELETE FROM riset 
-            WHERE riset_id = $1 AND creator_id = $2 AND status = 'pending'
+            WHERE riset_id = $1 AND creator_id = $2
         ", [$riset_id, $user_id]);
 
         if ($del && pg_affected_rows($del) > 0) {
@@ -185,20 +185,16 @@ function getStatusBadge($status)
                                                             <i class="fas fa-eye"></i>
                                                         </button>
 
-                                                        <?php if ($r['status'] === 'pending'): ?>
-                                                            <!-- Tombol Edit -->
-                                                            <a href="edit_riset.php?id=<?= $r['riset_id'] ?>"
-                                                                class="btn btn-sm btn-primary mb-1" title="Edit">
-                                                                <i class="fas fa-edit"></i>
-                                                            </a>
-                                                            <!-- Tombol Hapus -->
-                                                            <button class="btn btn-sm btn-danger mb-1" title="Hapus"
-                                                                onclick="confirmDelete(<?= $r['riset_id'] ?>, '<?= htmlspecialchars($r['judul'], ENT_QUOTES) ?>')">
-                                                                <i class="fas fa-trash"></i>
-                                                            </button>
-                                                        <?php else: ?>
-                                                            <span class="badge badge-secondary">-</span>
-                                                        <?php endif; ?>
+                                                        <!-- Tombol Edit -->
+                                                        <a href="edit_riset.php?id=<?= $r['riset_id'] ?>"
+                                                            class="btn btn-sm btn-primary mb-1" title="Edit">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                                        <!-- Tombol Hapus -->
+                                                        <button class="btn btn-sm btn-danger mb-1" title="Hapus"
+                                                            onclick="confirmDelete(<?= $r['riset_id'] ?>, '<?= htmlspecialchars($r['judul'], ENT_QUOTES) ?>')">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
                                                     </td>
                                                 </tr>
 
