@@ -55,12 +55,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['ris
 }
 
 // Get Research List expecting Ketua Approval (status 'approve_dosen_pembimbing')
+// Supports both Mahasiswa and Dosen(Admin Lab) creators
 $q = pg_query($koneksi, "
     SELECT r.riset_id, r.judul, r.deskripsi, r.tanggal_mulai, r.tanggal_selesai, r.created_at,
-           m.nama AS mahasiswa_nama, m.nim, d.nama AS admin_approval_name
+           u.role AS creator_role,
+           COALESCE(m.nama, d_creator.nama) AS nama_pemohon,
+           COALESCE(m.nim, d_creator.nip) AS id_pemohon,
+           d.nama AS admin_approval_name
     FROM riset r
     JOIN users u ON r.creator_id = u.user_id
-    JOIN mahasiswa m ON u.user_id = m.user_id
+    LEFT JOIN mahasiswa m ON u.user_id = m.user_id
+    LEFT JOIN dosen d_creator ON u.user_id = d_creator.user_id
     LEFT JOIN dosen d ON r.approved_dosen_by = d.user_id
     WHERE r.status = 'approve_dosen_pembimbing'
     ORDER BY r.created_at ASC
@@ -106,7 +111,7 @@ if ($list === false)
                                     <thead class="thead-light">
                                         <tr>
                                             <th>No</th>
-                                            <th>Mahasiswa</th>
+                                            <th>Pemohon</th>
                                             <th>Judul Riset</th>
                                             <th>Tanggal Pengajuan</th>
                                             <th>Aksi</th>
@@ -119,12 +124,19 @@ if ($list === false)
                                                     menunggu approval ketua.</td>
                                             </tr>
                                         <?php else:
-                                            foreach ($list as $i => $r): ?>
+                                            foreach ($list as $i => $r):
+                                                $role_badge = ($r['creator_role'] === 'mahasiswa')
+                                                    ? '<span class="badge badge-primary">Mahasiswa</span>'
+                                                    : '<span class="badge badge-success">Dosen</span>';
+                                                $id_label = ($r['creator_role'] === 'mahasiswa') ? 'NIM' : 'NIP';
+                                                ?>
                                                 <tr>
                                                     <td class="text-center"><?= $i + 1 ?></td>
                                                     <td>
-                                                        <strong><?= htmlspecialchars($r['mahasiswa_nama']) ?></strong><br>
-                                                        <small><?= htmlspecialchars($r['nim']) ?></small>
+                                                        <strong><?= htmlspecialchars($r['nama_pemohon']) ?></strong>
+                                                        <?= $role_badge ?><br>
+                                                        <small><?= $id_label ?>:
+                                                            <?= htmlspecialchars($r['id_pemohon']) ?></small>
                                                     </td>
                                                     <td><?= htmlspecialchars($r['judul']) ?></td>
                                                     <td class="text-center"><?= date('d/m/Y', strtotime($r['created_at'])) ?>
@@ -144,7 +156,7 @@ if ($list === false)
                                                         <div class="modal-content">
                                                             <div class="modal-header">
                                                                 <h5 class="modal-title font-weight-bold text-primary">Detail
-                                                                    Riset (Final Logic)</h5>
+                                                                    Riset</h5>
                                                                 <button type="button" class="close" data-dismiss="modal"
                                                                     aria-label="Close">
                                                                     <span aria-hidden="true">&times;</span>
@@ -153,13 +165,17 @@ if ($list === false)
                                                             <div class="modal-body">
                                                                 <div class="alert alert-info">
                                                                     <i class="fas fa-info-circle"></i> Riset ini telah disetujui
-                                                                    oleh Admin Lab/Dosen.
+                                                                    (Approved Dosen).
                                                                 </div>
                                                                 <div class="row">
                                                                     <div class="col-md-6">
-                                                                        <p><strong>Mahasiswa:</strong>
-                                                                            <?= htmlspecialchars($r['mahasiswa_nama']) ?>
-                                                                            (<?= htmlspecialchars($r['nim']) ?>)</p>
+                                                                        <p><strong>Pemohon:</strong>
+                                                                            <?= htmlspecialchars($r['nama_pemohon']) ?>
+                                                                        </p>
+                                                                        <p><strong>Role:</strong>
+                                                                            <?= ucfirst($r['creator_role']) ?>
+                                                                            (<?= $id_label ?>:
+                                                                            <?= htmlspecialchars($r['id_pemohon']) ?>)</p>
                                                                         <p><strong>Judul:</strong>
                                                                             <?= htmlspecialchars($r['judul']) ?></p>
                                                                     </div>

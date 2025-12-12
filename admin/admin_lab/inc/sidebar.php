@@ -63,6 +63,12 @@ if ($q && pg_num_rows($q) > 0) {
     <!-- Publikasi -->
     <div class="sidebar-heading">Publikasi & Informasi</div>
     <li class="nav-item">
+        <a class="nav-link" href="riset.php">
+            <i class="fas fa-flask"></i>
+            <span>Riset Saya</span>
+        </a>
+    </li>
+    <li class="nav-item">
         <a class="nav-link" href="dataset.php">
             <i class="fas fa-newspaper"></i>
             <span>Dataset</span>
