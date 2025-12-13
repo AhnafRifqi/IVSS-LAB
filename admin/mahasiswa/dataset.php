@@ -68,7 +68,10 @@ if ($datasets === false) $datasets = [];
                             elseif ($msg === 'updated') echo '<div class="alert alert-success">Dataset berhasil diupdate.</div>';
                             elseif ($msg === 'deleted') echo '<div class="alert alert-success">Dataset berhasil dihapus.</div>';
                             elseif ($msg === 'copied') echo '<div class="alert alert-success">Dataset berhasil dicopy.</div>';
-                            elseif ($msg === 'error') echo '<div class="alert alert-danger">Terjadi kesalahan.</div>';
+                            elseif ($msg === 'error') {
+                                $error_detail = $_GET['error_detail'] ?? 'Terjadi kesalahan yang tidak diketahui.';
+                                echo '<div class="alert alert-danger">Terjadi kesalahan: ' . htmlspecialchars($error_detail) . '</div>';
+                            }
                         }
                         ?>
 
@@ -112,12 +115,13 @@ if ($datasets === false) $datasets = [];
                                                 <a href="edit_dataset.php?id=<?= $d['dataset_id'] ?>" class="btn btn-sm btn-primary">
                                                     <i class="fas fa-edit"></i> Edit
                                                 </a>
-                                                <a href="hapus_dataset.php?id=<?= $d['dataset_id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus dataset ini?')">
+                                                <a href="proses_dataset.php?action=hapus&id=<?= $d['dataset_id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus dataset ini?')">
                                                     <i class="fas fa-trash"></i> Hapus
                                                 </a>
                                             <?php
                                             } elseif ($d['uploader_role'] === 'ketua') {
                                                 // dataset milik ketua, mahasiswa bisa copy
+                                                // Arahkan ke edit_dataset.php untuk mengisi form copy
                                                 ?>
                                                 <a href="edit_dataset.php?id=<?= $d['dataset_id'] ?>" class="btn btn-sm btn-warning">
                                                     <i class="fas fa-copy"></i> Copy
@@ -135,10 +139,7 @@ if ($datasets === false) $datasets = [];
                         </div>
                     </div>
                 </div>
-            </div><!-- /.container -->
-        </div><!-- /#content -->
-
-        <?php include '../inc/footer.php'; ?>
+            </div></div><?php include '../inc/footer.php'; ?>
     </div>
 </div>
 

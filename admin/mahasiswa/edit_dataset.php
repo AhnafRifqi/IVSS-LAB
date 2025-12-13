@@ -15,67 +15,35 @@ if (!$dataset_id) {
     exit;
 }
 
-// Ambil dataset
+// Ambil dataset, termasuk role uploader
 $q = pg_query_params($koneksi, "SELECT d.*, u.role AS uploader_role FROM dataset d LEFT JOIN users u ON d.uploader_by = u.user_id WHERE d.dataset_id = $1", [$dataset_id]);
 $dataset = pg_fetch_assoc($q);
 
 if (!$dataset) {
-    header('Location: dataset.php');
+    header('Location: dataset.php?msg=error&error_detail=' . urlencode('Dataset tidak ditemukan.'));
     exit;
 }
 
-$alert = '';
+// Tentukan apakah ini mode EDIT atau COPY
+$is_owner = ($dataset['uploader_by'] == $user_id);
+$is_ketua_dataset = ($dataset['uploader_role'] === 'ketua');
 
-if (isset($_POST['submit'])) {
-    $judul = trim($_POST['judul']);
-    $deskripsi = trim($_POST['deskripsi']);
-    $file_path = trim($_POST['file_path']);
-    $visibility_from_form = $_POST['visibility'];
-
-    // Cek apakah dataset milik mahasiswa sendiri
-    $is_owner = ($dataset['uploader_by'] == $user_id);
-
-    if ($is_owner) {
-        // Update dataset milik mahasiswa sendiri
-        $update = pg_query_params($koneksi, "
-            UPDATE dataset
-            SET judul = $1, deskripsi = $2, file_path = $3, visibility = $4
-            WHERE dataset_id = $5 AND uploader_by = $6
-        ", [$judul, $deskripsi, $file_path, $visibility_from_form, $dataset_id, $user_id]);
-
-        if ($update) {
-            header('Location: dataset.php?msg=updated');
-            exit;
-        } else {
-            $alert = '<div class="alert alert-danger">Gagal update dataset.</div>';
-        }
-    } else {
-        // Dataset milik ketua (copy)
-        if ($dataset['uploader_role'] === 'ketua') {
-            $insert = pg_query_params($koneksi, "
-                INSERT INTO dataset (judul, deskripsi, file_path, uploader_by, visibility)
-                VALUES ($1, $2, $3, $4, $5)
-            ", [$judul, $deskripsi, $file_path, $user_id, $visibility_from_form]);
-
-            if ($insert) {
-                header('Location: dataset.php?msg=copied');
-                exit;
-            } else {
-                $alert = '<div class="alert alert-danger">Gagal membuat copy dataset.</div>';
-            }
-        } else {
-            // Bukan owner dan bukan dataset ketua
-            header('Location: dataset.php');
-            exit;
-        }
-    }
+// Jika bukan pemilik DAN bukan dataset ketua, redirect.
+if (!$is_owner && !$is_ketua_dataset) {
+    header('Location: dataset.php?msg=error&error_detail=' . urlencode('Anda tidak memiliki izin untuk mengedit/menyalin dataset ini.'));
+    exit;
 }
+
+// Tentukan action dan teks tombol untuk form
+$action_mode = $is_owner ? 'update' : 'copy';
+$submit_text = $is_owner ? 'Update' : 'Copy';
+$title_text = $is_owner ? 'Edit Dataset' : 'Copy Dataset dari Ketua';
 ?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="utf-8">
-<title>Edit Dataset</title>
+<title><?= $title_text ?></title>
 <link href="../assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
 <link href="../assets/css/sb-admin-2.min.css" rel="stylesheet">
 </head>
@@ -85,13 +53,15 @@ if (isset($_POST['submit'])) {
     <div id="content-wrapper" class="d-flex flex-column">
         <div id="content">
             <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 shadow">
-                <span class="h5 mb-0 text-primary">Edit Dataset</span>
+                <span class="h5 mb-0 text-primary"><?= $title_text ?></span>
             </nav>
             <div class="container-fluid">
                 <div class="card shadow mb-4">
                     <div class="card-body">
-                        <?= $alert ?>
-                        <form method="POST">
+                        <form method="POST" action="proses_dataset.php">
+                            <input type="hidden" name="action" value="<?= $action_mode ?>">
+                            <input type="hidden" name="dataset_id" value="<?= htmlspecialchars($dataset['dataset_id']) ?>">
+                            
                             <div class="mb-3">
                                 <label class="form-label">Judul</label>
                                 <input type="text" name="judul" class="form-control" required value="<?= htmlspecialchars($dataset['judul']) ?>">
@@ -112,7 +82,7 @@ if (isset($_POST['submit'])) {
                                 <input type="hidden" name="visibility" value="<?= htmlspecialchars($dataset['visibility']) ?>">
                             </div>
                             <button type="submit" name="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> <?= ($dataset['uploader_by'] == $user_id) ? 'Update' : 'Copy' ?>
+                                <i class="fas fa-save"></i> <?= $submit_text ?>
                             </button>
                             <a href="dataset.php" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Kembali</a>
                         </form>
