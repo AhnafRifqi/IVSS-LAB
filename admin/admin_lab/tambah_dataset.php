@@ -7,26 +7,10 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-$user_id = $_SESSION['user_id'];
-$alert = '';
-
-if (isset($_POST['submit'])) {
-    $judul = trim($_POST['judul']);
-    $deskripsi = trim($_POST['deskripsi']);
-    $file_path = trim($_POST['file_path']);
-    $visibility = $_POST['visibility'];
-
-    $insert = pg_query_params($koneksi, "
-        INSERT INTO dataset (judul, deskripsi, file_path, uploader_by, visibility)
-        VALUES ($1, $2, $3, $4, $5)
-    ", [$judul, $deskripsi, $file_path, $user_id, $visibility]);
-
-    if ($insert) {
-        header('Location: dataset.php?msg=created');
-        exit;
-    } else {
-        $alert = '<div class="alert alert-danger">Gagal menambahkan dataset.</div>';
-    }
+$error = '';
+// Menampilkan pesan error dari proses_dataset.php
+if (isset($_GET['msg']) && $_GET['msg'] === 'error') {
+    $error = "Gagal menambah data: " . htmlspecialchars($_GET['error_detail'] ?? 'Terjadi kesalahan.');
 }
 ?>
 <!DOCTYPE html>
@@ -48,28 +32,35 @@ if (isset($_POST['submit'])) {
             <div class="container-fluid">
                 <div class="card shadow mb-4">
                     <div class="card-body">
-                        <?= $alert ?>
-                        <form method="POST">
+                        <?php if ($error): ?>
+                            <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
+                        <?php endif; ?>
+                        
+                        <form method="POST" action="proses_dataset.php">
+                            <input type="hidden" name="action" value="tambah">
+
                             <div class="mb-3">
                                 <label class="form-label">Judul</label>
-                                <input type="text" name="judul" class="form-control" required>
+                                <input type="text" name="judul" class="form-control" required 
+                                    value="<?= htmlspecialchars($_POST['judul'] ?? '') ?>">
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Deskripsi</label>
-                                <textarea name="deskripsi" class="form-control" rows="4"></textarea>
+                                <textarea name="deskripsi" class="form-control" rows="4"><?= htmlspecialchars($_POST['deskripsi'] ?? '') ?></textarea>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">File (link)</label>
-                                <input type="text" name="file_path" class="form-control">
+                                <input type="text" name="file_path" class="form-control"
+                                    value="<?= htmlspecialchars($_POST['file_path'] ?? '') ?>">
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Visibility</label>
                                 <select name="visibility" class="form-control">
-                                    <option value="publik">Publik</option>
-                                    <option value="privat">Privat</option>
+                                    <option value="publik" <?= ($_POST['visibility'] ?? '')=='publik'?'selected':'' ?>>Publik</option>
+                                    <option value="privat" <?= ($_POST['visibility'] ?? 'privat')=='privat'?'selected':'' ?>>Privat</option>
                                 </select>
                             </div>
-                            <button type="submit" name="submit" class="btn btn-success"><i class="fas fa-plus"></i> Tambah</button>
+                            <button type="submit" class="btn btn-success"><i class="fas fa-plus"></i> Tambah</button>
                             <a href="dataset.php" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Kembali</a>
                         </form>
                     </div>

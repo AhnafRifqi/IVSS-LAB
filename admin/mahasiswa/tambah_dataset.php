@@ -2,32 +2,15 @@
 session_start();
 include '../inc/koneksi.php';
 
-if (!isset($_SESSION['user_id'])) {
+// Pastikan hanya mahasiswa
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'mahasiswa') {
     header('Location: ../index.php');
     exit;
 }
+// Variabel $user_id tetap dipertahankan jika dibutuhkan di bagian lain, 
+// tetapi $alert dan logika POST handler Dihapus.
 
 $user_id = $_SESSION['user_id'];
-$alert = '';
-
-if (isset($_POST['submit'])) {
-    $judul = trim($_POST['judul']);
-    $deskripsi = trim($_POST['deskripsi']);
-    $file_path = trim($_POST['file_path']);
-    $visibility = $_POST['visibility'];
-
-    $insert = pg_query_params($koneksi, "
-        INSERT INTO dataset (judul, deskripsi, file_path, uploader_by, visibility)
-        VALUES ($1, $2, $3, $4, $5)
-    ", [$judul, $deskripsi, $file_path, $user_id, $visibility]);
-
-    if ($insert) {
-        header('Location: dataset.php?msg=created');
-        exit;
-    } else {
-        $alert = '<div class="alert alert-danger">Gagal menambahkan dataset.</div>';
-    }
-}
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -48,8 +31,9 @@ if (isset($_POST['submit'])) {
             <div class="container-fluid">
                 <div class="card shadow mb-4">
                     <div class="card-body">
-                        <?= $alert ?>
-                        <form method="POST">
+                        <form method="POST" action="proses_dataset.php">
+                            <input type="hidden" name="action" value="tambah">
+                            
                             <div class="mb-3">
                                 <label class="form-label">Judul</label>
                                 <input type="text" name="judul" class="form-control" required>

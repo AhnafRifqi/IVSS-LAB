@@ -25,6 +25,8 @@ $q = pg_query_params($koneksi, "
 
 $datasets = $q ? pg_fetch_all($q) : [];
 if ($datasets === false) $datasets = [];
+if ($q) pg_free_result($q); // Bebaskan hasil query
+
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -48,7 +50,6 @@ if ($datasets === false) $datasets = [];
             <div class="container-fluid">
                 <div class="card shadow mb-4">
                     <div class="card-body">
-                        <!-- Tombol Tambah di atas tabel -->
                         <div class="d-flex justify-content-between mb-3">
                             <h6 class="m-0 font-weight-bold text-primary">Daftar Dataset</h6>
                             <a href="tambah_dataset.php" class="btn btn-success btn-sm">
@@ -57,7 +58,7 @@ if ($datasets === false) $datasets = [];
                         </div>
 
                         <?php
-                        // Notifikasi aksi
+                        // Menampilkan pesan status dari proses_dataset.php
                         if (isset($_GET['msg'])) {
                             $msg = $_GET['msg'];
                             if ($msg === 'created') {
@@ -67,7 +68,8 @@ if ($datasets === false) $datasets = [];
                             } elseif ($msg === 'deleted') {
                                 echo '<div class="alert alert-success">Dataset berhasil dihapus.</div>';
                             } elseif ($msg === 'error') {
-                                echo '<div class="alert alert-danger">Terjadi kesalahan.</div>';
+                                $detail = htmlspecialchars($_GET['error_detail'] ?? 'Terjadi kesalahan tidak diketahui.');
+                                echo '<div class="alert alert-danger">Terjadi kesalahan: ' . $detail . '</div>';
                             }
                         }
                         ?>
@@ -109,7 +111,7 @@ if ($datasets === false) $datasets = [];
                                                 <a href="edit_dataset.php?id=<?= $d['dataset_id'] ?>" class="btn btn-sm btn-primary">
                                                     <i class="fas fa-edit"></i> Edit
                                                 </a>
-                                                <a href="hapus_dataset.php?id=<?= $d['dataset_id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus dataset ini?')">
+                                                <a href="proses_dataset.php?action=hapus&id=<?= $d['dataset_id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus dataset ini?')">
                                                     <i class="fas fa-trash"></i> Hapus
                                                 </a>
                                             <?php else: ?>
@@ -123,10 +125,7 @@ if ($datasets === false) $datasets = [];
                         </div>
                     </div>
                 </div>
-            </div><!-- /.container -->
-        </div><!-- /#content -->
-
-        <?php include '../inc/footer.php'; ?>
+            </div></div><?php include '../inc/footer.php'; ?>
     </div>
 </div>
 
