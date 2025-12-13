@@ -135,21 +135,51 @@ if ($q && pg_num_rows($q) > 0) {
     <hr class="sidebar-divider d-none d-md-block">
 
     <!-- Tentang Lab -->
-    <div class="sidebar-heading">Tentang Lab</div>
+<div class="sidebar-heading">Tentang Lab</div>
 
-    <li class="nav-item">
-        <a class="nav-link" href="logo.php">
-            <i class="fas fa-image"></i>
-            <span>Logo Website</span>
-        </a>
-    </li>
+<li class="nav-item">
+    <a class="nav-link" href="logo.php">
+        <i class="fas fa-image"></i>
+        <span>Logo Website</span>
+    </a>
+</li>
 
-    <li class="nav-item">
-        <a class="nav-link" href="visimisi.php">
-            <i class="fas fa-bullseye"></i>
-            <span>Visi & Misi</span>
-        </a>
-    </li>
+<li class="nav-item">
+    <a class="nav-link" href="visimisi.php">
+        <i class="fas fa-bullseye"></i>
+        <span>Visi & Misi</span>
+    </a>
+</li>
+
+<!-- Tambahan link baru -->
+<li class="nav-item">
+    <a class="nav-link" href="hero_section.php">
+        <i class="fas fa-star"></i>
+        <span>Hero Section</span>
+    </a>
+</li>
+
+<li class="nav-item">
+    <a class="nav-link" href="kegiatan_proyek.php">
+        <i class="fas fa-project-diagram"></i>
+        <span>Kegiatan Proyek</span>
+    </a>
+</li>
+
+<li class="nav-item">
+    <a class="nav-link" href="profil_lab.php">
+        <i class="fas fa-building"></i>
+        <span>Profil Lab</span>
+    </a>
+</li>
+
+<li class="nav-item">
+    <a class="nav-link" href="perkuliahan_terkait.php">
+        <i class="fas fa-book"></i>
+        <span>Perkuliahan Terkait</span>
+    </a>
+</li>
+
 
     <hr class="sidebar-divider d-none d-md-block">
 
