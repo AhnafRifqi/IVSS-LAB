@@ -38,6 +38,7 @@ $profile_img_src = '';
 if (!empty($admin['foto'])) {
     $profile_img_src = '../assets/img/' . $admin['foto'];
 }
+
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -81,10 +82,12 @@ if (!empty($admin['foto'])) {
                 </ul>
             </nav>
 
+            <!-- Page Content -->
             <div class="container-fluid">
                 <h1 class="h3 mb-4 text-gray-800">Profil Ketua Lab IVSS</h1>
 
                 <div class="row">
+                    <!-- Profil Card -->
                     <div class="col-lg-4">
                         <div class="card mb-4 shadow-sm">
                             <div class="card-body text-center">
@@ -105,6 +108,7 @@ if (!empty($admin['foto'])) {
                         </div>
                     </div>
 
+                    <!-- Profil Info -->
                     <div class="col-lg-8">
                         <div class="card shadow-sm">
                             <div class="card-header"><strong>Profil Akun</strong></div>
