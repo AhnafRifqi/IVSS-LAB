@@ -93,14 +93,14 @@ unset($f);
                                             </td>
                                             <td class="truncate" title="<?= htmlspecialchars($row['isi']) ?>"><?= htmlspecialchars($row['isi']) ?></td>
                                             <td class="text-center">
-                                                <a href="edit_fasilitas.php?id=<?=($row['id']) ?>" class="btn btn-primary btn-xs">
-                                                    <i class="fas fa-edit"></i> Edit
-                                                </a>
-                                                <a href="hapus_fasilitas.php?id=<?=($row['id']) ?>" class="btn btn-danger btn-xs"
-                                                    onclick="return confirm('Yakin ingin menghapus fasilitas ini?');">
-                                                    <i class="fas fa-trash"></i> Hapus
-                                                </a>
-                                            </td>
+                                            <a href="edit_fasilitas.php?id=<?= $row['id'] ?>" class="btn btn-primary btn-xs">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </a>
+                                            <a href="proses_fasilitas.php?action=hapus&id=<?= $row['id'] ?>" class="btn btn-danger btn-xs"
+                                                onclick="return confirm('Yakin ingin menghapus fasilitas ini?');">
+                                                <i class="fas fa-trash"></i> Hapus
+                                            </a>
+                                        </td>
                                         </tr>
                                     <?php endforeach; else: ?>
                                         <tr><td colspan="5" class="text-center text-muted">Tidak ada data</td></tr>
