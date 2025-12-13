@@ -1,189 +1,190 @@
 <?php
 session_start();
-include '../inc/koneksi.php';
-
+// 1. Cek Autentikasi dan Role
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'ketua') {
-    header('Location: ../index.php');
+    header('Location: ../index.php'); 
     exit;
 }
 
-$error = '';
+// 2. Ambil pesan notifikasi
+$msg = $_GET['msg'] ?? '';
+$detail = $_GET['detail'] ?? '';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $nip = trim($_POST['nip'] ?? '');
-    $nama = trim($_POST['nama'] ?? '');
-    $nidn = trim($_POST['nidn'] ?? '');
-    $email = trim($_POST['email'] ?? '');
-    $jabatan = trim($_POST['jabatan'] ?? '');
-    $pendidikan = trim($_POST['pendidikan'] ?? '');
-    $linkedin = trim($_POST['linkedin'] ?? '');
-    $google_scholar = trim($_POST['google_scholar'] ?? '');
-    $sinta = trim($_POST['sinta'] ?? '');
-    $scopus = trim($_POST['scopus'] ?? '');
-
-    if ($nip === '' || $nama === '' || $email === '') {
-        $error = 'NIP, Nama, dan Email wajib diisi.';
-    }
-
-    $foto_saved = null;
-    if ($error === '' && !empty($_FILES['foto_file']['name'])) {
-        $up = $_FILES['foto_file'];
-        $ext = strtolower(pathinfo($up['name'], PATHINFO_EXTENSION));
-        $allowed = ['jpg','jpeg','png'];
-        if (!in_array($ext, $allowed)) {
-            $error = 'Tipe file foto tidak diperbolehkan. (jpg, jpeg, png)';
-        } else {
-            $targetDir = '../assets/img/';
-            if (!is_dir($targetDir)) mkdir($targetDir, 0755, true);
-            $filename = basename($up['name']);
-            $targetFile = $targetDir . $filename;
-
-            if (move_uploaded_file($up['tmp_name'], $targetFile)) {
-                $foto_saved = '' . $filename;
-            } else {
-                $error = 'Gagal mengunggah foto.';
-            }
-        }
-    }
-
-    if ($error === '') {
-        $sql = 'INSERT INTO dosen (nip, nama, nidn, email, jabatan, foto, linkedin, google_scholarolar, sinta, scopus, pendidikan)
-                VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)';
-        $params = [
-            $nip,
-            $nama,
-            $nidn !== '' ? $nidn : null,
-            $email,
-            $jabatan !== '' ? $jabatan : null,
-            $foto_saved !== '' ? $foto_saved : null,
-            $linkedin !== '' ? $linkedin : null,
-            $google_scholar !== '' ? $google_scholar : null,
-            $sinta !== '' ? $sinta : null,
-            $scopus !== '' ? $scopus : null,
-            $pendidikan !== '' ? $pendidikan : null
-        ];
-        $res = pg_query_params($koneksi, $sql, $params);
-        if ($res) {
-            pg_free_result($res);
-            header('Location: dosen.php?msg=created');
-            exit;
-        } else {
-            $error = 'Gagal menyimpan data (cek NIP).';
-        }
-    }
+$alert = '';
+if ($msg === 'error' && $detail) {
+    $alert = '<div class="alert alert-danger alert-dismissible fade show" role="alert">' . 
+             '<strong>Error:</strong> ' . htmlspecialchars($detail) . 
+             '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>';
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="utf-8">
-<title>Tambah Dosen</title>
-<link href="../assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
-<link href="../assets/css/sb-admin-2.min.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote.min.css" rel="stylesheet">
-<style>.img-thumb { width:100px; height:auto; border-radius:6px; object-fit:cover; margin-bottom:8px; }</style>
+    <meta charset="utf-8">
+    <title>Tambah Dosen</title>
+
+    <link href="../assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
+    <link href="../assets/css/sb-admin-2.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote.min.css" rel="stylesheet">
+    
+    <style>
+        .img-thumb { 
+            width: 100px; 
+            height: 100px; 
+            border-radius: 6px; 
+            object-fit: cover; 
+            margin-bottom: 8px; 
+            border: 1px solid #ddd; 
+        }
+    </style>
 </head>
 <body id="page-top">
 <div id="wrapper">
-<?php include 'inc/sidebar.php'; ?>
-<div id="content-wrapper" class="d-flex flex-column">
-<div id="content">
-<nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 shadow">
-    <span class="h5 mb-0 text-primary">Tambah Dosen</span>
-</nav>
-<div class="container-fluid">
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <?php if ($error): ?><div class="alert alert-danger"><?= htmlspecialchars($error) ?></div><?php endif; ?>
+    <?php include 'inc/sidebar.php'; ?>
+    <div id="content-wrapper" class="d-flex flex-column">
+        <div id="content">
 
-            <form method="POST" enctype="multipart/form-data">
-                <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label>NIP</label>
-                        <input type="text" name="nip" class="form-control" value="<?= htmlspecialchars($_POST['nip'] ?? '') ?>" required>
+            <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 shadow">
+                <span class="h5 mb-0 text-primary">Tambah Dosen</span>
+            </nav>
+
+            <div class="container-fluid">
+                <div class="card shadow mb-4">
+                    <div class="card-body">
+                        <?= $alert ?>
+
+                        <form method="POST" enctype="multipart/form-data" action="proses_dosen.php">
+                            <input type="hidden" name="action" value="add">
+
+                            <h6 class="text-primary font-weight-bold mb-3">Data Identitas</h6>
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label for="nip">NIP</label>
+                                    <input type="text" id="nip" name="nip" class="form-control" 
+                                           value="<?= htmlspecialchars($_POST['nip'] ?? '') ?>" required>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="nidn">NIDN</label>
+                                    <input type="text" id="nidn" name="nidn" class="form-control" 
+                                           value="<?= htmlspecialchars($_POST['nidn'] ?? '') ?>">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="nama">Nama Lengkap</label>
+                                <input type="text" id="nama" name="nama" class="form-control" 
+                                       value="<?= htmlspecialchars($_POST['nama'] ?? '') ?>" required>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label for="email">Email</label>
+                                    <input type="email" id="email" name="email" class="form-control" 
+                                           value="<?= htmlspecialchars($_POST['email'] ?? '') ?>" required>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="jabatan">Jabatan</label>
+                                    <input type="text" id="jabatan" name="jabatan" class="form-control" 
+                                           value="<?= htmlspecialchars($_POST['jabatan'] ?? '') ?>">
+                                </div>
+                            </div>
+
+                            <hr class="my-4">
+                            <h6 class="text-primary font-weight-bold mb-3">Informasi Lain</h6>
+
+                            <div class="form-group">
+                                <label>Foto Profil</label><br>
+                                <img id="preview" src="" class="img-thumb" style="display:none;">
+                                <input type="file" name="foto_file" class="form-control-file mt-2" 
+                                       accept=".jpg,.jpeg,.png" 
+                                       onchange="previewFile(event,'preview')">
+                                <small class="form-text text-muted">Upload JPG/PNG/JPEG. Ukuran maksimum disarankan 2MB.</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="pendidikan">Riwayat Pendidikan</label>
+                                <textarea name="pendidikan" id="pendidikan" class="form-control" rows="5"><?= htmlspecialchars($_POST['pendidikan'] ?? '') ?></textarea>
+                            </div>
+                            
+                            <h6 class="text-primary font-weight-bold mb-3">Link Publikasi (Opsional)</h6>
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label for="linkedin">LinkedIn (URL)</label>
+                                    <input type="url" id="linkedin" name="linkedin" class="form-control" 
+                                           value="<?= htmlspecialchars($_POST['linkedin'] ?? '') ?>">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="google_scholar">Google Scholar (URL)</label>
+                                    <input type="url" id="google_scholar" name="google_scholar" class="form-control" 
+                                           value="<?= htmlspecialchars($_POST['google_scholar'] ?? '') ?>">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label for="sinta">Sinta (URL)</label>
+                                    <input type="url" id="sinta" name="sinta" class="form-control" 
+                                           value="<?= htmlspecialchars($_POST['sinta'] ?? '') ?>">
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="scopus">Scopus (URL)</label>
+                                    <input type="url" id="scopus" name="scopus" class="form-control" 
+                                           value="<?= htmlspecialchars($_POST['scopus'] ?? '') ?>">
+                                </div>
+                            </div>
+
+                            <div class="mt-4 d-flex gap-2">
+                                <button class="btn btn-success" type="submit"><i class="fas fa-save"></i> Simpan Dosen</button>
+                                <a href="dosen.php" class="btn btn-secondary ml-2">Batal</a>
+                            </div>
+                        </form>
                     </div>
-                    <div class="form-group col-md-6">
-                        <label>NIDN</label>
-                        <input type="text" name="nidn" class="form-control" value="<?= htmlspecialchars($_POST['nidn'] ?? '') ?>">
-                    </div>
                 </div>
-
-                <div class="form-group">
-                    <label>Nama</label>
-                    <input type="text" name="nama" class="form-control" value="<?= htmlspecialchars($_POST['nama'] ?? '') ?>" required>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group col-md-6">
-                        <label>Email</label>
-                        <input type="email" name="email" class="form-control" value="<?= htmlspecialchars($_POST['email'] ?? '') ?>" required>
-                    </div>
-                    <div class="form-group col-md-6">
-                        <label>Jabatan</label>
-                        <input type="text" name="jabatan" class="form-control" value="<?= htmlspecialchars($_POST['jabatan'] ?? '') ?>">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Foto</label><br>
-                    <img id="preview" src="" class="img-thumb" style="display:none;">
-                    <input type="file" name="foto_file" class="form-control mt-2" accept=".jpg,.jpeg,.png" onchange="previewFile(event,'preview')">
-                    <small class="form-text text-muted">Upload JPG/PNG/JPEG.</small>
-                </div>
-
-                <div class="form-group">
-                    <label>Pendidikan</label>
-                    <textarea name="pendidikan" id="pendidikan" class="form-control"><?=($_POST['pendidikan'] ?? '') ?></textarea>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group col-md-6"><label>LinkedIn</label><input type="text" name="linkedin" class="form-control" value="<?= htmlspecialchars($_POST['linkedin'] ?? '') ?>"></div>
-                    <div class="form-group col-md-6"><label>Google Scholar</label><input type="text" name="google_scholar" class="form-control" value="<?= htmlspecialchars($_POST['google_scholar'] ?? '') ?>"></div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group col-md-6"><label>Sinta</label><input type="text" name="sinta" class="form-control" value="<?= htmlspecialchars($_POST['sinta'] ?? '') ?>"></div>
-                    <div class="form-group col-md-6"><label>Scopus</label><input type="text" name="scopus" class="form-control" value="<?= htmlspecialchars($_POST['scopus'] ?? '') ?>"></div>
-                </div>
-
-                <div class="d-flex gap-2">
-                    <button class="btn btn-success" type="submit"><i class="fas fa-save"></i> Simpan</button>
-                    <a href="dosen.php" class="btn btn-secondary">Batal</a>
-                </div>
-            </form>
+            </div>
         </div>
+        <?php include '../inc/footer.php'; ?>
     </div>
-</div>
-</div>
-<?php include '../inc/footer.php'; ?>
-</div>
 </div>
 
 <script src="../assets/vendor/jquery/jquery.min.js"></script>
 <script src="../assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote.min.js"></script>
+<script src="../assets/js/sb-admin-2.min.js"></script>
+
 <script>
 $(document).ready(function() {
-    $('#pendidikan').summernote({
-        height: 150,
-        placeholder: 'Isi pendidikan dosen...',
+    $('#pendidikan').summernote({ 
+        height: 150, 
         toolbar: [
-            ['style', ['bold','italic','underline','clear']],
-            ['para', ['ul','ol','paragraph']],
+            ['style', ['bold', 'italic', 'underline', 'clear']],
+            ['para', ['ul', 'ol', 'paragraph']],
             ['insert', ['link']],
-            ['view', ['fullscreen','codeview']]
-        ]
+            ['view', ['fullscreen', 'codeview']]
+        ] 
+    });
+    
+    // Auto-hide alert after 5 seconds
+    $(".alert").delay(5000).slideUp(300, function() {
+        $(this).alert('close');
     });
 });
 
+// Fungsi Preview Gambar
 function previewFile(e, id) {
-    const file = e.target.files[0];
-    const img = document.getElementById(id);
-    if (!file) { img.style.display='none'; return; }
-    const reader = new FileReader();
-    reader.onload = function(ev){ img.src = ev.target.result; img.style.display='block'; }
-    reader.readAsDataURL(file);
+    const f = e.target.files[0];
+    const i = document.getElementById(id);
+    
+    if (!f) {
+        i.src = '';
+        i.style.display = 'none';
+        return;
+    }
+    
+    const r = new FileReader();
+    r.onload = function(ev) {
+        i.src = ev.target.result;
+        i.style.display = 'block';
+    };
+    r.readAsDataURL(f);
 }
 </script>
 </body>
