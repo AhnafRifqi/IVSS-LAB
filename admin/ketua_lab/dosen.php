@@ -89,7 +89,7 @@ $detail = $_GET['detail'] ?? '';
                     <td><?= htmlspecialchars($row['username'] ?? ('user_id:' . ($row['user_id'] ?? '-'))); ?></td>
                     <td class="text-center">
                         <a href="edit_dosen.php?nip=<?= urlencode($row['nip']); ?>" class="btn btn-primary btn-xs"><i class="fas fa-edit"></i> Edit</a>
-                        <a href="process_dosen.php?action=delete&nip=<?= urlencode($row['nip']); ?>" class="btn btn-danger btn-xs" onclick="return confirm('Hapus dosen <?= addslashes(htmlspecialchars($row['nama'])) ?> ?');"><i class="fas fa-trash"></i> Hapus</a>
+                        <a href="proses_dosen.php?action=delete&nip=<?= urlencode($row['nip']); ?>" class="btn btn-danger btn-xs" onclick="return confirm('Hapus dosen <?= addslashes(htmlspecialchars($row['nama'])) ?> ?');"><i class="fas fa-trash"></i> Hapus</a>
                     </td>
                 </tr>
                 <?php

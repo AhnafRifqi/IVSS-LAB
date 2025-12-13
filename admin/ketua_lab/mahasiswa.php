@@ -91,10 +91,11 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'ketua') {
                                 <td class="text-center"><?= htmlspecialchars($row['status_mahasiswa'] ?? '-') ?></td>
                                 <td class="text-center">
                                     <a href="edit_mahasiswa.php?nim=<?= urlencode($row['nim']) ?>" class="btn btn-primary btn-xs"><i class="fas fa-edit"></i> Edit</a>
-                                    <a href="hapus_mahasiswa.php?nim=<?= urlencode($row['nim']) ?>" class="btn btn-danger btn-xs" onclick="return confirm('Hapus mahasiswa <?= addslashes(htmlspecialchars($row['nama'])) ?> ?');">
+                                    
+                                    <a href="proses_mahasiswa.php?action=delete&nim=<?= urlencode($row['nim']) ?>" class="btn btn-danger btn-xs" onclick="return confirm('Hapus mahasiswa <?= addslashes(htmlspecialchars($row['nama'])) ?> ?');">
                                         <i class="fas fa-trash"></i> Hapus
                                     </a>
-                                </td>
+                                    </td>
                             </tr>
                             <?php
                                 endwhile;
