@@ -1,22 +1,29 @@
 <?php
 session_start();
-
 include '../inc/koneksi.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'ketua') {
-    header('Location: ../index.php');
+    header('Location: ../index.php'); 
     exit;
 }
 
-$user_id = $_SESSION['user_id'];
+// alert message
+$msg = $_GET['msg'] ?? '';
 $alert = '';
+switch ($msg) {
+    case 'created': $alert = '<div class="alert alert-success">User berhasil dibuat.</div>'; break;
+    case 'deleted': $alert = '<div class="alert alert-success">User berhasil dihapus.</div>'; break;
+    case 'error': $alert = '<div class="alert alert-danger">Terjadi kesalahan.</div>'; break;
+    case 'error_empty': $alert = '<div class="alert alert-danger">Username, password, dan role wajib diisi.</div>'; break;
+    case 'error_role': $alert = '<div class="alert alert-danger">Role tidak valid.</div>'; break;
+}
 
 // ambil daftar dosen yang belum punya user
-$dosen_q = pg_query_params($koneksi, "SELECT nip, nama FROM dosen WHERE user_id IS NULL ORDER BY nama ASC", array());
+$dosen_q = pg_query($koneksi, "SELECT nip, nama FROM dosen WHERE user_id IS NULL ORDER BY nama ASC");
 $dosen_list = $dosen_q ? pg_fetch_all($dosen_q) : [];
 if ($dosen_list === false) $dosen_list = [];
 
-// ambil mahasiswa yang belum punya user dan sudah acc_ketua
+// ambil mahasiswa yang belum punya user & acc ketua
 $mhs_q = pg_query_params($koneksi,
     "SELECT nim, nama FROM mahasiswa WHERE user_id IS NULL AND status_pendaftaran = $1 ORDER BY nama ASC",
     array('acc_ketua')
@@ -24,70 +31,7 @@ $mhs_q = pg_query_params($koneksi,
 $mhs_list = $mhs_q ? pg_fetch_all($mhs_q) : [];
 if ($mhs_list === false) $mhs_list = [];
 
-// allowed roles
-$allowed_roles = ['ketua', 'admin', 'berita', 'mahasiswa'];
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $entity_type = trim($_POST['entity_type'] ?? '');
-    // tetap ambil entity_id dari satu field entity_id — JS akan memastikan hanya select aktif yang tidak disabled
-    $entity_id   = trim($_POST['entity_id'] ?? '');
-    $username    = trim($_POST['username'] ?? '');
-    $password    = trim($_POST['password'] ?? '');
-    $role        = trim($_POST['role'] ?? '');
-
-    // basic validation
-    if ($username === '' || $password === '' || $role === '') {
-        $alert = '<div class="alert alert-danger">Username, password, dan role wajib diisi.</div>';
-    } elseif (!in_array($role, $allowed_roles, true)) {
-        $alert = '<div class="alert alert-danger">Role tidak valid.</div>';
-    } else {
-        // insert user (plain password as requested)
-        $res = pg_query_params($koneksi, 'INSERT INTO users(username,password,role) VALUES($1,$2,$3) RETURNING user_id', array($username, $password, $role));
-
-        if ($res && pg_num_rows($res) === 1) {
-            $new_user = pg_fetch_assoc($res);
-            $new_id = (int)$new_user['user_id'];
-            pg_free_result($res);
-
-            // langsung update dosen/mahasiswa sesuai entity
-            if ($entity_type === 'dosen' && $entity_id !== '') {
-                $u = pg_query_params($koneksi, 'UPDATE dosen SET user_id=$1 WHERE nip=$2', array($new_id, $entity_id));
-                $alert = $u ?
-                    '<div class="alert alert-success">User berhasil dibuat dan dikaitkan ke dosen.</div>' :
-                    '<div class="alert alert-warning">User dibuat tapi gagal dikaitkan ke dosen.</div>';
-            } elseif ($entity_type === 'mahasiswa' && $entity_id !== '') {
-                $u = pg_query_params($koneksi, 'UPDATE mahasiswa SET user_id=$1 WHERE nim=$2', array($new_id, $entity_id));
-                $alert = $u ?
-                    '<div class="alert alert-success">User berhasil dibuat dan dikaitkan ke mahasiswa.</div>' :
-                    '<div class="alert alert-warning">User dibuat tapi gagal dikaitkan ke mahasiswa.</div>';
-            } else {
-                $alert = '<div class="alert alert-success">User berhasil dibuat.</div>';
-            }
-
-            // refresh lists: dosen & mahasiswa (mah hanya yang acc_ketua dan belum punya user)
-            $dosen_q = pg_query_params($koneksi, "SELECT nip, nama FROM dosen WHERE user_id IS NULL ORDER BY nama ASC", array());
-            $dosen_list = $dosen_q ? pg_fetch_all($dosen_q) : [];
-            if ($dosen_list === false) $dosen_list = [];
-
-            $mhs_q = pg_query_params($koneksi,
-                "SELECT nim, nama FROM mahasiswa WHERE user_id IS NULL AND status_pendaftaran = $1 ORDER BY nama ASC",
-                array('acc_ketua')
-            );
-            $mhs_list = $mhs_q ? pg_fetch_all($mhs_q) : [];
-            if ($mhs_list === false) $mhs_list = [];
-
-        } else {
-            $pgerr = pg_last_error($koneksi);
-            if (stripos($pgerr, 'duplicate') !== false || stripos($pgerr, 'unique') !== false) {
-                $alert = '<div class="alert alert-danger">Username sudah terpakai.</div>';
-            } else {
-                $alert = '<div class="alert alert-danger">Gagal membuat user. ' . htmlspecialchars($pgerr) . '</div>';
-            }
-        }
-    }
-}
-
-// ambil semua users beserta info dosen/mahasiswa
+// ambil semua users
 $users_q = pg_query($koneksi, "
     SELECT u.user_id,u.username,u.role,u.created_at,
         d.nip,d.nama AS dosen_nama,
@@ -99,7 +43,6 @@ $users_q = pg_query($koneksi, "
 ");
 $users = $users_q ? pg_fetch_all($users_q) : [];
 if ($users === false) $users = [];
-
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -125,11 +68,12 @@ if ($users === false) $users = [];
                 <?= $alert ?>
 
                 <div class="row">
+                    <!-- Form Tambah User -->
                     <div class="col-lg-5">
                         <div class="card mb-4 shadow-sm">
                             <div class="card-header"><strong>Tambah User</strong></div>
                             <div class="card-body">
-                                <form method="POST" class="needs-validation" novalidate>
+                                <form method="POST" action="proses_users.php?action=tambah" class="needs-validation" novalidate>
                                     <div class="form-group">
                                         <label>Pilih Entitas (opsional)</label>
                                         <select id="entity_type" name="entity_type" class="form-control" onchange="toggleEntitySelect()">
@@ -158,7 +102,7 @@ if ($users === false) $users = [];
                                                 <option value="<?= htmlspecialchars($m['nim']) ?>"><?= htmlspecialchars($m['nama'] . ' (' . $m['nim'] . ')') ?></option>
                                             <?php endforeach; ?>
                                         </select>
-                                        <small class="form-text text-muted">Hanya mahasiswa dengan status pendaftaran <strong>acc_ketua</strong> dan tanpa user yang muncul.</small>
+                                        <small class="form-text text-muted">Hanya mahasiswa dengan status <strong>acc_ketua</strong> yang muncul.</small>
                                     </div>
 
                                     <div class="form-group">
@@ -169,7 +113,7 @@ if ($users === false) $users = [];
                                     <div class="form-group">
                                         <label>Password</label>
                                         <input name="password" type="password" class="form-control" required>
-                                        <small class="form-text text-muted"><strong>Plain password</strong> (User disarankan login agar berubah menjadi Hash+salt dan ubah password pada halaman profil)</small>
+                                        <small class="form-text text-muted"><strong>Plain password</strong> (User disarankan login agar berubah menjadi Hash+salt)</small>
                                     </div>
 
                                     <div class="form-group">
@@ -192,6 +136,7 @@ if ($users === false) $users = [];
                         </div>
                     </div>
 
+                    <!-- Tabel Users -->
                     <div class="col-lg-7">
                         <div class="card mb-4 shadow-sm">
                             <div class="card-header"><strong>Daftar Users</strong></div>
@@ -205,28 +150,33 @@ if ($users === false) $users = [];
                                                 <th>Role</th>
                                                 <th>Terkait</th>
                                                 <th>Created</th>
+                                                <th>Aksi</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <?php if (empty($users)) : ?>
-                                                <tr><td colspan="5" class="text-center text-muted">Belum ada user.</td></tr>
-                                            <?php else :
-                                                foreach ($users as $i => $u) : ?>
-                                                    <tr>
-                                                        <td class="text-center"><?= $i + 1 ?></td>
-                                                        <td><?= htmlspecialchars($u['username']) ?></td>
-                                                        <td><?= htmlspecialchars($u['role']) ?></td>
-                                                        <td>
-                                                            <?php
-                                                            if (!empty($u['nip'])) echo 'Dosen: ' . htmlspecialchars($u['dosen_nama']) . ' (' . $u['nip'] . ')';
-                                                            elseif (!empty($u['nim'])) echo 'Mahasiswa: ' . htmlspecialchars($u['mhs_nama']) . ' (NIM:' . $u['nim'] . ')';
-                                                            else echo '<span class="small-muted">Tidak terhubung</span>';
-                                                            ?>
-                                                        </td>
-                                                        <td><?= htmlspecialchars($u['created_at']) ?></td>
-                                                    </tr>
-                                                <?php endforeach;
-                                            endif; ?>
+                                                <tr><td colspan="6" class="text-center text-muted">Belum ada user.</td></tr>
+                                            <?php else : foreach ($users as $i => $u) : ?>
+                                                <tr>
+                                                    <td class="text-center"><?= $i + 1 ?></td>
+                                                    <td><?= htmlspecialchars($u['username']) ?></td>
+                                                    <td><?= htmlspecialchars($u['role']) ?></td>
+                                                    <td>
+                                                        <?php
+                                                        if (!empty($u['nip'])) echo 'Dosen: ' . htmlspecialchars($u['dosen_nama']) . ' (' . $u['nip'] . ')';
+                                                        elseif (!empty($u['nim'])) echo 'Mahasiswa: ' . htmlspecialchars($u['mhs_nama']) . ' (NIM:' . $u['nim'] . ')';
+                                                        else echo '<span class="small-muted">Tidak terhubung</span>';
+                                                        ?>
+                                                    </td>
+                                                    <td><?= htmlspecialchars($u['created_at']) ?></td>
+                                                    <td class="text-center">
+                                                        <a href="proses_users.php?action=hapus&id=<?= $u['user_id'] ?>" class="btn btn-danger btn-xs"
+                                                           onclick="return confirm('Yakin ingin menghapus user ini?');">
+                                                           <i class="fas fa-trash"></i> Hapus
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach; endif; ?>
                                         </tbody>
                                     </table>
                                 </div>
@@ -237,6 +187,7 @@ if ($users === false) $users = [];
                 </div>
             </div>
         </div>
+
         <?php include '../inc/footer.php'; ?>
     </div>
 </div>
@@ -247,38 +198,31 @@ if ($users === false) $users = [];
 <script src="../assets/vendor/datatables/dataTables.bootstrap4.min.js"></script>
 <script src="../assets/js/sb-admin-2.min.js"></script>
 <script>
-    function toggleEntitySelect() {
-        var t = document.getElementById('entity_type').value;
-        var sd = document.getElementById('select-dosen');
-        var sm = document.getElementById('select-mhs');
+function toggleEntitySelect() {
+    var t = document.getElementById('entity_type').value;
+    var sd = document.getElementById('select-dosen');
+    var sm = document.getElementById('select-mhs');
 
-        // tampil/hidden block
-        sd.style.display = (t === 'dosen') ? 'block' : 'none';
-        sm.style.display = (t === 'mahasiswa') ? 'block' : 'none';
+    sd.style.display = (t === 'dosen') ? 'block' : 'none';
+    sm.style.display = (t === 'mahasiswa') ? 'block' : 'none';
 
-        // disable select yang tidak aktif supaya tidak terkirim saat submit
-        var selD = sd.querySelector('select[name="entity_id"]');
-        var selM = sm.querySelector('select[name="entity_id"]');
-        if (selD) selD.disabled = (t !== 'dosen');
-        if (selM) selM.disabled = (t !== 'mahasiswa');
-    }
+    var selD = sd.querySelector('select[name="entity_id"]');
+    var selM = sm.querySelector('select[name="entity_id"]');
+    if (selD) selD.disabled = (t !== 'dosen');
+    if (selM) selM.disabled = (t !== 'mahasiswa');
+}
 
-    function resetEntitySelect() {
-        document.getElementById('entity_type').value = '';
-        toggleEntitySelect();
-    }
+function resetEntitySelect() {
+    document.getElementById('entity_type').value = '';
+    toggleEntitySelect();
+}
 
-    $(document).ready(function() {
-        // pastikan state awal benar (mis. setelah reload)
-        toggleEntitySelect();
-
-        $('#usersTable').DataTable({
-            "columnDefs": [{
-                "orderable": false,
-                "targets": [3]
-            }]
-        });
+$(document).ready(function() {
+    toggleEntitySelect();
+    $('#usersTable').DataTable({
+        "columnDefs": [{"orderable": false, "targets": [3,5]}]
     });
+});
 </script>
 </body>
 </html>
