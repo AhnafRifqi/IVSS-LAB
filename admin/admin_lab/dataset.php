@@ -16,7 +16,7 @@ $q = pg_query_params($koneksi, "
     FROM dataset d
     LEFT JOIN users u ON d.uploader_by = u.user_id
     LEFT JOIN mahasiswa m ON u.user_id = m.user_id AND u.role = 'mahasiswa'
-    LEFT JOIN dosen dos ON u.user_id = dos.user_id AND u.role = 'dosen'
+    LEFT JOIN dosen dos ON u.user_id = dos.user_id AND u.role = 'admin'
     WHERE d.visibility = 'publik' OR d.uploader_by = $1
     ORDER BY d.tanggal_upload DESC
 ", [$user_id]);
