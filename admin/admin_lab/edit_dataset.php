@@ -8,40 +8,44 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $user_id = $_SESSION['user_id'];
-$dataset_id = $_GET['id'] ?? null;
-if (!$dataset_id) {
+$dataset_id = (int)($_GET['id'] ?? 0);
+if ($dataset_id <= 0) {
     header('Location: dataset.php');
     exit;
 }
 
-// Ambil dataset untuk dicek ownership
+// Ambil dataset untuk dicek ownership (READ)
 $q = pg_query_params($koneksi, "SELECT * FROM dataset WHERE dataset_id = $1", [$dataset_id]);
 $dataset = pg_fetch_assoc($q);
+if ($q) pg_free_result($q);
 
 if (!$dataset || $dataset['uploader_by'] != $user_id) {
-    header('Location: dataset.php');
+    header('Location: dataset.php?msg=error&error_detail=' . urlencode('Dataset tidak ditemukan atau akses ditolak.'));
     exit;
 }
 
-if (isset($_POST['submit'])) {
-    $judul = trim($_POST['judul']);
-    $deskripsi = trim($_POST['deskripsi']);
-    $file_path = trim($_POST['file_path']);
-    $visibility = $_POST['visibility'];
+// --- Penanganan Pesan Status dan Pengisian Ulang Form ---
+$error = '';
+$success = '';
 
-    $update = pg_query_params($koneksi, "
-        UPDATE dataset
-        SET judul = $1, deskripsi = $2, file_path = $3, visibility = $4
-        WHERE dataset_id = $5 AND uploader_by = $6
-    ", [$judul, $deskripsi, $file_path, $visibility, $dataset_id, $user_id]);
-
-    if ($update) {
-        header('Location: dataset.php?msg=updated');
-        exit;
-    } else {
-        $alert = '<div class="alert alert-danger">Gagal update dataset.</div>';
+if (isset($_GET['msg'])) {
+    if ($_GET['msg'] === 'updated') {
+        $success = "Data berhasil diupdate.";
+    } elseif ($_GET['msg'] === 'error') {
+        $error = "Gagal update data: " . htmlspecialchars($_GET['error_detail'] ?? 'Terjadi kesalahan.');
+        
+        // Gunakan data POST dari kegagalan terakhir untuk mengisi ulang form
+        $dataset['judul'] = $_POST['judul'] ?? $dataset['judul'];
+        $dataset['deskripsi'] = $_POST['deskripsi'] ?? $dataset['deskripsi'];
+        $dataset['file_path'] = $_POST['file_path'] ?? $dataset['file_path'];
+        $dataset['visibility'] = $_POST['visibility'] ?? $dataset['visibility'];
     }
 }
+// Data awal (jika tidak ada error POST)
+$judul_val = htmlspecialchars($dataset['judul'] ?? '');
+$deskripsi_val = htmlspecialchars($dataset['deskripsi'] ?? '');
+$file_path_val = htmlspecialchars($dataset['file_path'] ?? '');
+$visibility_val = htmlspecialchars($dataset['visibility'] ?? 'privat');
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -62,28 +66,37 @@ if (isset($_POST['submit'])) {
             <div class="container-fluid">
                 <div class="card shadow mb-4">
                     <div class="card-body">
-                        <?= $alert ?? '' ?>
-                        <form method="POST">
+                        <?php if ($error): ?>
+                            <div class="alert alert-danger"><?= $error ?></div>
+                        <?php endif; ?>
+                        <?php if ($success): ?>
+                            <div class="alert alert-success"><?= $success ?></div>
+                        <?php endif; ?>
+
+                        <form method="POST" action="proses_dataset.php">
+                            <input type="hidden" name="action" value="edit">
+                            <input type="hidden" name="dataset_id" value="<?= $dataset_id ?>">
+                            
                             <div class="mb-3">
                                 <label class="form-label">Judul</label>
-                                <input type="text" name="judul" class="form-control" required value="<?= htmlspecialchars($dataset['judul']) ?>">
+                                <input type="text" name="judul" class="form-control" required value="<?= $judul_val ?>">
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Deskripsi</label>
-                                <textarea name="deskripsi" class="form-control" rows="4"><?= htmlspecialchars($dataset['deskripsi']) ?></textarea>
+                                <textarea name="deskripsi" class="form-control" rows="4"><?= $deskripsi_val ?></textarea>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">File (link)</label>
-                                <input type="text" name="file_path" class="form-control" value="<?= htmlspecialchars($dataset['file_path']) ?>">
+                                <input type="text" name="file_path" class="form-control" value="<?= $file_path_val ?>">
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Visibility</label>
                                 <select name="visibility" class="form-control">
-                                    <option value="publik" <?= $dataset['visibility']=='publik'?'selected':'' ?>>Publik</option>
-                                    <option value="privat" <?= $dataset['visibility']=='privat'?'selected':'' ?>>Privat</option>
+                                    <option value="publik" <?= $visibility_val=='publik'?'selected':'' ?>>Publik</option>
+                                    <option value="privat" <?= $visibility_val=='privat'?'selected':'' ?>>Privat</option>
                                 </select>
                             </div>
-                            <button type="submit" name="submit" class="btn btn-primary"><i class="fas fa-save"></i> Update</button>
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Update</button>
                             <a href="dataset.php" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Kembali</a>
                         </form>
                     </div>

@@ -43,7 +43,6 @@ unset($f);
     <div id="content-wrapper" class="d-flex flex-column">
         <div id="content">
 
-            <!-- Topbar -->
             <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
                 <span class="h5 mb-0 text-primary font-weight-bold">Data Fasilitas</span>
             </nav>
@@ -57,12 +56,13 @@ unset($f);
                     </a>
                 </div>
                 <?php
+                // Menampilkan pesan status dari proses_fasilitas.php
                 if (isset($_GET['msg'])) {
                     $m = $_GET['msg'];
                     if ($m === 'created') echo '<div class="alert alert-success">Data berhasil ditambahkan.</div>';
                     if ($m === 'updated') echo '<div class="alert alert-success">Data berhasil diubah.</div>';
                     if ($m === 'deleted') echo '<div class="alert alert-success">Data berhasil dihapus.</div>';
-                    if ($m === 'error') echo '<div class="alert alert-danger">Terjadi kesalahan.</div>';
+                    if ($m === 'error') echo '<div class="alert alert-danger">Terjadi kesalahan: ' . htmlspecialchars($_GET['error_detail'] ?? 'Kesalahan tidak diketahui') . '</div>';
                 }
                 ?>
                 <div class="card shadow mb-4">
@@ -93,10 +93,10 @@ unset($f);
                                             </td>
                                             <td class="truncate" title="<?= htmlspecialchars($row['isi']) ?>"><?= htmlspecialchars($row['isi']) ?></td>
                                             <td class="text-center">
-                                                <a href="edit_fasilitas.php?id=<?=($row['id']) ?>" class="btn btn-primary btn-xs">
+                                                <a href="edit_fasilitas.php?id=<?= htmlspecialchars($row['id']) ?>" class="btn btn-primary btn-xs">
                                                     <i class="fas fa-edit"></i> Edit
                                                 </a>
-                                                <a href="hapus_fasilitas.php?id=<?=($row['id']) ?>" class="btn btn-danger btn-xs"
+                                                <a href="proses_fasilitas.php?action=hapus&id=<?= htmlspecialchars($row['id']) ?>" class="btn btn-danger btn-xs"
                                                     onclick="return confirm('Yakin ingin menghapus fasilitas ini?');">
                                                     <i class="fas fa-trash"></i> Hapus
                                                 </a>
@@ -111,14 +111,10 @@ unset($f);
                     </div>
                 </div>
 
-            </div> <!-- container -->
-        </div> <!-- content -->
-
-        <?php include '../inc/footer.php'; ?>
+            </div> </div> <?php include '../inc/footer.php'; ?>
     </div>
 </div>
 
-<!-- scripts -->
 <script src="../assets/vendor/jquery/jquery.min.js"></script>
 <script src="../assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script src="../assets/vendor/datatables/jquery.dataTables.min.js"></script>

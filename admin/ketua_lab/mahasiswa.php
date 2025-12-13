@@ -1,6 +1,5 @@
 <?php
 session_start();
-
 include '../inc/koneksi.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'ketua') {
@@ -35,13 +34,10 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'ketua') {
 
             <div class="container-fluid">
                 <h1 class="h3 mb-4 text-gray-800">Manajemen Mahasiswa</h1>
-                <div class="mb-3 text-right">
-                </div>
 
                 <?php
                 if (isset($_GET['msg'])) {
                     $m = $_GET['msg'];
-                    if ($m === 'created') echo '<div class="alert alert-success">Mahasiswa berhasil ditambahkan.</div>';
                     if ($m === 'updated') echo '<div class="alert alert-success">Mahasiswa berhasil diubah.</div>';
                     if ($m === 'deleted') echo '<div class="alert alert-success">Mahasiswa berhasil dihapus.</div>';
                     if ($m === 'error') echo '<div class="alert alert-danger">Terjadi kesalahan.</div>';
@@ -49,9 +45,9 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'ketua') {
 
                 $sql = '
                     SELECT m.nim, m.nama, m.jenis_kelamin, m.no_telp, m.email, m.keperluan,
-                            m.dosen_pembimbing, d.nama AS pembimbing_nama,
-                            m.status_mahasiswa, m.status_pendaftaran, m.tanggal_daftar, m.user_id,
-                            u.username
+                           m.dosen_pembimbing, d.nama AS pembimbing_nama,
+                           m.status_mahasiswa, m.tanggal_daftar, m.user_id,
+                           u.username
                     FROM mahasiswa m
                     LEFT JOIN dosen d ON d.nip = m.dosen_pembimbing
                     LEFT JOIN users u ON u.user_id = m.user_id
@@ -75,7 +71,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'ketua') {
                                 <th>No. Telp</th>
                                 <th>Pembimbing</th>
                                 <th>Status Mahasiswa</th>
-                                <th>User</th>
                                 <th>Aksi</th>
                             </tr>
                             </thead>
@@ -87,7 +82,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'ketua') {
                             ?>
                             <tr>
                                 <td class="text-center"><?= $no++; ?></td>
-
                                 <td><?= htmlspecialchars($row['nim']) ?></td>
                                 <td><?= htmlspecialchars($row['nama']) ?></td>
                                 <td class="text-center"><?= htmlspecialchars($row['jenis_kelamin'] ?? '-') ?></td>
@@ -95,22 +89,19 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'ketua') {
                                 <td><?= htmlspecialchars($row['no_telp'] ?? '-') ?></td>
                                 <td><?= htmlspecialchars($row['pembimbing_nama'] ?? '-') ?></td>
                                 <td class="text-center"><?= htmlspecialchars($row['status_mahasiswa'] ?? '-') ?></td>
-                                <td>
-                                    <?= htmlspecialchars($row['username'] ?? ('user_id:' . ($row['user_id'] ?? '-'))) ?>
-                                </td>
-
                                 <td class="text-center">
                                     <a href="edit_mahasiswa.php?nim=<?= urlencode($row['nim']) ?>" class="btn btn-primary btn-xs"><i class="fas fa-edit"></i> Edit</a>
-                                    <a href="hapus_mahasiswa.php?nim=<?= urlencode($row['nim']) ?>" class="btn btn-danger btn-xs" onclick="return confirm('Hapus mahasiswa <?= addslashes(htmlspecialchars($row['nama'])) ?> ?');">
+                                    
+                                    <a href="proses_mahasiswa.php?action=delete&nim=<?= urlencode($row['nim']) ?>" class="btn btn-danger btn-xs" onclick="return confirm('Hapus mahasiswa <?= addslashes(htmlspecialchars($row['nama'])) ?> ?');">
                                         <i class="fas fa-trash"></i> Hapus
                                     </a>
-                                </td>
+                                    </td>
                             </tr>
                             <?php
                                 endwhile;
                             else:
                             ?>
-                            <tr><td colspan="11" class="text-center text-muted">Tidak ada data</td></tr>
+                            <tr><td colspan="10" class="text-center text-muted">Tidak ada data</td></tr>
                             <?php endif;
                             if ($res) pg_free_result($res);
                             ?>
@@ -132,16 +123,14 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'ketua') {
 <script src="../assets/vendor/datatables/jquery.dataTables.min.js"></script>
 <script src="../assets/vendor/datatables/dataTables.bootstrap4.min.js"></script>
 <script src="../assets/js/sb-admin-2.min.js"></script>
-
 <script>
 $(document).ready(function() {
     $('#mahasiswaTable').DataTable({
         "columnDefs": [
-            { "orderable": false, "targets": [10] } // aksi tidak bisa di-sort
+            { "orderable": false, "targets": [9] }
         ]
     });
 });
 </script>
-
 </body>
 </html>

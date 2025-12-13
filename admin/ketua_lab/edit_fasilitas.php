@@ -7,78 +7,35 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'ketua') {
     exit;
 }
 
-$error = '';
-$success = '';
-
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 if ($id <= 0) {
     header('Location: fasilitas.php');
     exit;
 }
 
-// ambil data existing
+// ambil data existing (READ only)
 $q = pg_query_params($koneksi, 'SELECT id, nama, gambar, isi FROM fasilitas WHERE id=$1', [$id]);
 if (!$q || pg_num_rows($q) === 0) {
-    header('Location: fasilitas.php');
+    header('Location: fasilitas.php?msg=error&error_detail=' . urlencode('Data fasilitas tidak ditemukan.'));
     exit;
 }
 $row = pg_fetch_assoc($q);
 pg_free_result($q);
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $nama = trim($_POST['nama'] ?? '');
-    $isi  = trim($_POST['isi'] ?? '');
+// --- Penanganan Pesan Status dari Redirect ---
+$error = '';
+$success = '';
 
-    if ($nama === '') $error = 'Nama fasilitas wajib diisi.';
-
-    // foto: default tetap data lama
-    $foto_saved = $row['gambar'];
-
-    if (empty($error) && !empty($_FILES['foto_file']['name'])) {
-        $up = $_FILES['foto_file'];
-        $allowed = ['jpg','jpeg','png','gif','webp'];
-        $ext = strtolower(pathinfo($up['name'], PATHINFO_EXTENSION));
-        $targetDir = '../assets/img/';
-
-        if ($up['error'] !== UPLOAD_ERR_OK) {
-            $error = 'Gagal upload file.';
-        } elseif (!in_array($ext, $allowed)) {
-            $error = 'Tipe file tidak diperbolehkan.';
-        } else {
-            if (!is_dir($targetDir)) mkdir($targetDir, 0755, true);
-            $targetFile = $targetDir . $up['name'];
-
-            if (move_uploaded_file($up['tmp_name'], $targetFile)) {
-                // hapus file lama kalau ada
-                if ($foto_saved && is_file($targetDir . $foto_saved)) {
-                    @unlink($targetDir . $foto_saved);
-                }
-                $foto_saved = $up['name']; // nama file asli
-            } else {
-                $error = 'Gagal menyimpan file.';
-            }
-        }
-    }
-
-    if (empty($error)) {
-        $sql = 'UPDATE fasilitas SET nama=$1, gambar=$2, isi=$3 WHERE id=$4';
-        $res = pg_query_params($koneksi, $sql, [
-            $nama !== '' ? $nama : null,
-            $foto_saved !== '' ? $foto_saved : null,
-            $isi !== '' ? $isi : null,
-            $id
-        ]);
-
-        if ($res) {
-            pg_free_result($res);
-            $success = 'Data berhasil diupdate.';
-            // refresh data
-            $q2 = pg_query_params($koneksi, 'SELECT id, nama, gambar, isi FROM fasilitas WHERE id=$1', [$id]);
-            $row = pg_fetch_assoc($q2);
-            pg_free_result($q2);
-        } else {
-            $error = 'Gagal mengupdate data.';
-        }
+if (isset($_GET['msg'])) {
+    if ($_GET['msg'] === 'updated') {
+        $success = "Data berhasil diupdate.";
+    } elseif ($_GET['msg'] === 'error') {
+        $error = "Gagal update data: " . htmlspecialchars($_GET['error_detail'] ?? 'Terjadi kesalahan.');
+        
+        // Opsional: Jika terjadi error, gunakan data POST yang dikirimkan terakhir
+        // untuk mengisi ulang form agar user tidak perlu mengetik ulang
+        $row['nama'] = $_POST['nama'] ?? $row['nama'];
+        $row['isi'] = $_POST['isi'] ?? $row['isi'];
     }
 }
 ?>
@@ -113,10 +70,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="alert alert-success"><?= htmlspecialchars($success) ?></div>
                 <?php endif; ?>
 
-                <form method="POST" enctype="multipart/form-data">
+                <form method="POST" action="proses_fasilitas.php" enctype="multipart/form-data">
+                    <input type="hidden" name="action" value="edit"> 
+                    <input type="hidden" name="id" value="<?= htmlspecialchars($row['id']) ?>">
+                    <input type="hidden" name="foto_lama" value="<?= htmlspecialchars($row['gambar'] ?? '') ?>">
+
                     <div class="form-group">
                         <label>Nama</label>
-                        <input type="text" name="nama" class="form-control" value="<?= htmlspecialchars($_POST['nama'] ?? $row['nama']) ?>" required>
+                        <input type="text" name="nama" class="form-control" value="<?= htmlspecialchars($row['nama']) ?>" required>
                     </div>
 
                     <div class="form-group">
@@ -132,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     <div class="form-group">
                         <label>Isi</label>
-                        <textarea name="isi" rows="6" class="form-control"><?= htmlspecialchars($_POST['isi'] ?? $row['isi']) ?></textarea>
+                        <textarea name="isi" rows="6" class="form-control"><?= htmlspecialchars($row['isi']) ?></textarea>
                     </div>
 
                     <div class="d-flex gap-2">
