@@ -30,12 +30,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Tentukan output
             if ($status === '' || $status === 'pending') {
-                $hasil = "Maaf, persetujuan registrasi Anda masih pending.";
+                $hasil = "Status registrasi: <strong>Pending Admin Lab</strong> (Menunggu approval dosen pembimbing).";
+            } elseif ($status === 'acc_dosen') {
+                $hasil = "Status registrasi: <strong>Pending Ketua Lab</strong> (Menunggu approval Ketua Lab).";
             } elseif ($status === 'acc_ketua') {
                 if (!$akun_ada) {
-                    $hasil = "Registrasi Anda sudah disetujui oleh dosen pembimbing, namun akun belum dibuat.";
+                    // Acc ketua tapi user belum dibuat
+                    $hasil = "Status registrasi: <strong>Disetujui Ketua Lab</strong>. Akun belum dibuatkan oleh Admin.";
                 } else {
-                    $hasil  = "Selamat, akun Anda sudah dibuat.<br>";
+                    $hasil = "Selamat, akun Anda sudah dibuat.<br>";
                     $hasil .= "Username: <strong>" . htmlspecialchars($row['username']) . "</strong><br>";
                     $hasil .= "Password: <strong>" . htmlspecialchars($row['pass_user']) . "</strong><br>";
                     $hasil .= "Silakan login dan segera ganti password.";
@@ -53,51 +56,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <!DOCTYPE html>
 <html>
+
 <head>
-   <title>Cek Status Registrasi</title>
+    <title>Cek Status Registrasi</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
     <link rel="stylesheet" href="assets/css/lineicons.css" />
     <link rel="stylesheet" href="style.css" />
 </head>
+
 <body class="bg-light">
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-7 col-lg-5">
-            <div class="card shadow-lg border-0 p-4" style="border-radius: 15px;">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-7 col-lg-5">
+                <div class="card shadow-lg border-0 p-4" style="border-radius: 15px;">
 
-                <div class="text-center mb-3">
-                    <img src="admin/assets/img/<?php echo $logo_data['logo'] ?>"
-                    alt="Logo IVSS" class="img-fluid d-block mx-auto mb-3" style="max-width: 160px;">
-                </div>
-                
-                <div class="text-center mb-4">
-                    <h4 class="fw-bold text-dark">Cek Status Registrasi</h4>
-                    <p class="text-muted">Masukkan NIM Anda untuk mengetahui status pengajuan.</p>
-                </div>
-
-                <form method="post">
-                    <div class="mb-4">
-                        <label for="nimInput" class="form-label fw-bold">Masukkan NIM:</label>
-                        <input type="text" name="nim" id="nimInput" class="form-control form-control-sm shadow-sm" placeholder="Masukkan NIM yang didaftarkan" required>
+                    <div class="text-center mb-3">
+                        <img src="admin/assets/img/<?php echo $logo_data['logo'] ?>" alt="Logo IVSS"
+                            class="img-fluid d-block mx-auto mb-3" style="max-width: 160px;">
                     </div>
-                    
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-sm fw-bold text-white shadow" style="background-color: #1A1A37;">
-                            Cek Status
-                        </button>
-                        <a href="index.php" class="btn btn-outline-secondary btn-sm">Kembali ke Beranda</a>
-                    </div>
-                </form>
 
-                <?php if ($hasil): ?>
-                    <hr class="mt-4 mb-3">
-                    <?php 
+                    <div class="text-center mb-4">
+                        <h4 class="fw-bold text-dark">Cek Status Registrasi</h4>
+                        <p class="text-muted">Masukkan NIM Anda untuk mengetahui status pengajuan.</p>
+                    </div>
+
+                    <form method="post">
+                        <div class="mb-4">
+                            <label for="nimInput" class="form-label fw-bold">Masukkan NIM:</label>
+                            <input type="text" name="nim" id="nimInput" class="form-control form-control-sm shadow-sm"
+                                placeholder="Masukkan NIM yang didaftarkan" required>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-sm fw-bold text-white shadow"
+                                style="background-color: #1A1A37;">
+                                Cek Status
+                            </button>
+                            <a href="index.php" class="btn btn-outline-secondary btn-sm">Kembali ke Beranda</a>
+                        </div>
+                    </form>
+
+                    <?php if ($hasil): ?>
+                        <hr class="mt-4 mb-3">
+                        <?php
                         // Tentukan variabel untuk status, ikon, dan warna
                         $icon_class = 'lni lni-question-circle'; // Default
                         $alert_class = 'bg-info-subtle text-info border border-info'; // Default: Info
-                        
+                    
                         if (strpos($hasil, 'disetujui') !== false || strpos($hasil, 'akun Anda sudah dibuat') !== false) {
                             $alert_class = 'bg-success-subtle text-success border border-success';
                             $icon_class = 'lni lni-checkmark-circle';
@@ -105,29 +112,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $alert_class = 'bg-warning-subtle text-warning border border-warning';
                             $icon_class = 'lni lni-timer'; // Ikon jam untuk pending
                         } elseif (strpos($hasil, 'Maaf, Anda belum registrasi') !== false || strpos($hasil, 'Masukkan NIM') !== false) {
-                             $alert_class = 'bg-secondary-subtle text-secondary border border-secondary';
-                             $icon_class = 'lni lni-search-alt'; // Ikon pencarian untuk belum registrasi/input
+                            $alert_class = 'bg-secondary-subtle text-secondary border border-secondary';
+                            $icon_class = 'lni lni-search-alt'; // Ikon pencarian untuk belum registrasi/input
                         } else {
                             // Untuk kasus umum atau kegagalan
                             $alert_class = 'bg-danger-subtle text-danger border border-danger';
                             $icon_class = 'lni lni-close';
                         }
-                    ?>
-                    
-                    <div class="p-3 rounded-3 <?= $alert_class ?>">
-                        <div class="d-flex align-items-start">
-                            <span class="fs-4 me-3 mt-1">
-                                <i class="<?= $icon_class ?>"></i>
-                            </span>
-                            <p class="mb-0 fw-semibold text-break pt-1"><?= $hasil ?></p>
+                        ?>
+
+                        <div class="p-3 rounded-3 <?= $alert_class ?>">
+                            <div class="d-flex align-items-start">
+                                <span class="fs-4 me-3 mt-1">
+                                    <i class="<?= $icon_class ?>"></i>
+                                </span>
+                                <p class="mb-0 fw-semibold text-break pt-1"><?= $hasil ?></p>
+                            </div>
                         </div>
-                    </div>
-                <?php endif; ?>
-                
+                    <?php endif; ?>
+
+                </div>
             </div>
         </div>
     </div>
-</div>
 
 </body>
+
 </html>

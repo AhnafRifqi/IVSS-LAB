@@ -8,7 +8,11 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'admin') {
     exit;
 }
 
-$dosen_nip = $_SESSION['username'] ?? null;
+// Ambil NIP berdasarkan user_id (karena username belum tentu NIP)
+$user_id = $_SESSION['user_id'];
+$q_nip = pg_query_params($koneksi, "SELECT nip FROM dosen WHERE user_id = $1", [$user_id]);
+$row_nip = pg_fetch_assoc($q_nip);
+$dosen_nip = $row_nip['nip'] ?? null;
 
 $alert = '';
 
@@ -25,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nim'], $_POST['action
         ", [$nim, $dosen_nip]);
 
         if ($res) {
-            $alert = '<div class="alert alert-success">Mahasiswa '.$nim.' berhasil di-acc oleh dosen.</div>';
+            $alert = '<div class="alert alert-success">Mahasiswa ' . $nim . ' berhasil di-acc oleh dosen.</div>';
         } else {
             $alert = '<div class="alert alert-danger">Gagal update status mahasiswa.</div>';
         }
@@ -37,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['nim'], $_POST['action
         ", [$nim, $dosen_nip]);
 
         if ($res) {
-            $alert = '<div class="alert alert-warning">Mahasiswa '.$nim.' ditolak dan dihapus.</div>';
+            $alert = '<div class="alert alert-warning">Mahasiswa ' . $nim . ' ditolak dan dihapus.</div>';
         } else {
             $alert = '<div class="alert alert-danger">Gagal menolak mahasiswa.</div>';
         }
@@ -56,85 +60,99 @@ if ($dosen_nip) {
     ", [$dosen_nip]);
 
     $list = $q ? pg_fetch_all($q) : [];
-    if ($list === false) $list = [];
+    if ($list === false)
+        $list = [];
 }
 ?>
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
-<meta charset="utf-8">
-<title>Review Pendaftaran - Dosen Pembimbing</title>
-<link href="../assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
-<link href="../assets/css/sb-admin-2.min.css" rel="stylesheet">
-<style>
-    .table thead th { text-align: center; }
-</style>
+    <meta charset="utf-8">
+    <title>Review Pendaftaran - Dosen Pembimbing</title>
+    <link href="../assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
+    <link href="../assets/css/sb-admin-2.min.css" rel="stylesheet">
+    <style>
+        .table thead th {
+            text-align: center;
+        }
+    </style>
 </head>
+
 <body id="page-top">
-<div id="wrapper">
-    <?php include 'inc/sidebar.php'; ?>
-    <div id="content-wrapper" class="d-flex flex-column">
-        <div id="content">
-            <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 shadow">
-                <span class="h5 mb-0 text-primary">Review Pendaftaran Mahasiswa (Pending)</span>
-            </nav>
-            <div class="container-fluid">
-                <?= $alert ?>
-                <div class="card shadow mb-4">
-                    <div class="card-body">
-                        <?php if (!$dosen_nip): ?>
-                            <div class="text-muted">Session NIP dosen belum diset. Tidak bisa menampilkan mahasiswa.</div>
-                        <?php elseif (empty($list)): ?>
-                            <div class="text-muted">Tidak ada mahasiswa pending untuk Anda.</div>
-                        <?php else: ?>
-                        <div class="table-responsive">
-                        <table class="table table-bordered">
-                            <thead class="table-primary text-center">
-                                <tr>
-                                    <th>No</th>
-                                    <th>NIM</th>
-                                    <th>Nama</th>
-                                    <th>Email</th>
-                                    <th>Pembimbing</th>
-                                    <th>Tanggal</th>
-                                    <th>Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            <?php $i=1; foreach ($list as $r): ?>
-                                <tr>
-                                    <td class="text-center"><?= $i++ ?></td>
-                                    <td><?= htmlspecialchars($r['nim']) ?></td>
-                                    <td><?= htmlspecialchars($r['nama']) ?></td>
-                                    <td><?= htmlspecialchars($r['email'] ?? '-') ?></td>
-                                    <td><?= htmlspecialchars($r['pembimbing'] ?? '-') ?></td>
-                                    <td><?= htmlspecialchars($r['tanggal_daftar'] ?? '-') ?></td>
-                                    <td class="text-center">
-                                        <form method="POST" style="display:inline" onsubmit="return confirm('Acc pendaftaran <?= addslashes(htmlspecialchars($r['nama'])) ?>?')">
-                                            <input type="hidden" name="nim" value="<?= htmlspecialchars($r['nim']) ?>">
-                                            <button name="action" value="acc_dosen" class="btn btn-sm btn-success">Acc</button>
-                                        </form>
-                                        <form method="POST" style="display:inline" onsubmit="return confirm('Tolak pendaftaran <?= addslashes(htmlspecialchars($r['nama'])) ?>?')">
-                                            <input type="hidden" name="nim" value="<?= htmlspecialchars($r['nim']) ?>">
-                                            <button name="action" value="reject" class="btn btn-sm btn-danger">Reject</button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                            </tbody>
-                        </table>
+    <div id="wrapper">
+        <?php include 'inc/sidebar.php'; ?>
+        <div id="content-wrapper" class="d-flex flex-column">
+            <div id="content">
+                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 shadow">
+                    <span class="h5 mb-0 text-primary">Review Pendaftaran Mahasiswa (Pending)</span>
+                </nav>
+                <div class="container-fluid">
+                    <?= $alert ?>
+                    <div class="card shadow mb-4">
+                        <div class="card-body">
+                            <?php if (!$dosen_nip): ?>
+                                <div class="text-muted">Session NIP dosen belum diset. Tidak bisa menampilkan mahasiswa.
+                                </div>
+                            <?php elseif (empty($list)): ?>
+                                <div class="text-muted">Tidak ada mahasiswa pending untuk Anda.</div>
+                            <?php else: ?>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered">
+                                        <thead class="table-primary text-center">
+                                            <tr>
+                                                <th>No</th>
+                                                <th>NIM</th>
+                                                <th>Nama</th>
+                                                <th>Email</th>
+                                                <th>Pembimbing</th>
+                                                <th>Tanggal</th>
+                                                <th>Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php $i = 1;
+                                            foreach ($list as $r): ?>
+                                                <tr>
+                                                    <td class="text-center"><?= $i++ ?></td>
+                                                    <td><?= htmlspecialchars($r['nim']) ?></td>
+                                                    <td><?= htmlspecialchars($r['nama']) ?></td>
+                                                    <td><?= htmlspecialchars($r['email'] ?? '-') ?></td>
+                                                    <td><?= htmlspecialchars($r['pembimbing'] ?? '-') ?></td>
+                                                    <td><?= htmlspecialchars($r['tanggal_daftar'] ?? '-') ?></td>
+                                                    <td class="text-center">
+                                                        <form method="POST" style="display:inline"
+                                                            onsubmit="return confirm('Acc pendaftaran <?= addslashes(htmlspecialchars($r['nama'])) ?>?')">
+                                                            <input type="hidden" name="nim"
+                                                                value="<?= htmlspecialchars($r['nim']) ?>">
+                                                            <button name="action" value="acc_dosen"
+                                                                class="btn btn-sm btn-success">Acc (Lanjut ke Ketua)</button>
+                                                        </form>
+                                                        <form method="POST" style="display:inline"
+                                                            onsubmit="return confirm('Tolak pendaftaran <?= addslashes(htmlspecialchars($r['nama'])) ?>?')">
+                                                            <input type="hidden" name="nim"
+                                                                value="<?= htmlspecialchars($r['nim']) ?>">
+                                                            <button name="action" value="reject"
+                                                                class="btn btn-sm btn-danger">Reject</button>
+                                                        </form>
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            <?php endif; ?>
                         </div>
-                        <?php endif; ?>
                     </div>
                 </div>
             </div>
+            <?php include '../inc/footer.php'; ?>
         </div>
-        <?php include '../inc/footer.php'; ?>
     </div>
-</div>
-<script src="../assets/vendor/jquery/jquery.min.js"></script>
-<script src="../assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-<script src="../assets/vendor/jquery-easing/jquery.easing.min.js"></script>
-<script src="../assets/js/sb-admin-2.min.js"></script>
+    <script src="../assets/vendor/jquery/jquery.min.js"></script>
+    <script src="../assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="../assets/vendor/jquery-easing/jquery.easing.min.js"></script>
+    <script src="../assets/js/sb-admin-2.min.js"></script>
 </body>
+
 </html>
