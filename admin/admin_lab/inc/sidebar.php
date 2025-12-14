@@ -68,6 +68,19 @@ if ($q && pg_num_rows($q) > 0) {
             <span>Riset Saya</span>
         </a>
     </li>
+
+
+
+    <li class="nav-item">
+        <a class="nav-link" href="acc_riset.php">
+            <i class="fas fa-clipboard-check"></i>
+            <span>Riset Mahasiswa</span>
+        </a>
+    </li>
+
+
+
+
     <li class="nav-item">
         <a class="nav-link" href="dataset.php">
             <i class="fas fa-newspaper"></i>
@@ -86,19 +99,7 @@ if ($q && pg_num_rows($q) > 0) {
         </a>
     </li>
 
-    <hr class="sidebar-divider d-none d-md-block">
-
-    <div class="sidebar-heading">Persetujuan Riset</div>
-    <li class="nav-item">
-        <a class="nav-link" href="acc_riset.php">
-            <i class="fas fa-clipboard-check"></i>
-            <span>Review Riset</span>
-        </a>
-    </li>
-
-
-
-    <hr class="sidebar-divider d-none d-md-block">
+   
 
     <!-- Logout -->
     <li class="nav-item">
