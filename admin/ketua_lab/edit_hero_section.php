@@ -13,6 +13,7 @@ if ($id === '') {
     exit;
 }
 
+// 1. Ambil data awal dari database
 $q = pg_query_params($koneksi, 'SELECT * FROM hero_section WHERE id = $1', array($id));
 if (!$q || pg_num_rows($q) === 0) {
     header('Location: hero_section.php?msg=notfound');
@@ -21,29 +22,33 @@ if (!$q || pg_num_rows($q) === 0) {
 $row = pg_fetch_assoc($q);
 pg_free_result($q);
 
+// 2. Ambil dan unset pesan notifikasi dari sesi
 $alert = '';
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $judul = trim($_POST['judul'] ?? '');
-    $isi   = trim($_POST['isi'] ?? '');
-
-    if ($judul === '' || $isi === '') {
-        $alert = '<div class="alert alert-danger">Judul dan Isi wajib diisi.</div>';
-    } else {
-        $res = pg_query_params($koneksi,
-            'UPDATE hero_section SET judul = $1, isi = $2 WHERE id = $3',
-            array($judul, $isi, $id)
-        );
-        if ($res) {
-            header('Location: hero_section.php?msg=updated');
-            exit;
-        } else {
-            $alert = '<div class="alert alert-danger">Gagal mengupdate data. Cek koneksi / constraint.</div>';
-        }
-    }
-
-    $row['judul'] = $_POST['judul'] ?? $row['judul'];
-    $row['isi']   = $_POST['isi'] ?? $row['isi'];
+if (isset($_SESSION['success_msg'])) {
+    $alert = '<div class="alert alert-success alert-dismissible fade show" role="alert">' . 
+             htmlspecialchars($_SESSION['success_msg']) . 
+             '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>';
+    unset($_SESSION['success_msg']);
+} elseif (isset($_SESSION['error_msg'])) {
+    $alert = '<div class="alert alert-danger alert-dismissible fade show" role="alert">' . 
+             htmlspecialchars($_SESSION['error_msg']) . 
+             '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>';
+    unset($_SESSION['error_msg']);
 }
+
+// 3. Ambil data form lama dari sesi (jika ada error)
+$form_data = $_SESSION['old_post'] ?? null;
+unset($_SESSION['old_post']);
+
+// 4. Jika ada data form yang gagal, timpa data database dengan data post
+if ($form_data) {
+    $row['judul'] = $form_data['judul'] ?? $row['judul'];
+    $row['isi']   = $form_data['isi'] ?? $row['isi'];
+}
+
+$judul_value = htmlspecialchars($row['judul'] ?? '');
+$isi_value = $row['isi'] ?? ''; // Jangan di-htmlspecialchars agar Summernote merender HTML
+
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -71,9 +76,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <div class="card shadow-sm mb-4">
                     <div class="card-body">
-                        <?= $alert ?>
+                        <?= $alert ?> <form method="POST" action="proses_hero_section.php">
+                            <input type="hidden" name="action" value="edit">
+                            <input type="hidden" name="id" value="<?= htmlspecialchars($row['id']) ?>">
 
-                        <form method="POST">
                             <div class="form-group">
                                 <label>ID (tidak bisa diubah)</label>
                                 <input type="text" class="form-control" value="<?= htmlspecialchars($row['id']) ?>" disabled>
@@ -81,12 +87,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                             <div class="form-group">
                                 <label>Judul</label>
-                                <input type="text" name="judul" class="form-control" value="<?= htmlspecialchars($row['judul'] ?? '') ?>" required>
+                                <input type="text" name="judul" class="form-control" value="<?= $judul_value ?>" required>
                             </div>
 
                             <div class="form-group">
                                 <label>Isi</label>
-                                <textarea id="summernote" name="isi" required><?= htmlspecialchars($row['isi'] ?? '') ?></textarea>
+                                <textarea id="summernote" name="isi" required><?= $isi_value ?></textarea>
                             </div>
 
                             <div class="d-flex gap-2">
