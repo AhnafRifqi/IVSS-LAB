@@ -1,8 +1,27 @@
 <?php
 session_start();
 include '../inc/koneksi.php';
+
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'ketua') {
     header('Location: ../index.php'); exit;
+}
+
+// Logika untuk menampilkan data di View
+$query = "SELECT * FROM kegiatan_proyek ORDER BY id ASC";
+$result = pg_query($koneksi, $query);
+
+// Ambil dan tampilkan pesan dari sesi
+$alert = '';
+if (isset($_SESSION['success_msg'])) {
+    $alert = '<div class="alert alert-success alert-dismissible fade show" role="alert">' . 
+             $_SESSION['success_msg'] . 
+             '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>';
+    unset($_SESSION['success_msg']);
+} elseif (isset($_SESSION['error_msg'])) {
+    $alert = '<div class="alert alert-danger alert-dismissible fade show" role="alert">' . 
+             $_SESSION['error_msg'] . 
+             '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>';
+    unset($_SESSION['error_msg']);
 }
 ?>
 <!DOCTYPE html>
@@ -28,16 +47,13 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'ketua') {
         </nav>
         <div class="container-fluid">
             <h1 class="h3 mb-4 text-gray-800">Admin - Manajemen Kegiatan Proyek</h1>
-            <?php
-            $query = "SELECT * FROM kegiatan_proyek ORDER BY id ASC";
-            $result = pg_query($koneksi, $query);
-            ?>
-            <div class="card shadow mb-4">
+            
+            <?= $alert ?> <div class="card shadow mb-4">
                 <div class="card-header py-3 d-flex justify-content-between align-items-center">
                     <h6 class="m-0 font-weight-bold text-primary">Daftar Kegiatan Proyek</h6>
                     <a href="tambah_kegiatan_proyek.php" class="btn btn-success btn-sm">
-                            <i class="fas fa-plus"></i> Tambah Data
-                        </a>
+                        <i class="fas fa-plus"></i> Tambah Data
+                    </a>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -58,10 +74,15 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'ketua') {
                                     <td class="text-center"><?= $no++; ?></td>
                                     <td><?= htmlspecialchars($row['judul']); ?></td>
                                     <td class="truncate"><?= ($row['isi']); ?></td>
-                                    <td class="text-center">
+                                    <td class="text-center" style="min-width: 150px;">
                                         <a href="edit_kegiatan_proyek.php?id=<?= $row['id']; ?>" 
-                                           class="btn btn-primary btn-xs">
-                                           <i class="fas fa-edit"></i> Edit
+                                            class="btn btn-primary btn-xs">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </a>
+                                        <a href="proses_kegiatan_proyek.php?action=delete&id=<?= $row['id']; ?>" 
+                                            class="btn btn-danger btn-xs" 
+                                            onclick="return confirm('Anda yakin ingin menghapus data ini? Aksi ini tidak dapat dibatalkan.');">
+                                            <i class="fas fa-trash"></i> Hapus
                                         </a>
                                     </td>
                                 </tr>
@@ -84,7 +105,11 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'ketua') {
 <script src="../assets/js/sb-admin-2.min.js"></script>
 <script>
 $(document).ready(function() {
-    $('#kegiatanTable').DataTable({ "columnDefs": [ { "orderable": false, "targets": [2,3] } ] });
+    $('#kegiatanTable').DataTable({ 
+        "columnDefs": [ 
+            { "orderable": false, "targets": [2,3] } 
+        ] 
+    });
 });
 </script>
 </body>

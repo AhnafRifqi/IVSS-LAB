@@ -13,7 +13,7 @@ $result = pg_query($koneksi, "SELECT * FROM profil_lab ORDER BY id ASC");
 $profil_lab_data = pg_fetch_all($result);
 if ($profil_lab_data === false) $profil_lab_data = [];
 
-// 3. Handle Notifikasi (jika ada)
+// 3. Handle Notifikasi (mengambil dari sesi)
 $alert = '';
 if (isset($_SESSION['success_msg'])) {
     $alert = '<div class="alert alert-success alert-dismissible fade show" role="alert">' . 
@@ -39,7 +39,7 @@ if (isset($_SESSION['success_msg'])) {
     
     <style>
         .truncate { 
-            max-width: 400px; /* Lebar yang cukup untuk preview */
+            max-width: 400px;
             white-space: nowrap; 
             overflow: hidden; 
             text-overflow: ellipsis; 
@@ -92,8 +92,13 @@ if (isset($_SESSION['success_msg'])) {
                                             <td class="text-center"><?= $no++; ?></td>
                                             <td><?= htmlspecialchars($row['judul']); ?></td>
                                             <td class="truncate"><?= $row['isi']; ?></td>
-                                            <td class="text-center" style="min-width: 100px;">
+                                            <td class="text-center" style="min-width: 150px;">
                                                 <a href="edit_profil_lab.php?id=<?= $row['id']; ?>" class="btn btn-primary btn-xs"><i class="fas fa-edit"></i> Edit</a>
+                                                <a href="proses_profil_lab.php?action=delete&id=<?= $row['id']; ?>" 
+                                                    class="btn btn-danger btn-xs" 
+                                                    onclick="return confirm('Anda yakin ingin menghapus data profil lab ini? Aksi ini tidak dapat dibatalkan.');">
+                                                    <i class="fas fa-trash"></i> Hapus
+                                                </a>
                                             </td>
                                         </tr>
                                         <?php endforeach; ?>
@@ -121,7 +126,7 @@ if (isset($_SESSION['success_msg'])) {
 $(document).ready(function() { 
     $('#profilTable').DataTable({ 
         "columnDefs": [
-            { "orderable": false, "targets": [2, 3] } // Kolom Isi dan Aksi tidak dapat diurutkan
+            { "orderable": false, "targets": [2, 3] }
         ],
         "language": {
             "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Indonesian.json"
