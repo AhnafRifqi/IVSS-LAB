@@ -84,7 +84,7 @@ if ($q && pg_num_rows($q) > 0) {
     <li class="nav-item">
         <a class="nav-link" href="acc_riset.php">
             <i class="fas fa-clipboard-check"></i>
-            <span>Riset Mahasiswa</span>
+            <span>Daftar Riset Lab</span>
         </a>
     </li>
 
