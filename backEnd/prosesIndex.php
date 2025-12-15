@@ -4,8 +4,8 @@ $query_visi = "SELECT isi FROM visimisi WHERE nama = 'visi' LIMIT 1";
 $query_misi = "SELECT isi FROM visimisi WHERE nama = 'misi' LIMIT 1";
 $query_dosen = "SELECT * FROM dosen";
 $query_peralatan_lab = "SELECT gambar, nama, isi FROM fasilitas 
-                        WHERE nama NOT IN ('Area Mushola', 'AC', 'Whiteboard', 'Locker')";
-$query_fasilitas_umum = "SELECT gambar, nama, isi FROM fasilitas WHERE nama = 'Area Mushola' OR nama = 'AC' OR nama = 'Whiteboard' OR nama = 'Locker'";
+                        WHERE nama NOT IN ('Area Mushola', 'AC', 'Whiteboard', 'Box Pengambilan Data')";
+$query_fasilitas_umum = "SELECT gambar, nama, isi FROM fasilitas WHERE nama = 'Area Mushola' OR nama = 'AC' OR nama = 'Box Pengambilan Data'";
 $query_berita_terbaru = "SELECT * FROM berita ORDER BY berita_id DESC LIMIT 3";
 $sql = "SELECT * FROM logo";
 $result = pg_query($koneksi, $sql);

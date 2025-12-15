@@ -3,6 +3,10 @@
     --bs-tertiary: #1d4052;
 }
 
+* {
+    font-family: 'Roboto', sans-serif !important;
+}
+
 
 
 .back-to-top {

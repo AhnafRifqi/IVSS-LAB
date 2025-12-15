@@ -93,25 +93,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="x-ua-compatible" content="ie=edge" />
-    <meta name="description" content="" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+<meta charset="utf-8">
+    <title>Laboratorium Visi Cerdas dan Sistem Cerdas</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="" name="keywords">
+    <meta content="" name="description">
 
-    <link rel="shortcut icon" href="assets/images/favicon.svg" type="image/svg" />
+    <link href="img/favicon.ico" rel="icon">
 
-    <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="assets/css/lineicons.css" />
-    <link rel="stylesheet" href="assets/css/tiny-slider.css" />
-    <link rel="stylesheet" href="assets/css/glightbox.min.css" />
-    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.lineicons.com/4.0/lineicons.css" rel="stylesheet">
+
+    <link href="lib/animate/animate.min.css" rel="stylesheet">
+    <link href="lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <link href="css/style.css" rel="stylesheet">
 </head>
 
 <body>
 
 <?php include('inc/navbar.php')?>
 
-<section class="py-5" style="background-color: #f8f9fa; min-height: 100vh; margin-top: 100px;">
+<section class="py-5" style="background-color: #f8f9fa; min-height: 100vh; margin-top: 50px;">
     <div class="container py-5">
         <div class="row justify-content-center">
             <div class="col-lg-10">
@@ -217,13 +227,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </p>
                                 
                                 <div class="d-flex justify-content-start gap-3">
-                                    <button type="button" class="btn btn-sm fw-bold text-white shadow"
-                                            style="background-color: #1A1A37; border-radius: 10px;"
+                                    <button type="button" class="btn btn-sm fw-bold shadow"
+                                            style="background-color: #1A1A37; border-radius: 10px; color:white"
                                             onclick="window.location.href='index.php';">
                                         Kembali
                                     </button>
-                                    <button type="submit" class="btn btn-sm fw-bold text-white shadow"
-                                            style="background-color: #1A1A37; border-radius: 10px;">
+                                    <button type="submit" class="btn btn-sm fw-bold shadow"
+                                            style="background-color: #1A1A37; border-radius: 10px; color:white">
                                         Kirim
                                     </button>
                                 </div>
@@ -243,6 +253,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </section>
 
 <?php include('inc/footer.php')?>
+    <!-- JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="lib/wow/wow.min.js"></script>
+    <script src="lib/easing/easing.min.js"></script>
+    <script src="lib/waypoints/waypoints.min.js"></script>
+    <script src="lib/owlcarousel/owl.carousel.min.js"></script>
+    <script src="lib/counterup/counterup.min.js"></script>
+
+    <!-- Template Javascript -->
+    <script src="js/main.js"></script>
 
 </body>
 </html>
