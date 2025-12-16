@@ -57,7 +57,7 @@ include 'backEnd/prosesDosen.php';
                 <div class="row g-5">
 
                     <!-- SIDEBAR (FOTO & KONTAK) -->
-                    <div class="col-md-4 border-end border-4 border-secondary">
+                    <div class="col-md-4">
 
                         <!-- Foto -->
                         <div class="text-center mb-4">

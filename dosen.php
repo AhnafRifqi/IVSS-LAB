@@ -40,7 +40,7 @@ include 'backEnd/prosesDosen.php';
     <?php include('inc/navbar.php'); ?>
 
     <!-- Page Header -->
-    <div class="container-fluid page-header py-5 wow fadeIn" data-wow-delay="0.1s">
+    <div class="container-fluid py-5 wow fadeIn" data-wow-delay="0.1s" style="background-color: #F3EAE0;">
         <div class="container text-center py-4">
             <h3 class="display-3 animated slideInDown" style="color: #1d4052;">Daftar Dosen Laboratorium Visi Cerdas dan Sistem Cerdas</h3>
         </div>
