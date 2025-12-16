@@ -84,7 +84,7 @@ if (!empty($admin['foto'])) {
 
             <!-- Page Content -->
             <div class="container-fluid">
-                <h1 class="h3 mb-4 text-gray-800">Profil Ketua Lab IVSS</h1>
+                <h1 class="h3 mb-4 text-gray-800">Profil Admin Berita Lab IVSS</h1>
 
                 <div class="row">
                     <!-- Profil Card -->
