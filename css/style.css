@@ -3,9 +3,6 @@
     --bs-tertiary: #1d4052;
 }
 
-* {
-    font-family: 'Roboto', sans-serif !important;
-}
 
 
 
@@ -598,9 +595,7 @@
 
 /*** Footer ***/
 .footer {
-    color: var(--bs-tertiary);
     background-color: #1d4052;
-    background: linear-gradient(rgba(5, 19, 17, .95), rgba(5, 19, 17, .95)), url(../img/bg-footer.jpg) center center no-repeat;
     background-size: cover;
 }
 

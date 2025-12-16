@@ -20,7 +20,7 @@ include 'backEnd/prosesBerita.php';
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-    
+
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://cdn.lineicons.com/4.0/lineicons.css" rel="stylesheet">
@@ -40,35 +40,35 @@ include 'backEnd/prosesBerita.php';
     </div>
     <?php include('inc/navbar.php');?>
     <section class="text-white py-5"
-            style="padding-top: 100px !important; padding-bottom: 100px !important; position: relative; overflow: hidden; background-color: #F3EAE0">
-            <div class="container">
-                <div class="row align-items-center">
-                    <div class="col-lg-10 mx-auto text-center">
-                        <h1 class="fw-bold display-5 mb-3" style="color: #1d4052;">Berita & Artikel Terbaru</h1>
-                        <p class="fs-5 " style="color: #1d4052;">Ikuti perkembangan terbaru dari Laboratorium Visi Cerdas dan Sistem
-                            Cerdas.</p>
-                    </div>
+        style="padding-top: 100px !important; padding-bottom: 100px !important; position: relative; overflow: hidden; background-color: #F3EAE0">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-10 mx-auto text-center">
+                    <h1 class="fw-bold display-5 mb-3" style="color: #1d4052;">Berita & Artikel Terbaru</h1>
+                    <p class="fs-5 " style="color: #1d4052;">Ikuti perkembangan terbaru dari Laboratorium Visi Cerdas
+                        dan Sistem
+                        Cerdas.</p>
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <section class="py-4" style="margin-top: -50px; margin-bottom: 60px;">
-            <div class="container">
-                <form action="" method="GET">
-                    <div class="mx-auto" style="max-width: 600px;">
-                        <div class="input-group shadow-lg rounded-pill overflow-hidden">
-                            <input type="text" class="form-control border-0 p-3" placeholder="Cari berita..."
-                                name="keyword" value="<?= htmlspecialchars($search_query); ?>" aria-label="Cari berita"
-                                style="background-color: #FFBC3B;">
-                            <button class="btn  px-4 fw-bold" type="submit"
-                                style="background-color: #1d4052; color: white">
-                                <i class="lni lni-search-alt" style="color: white;"></i> Cari
-                            </button>
-                        </div>
+    <section class="py-4" style="margin-top: -50px; margin-bottom: 60px;">
+        <div class="container">
+            <form action="" method="GET">
+                <div class="mx-auto" style="max-width: 600px;">
+                    <div class="input-group shadow-lg rounded-pill overflow-hidden">
+                        <input type="text" class="form-control border-0 p-3" placeholder="Cari berita..." name="keyword"
+                            value="<?= htmlspecialchars($search_query); ?>" aria-label="Cari berita"
+                            style="background-color: #FFBC3B;">
+                        <button class="btn  px-4 fw-bold" type="submit" style="background-color: #1d4052; color: white">
+                            <i class="lni lni-search-alt" style="color: white;"></i> Cari
+                        </button>
                     </div>
-                </form>
-            </div>
-        </section>
+                </div>
+            </form>
+        </div>
+    </section>
 
 
     <section class="container-fluid py-2" id="news-content-section">
@@ -111,9 +111,9 @@ include 'backEnd/prosesBerita.php';
                                         <p class="text-muted mb-4">
                                             <?= htmlspecialchars($featured['isi_tampilan']); ?>
                                         </p>
-                                        <a href="detailBerita.php?id=<?= htmlspecialchars($featured['berita_id']); ?>"
-                                            class=" fw-bold text-decoration-none d-inline-flex align-items-center"
-                                            style="color: #FFBC3B;">
+                                        <a href="detailBerita.php?id=<?= htmlspecialchars($item['berita_id']); ?>"
+                                            class=" fw-bold text-decoration-none bg-light d-inline-flex align-items-center mt-auto"
+                                            style="color: #1d4052; height:50px; padding-left: 20px">
                                             Baca Selengkapnya <i class="lni lni-arrow-right ms-2"></i>
                                         </a>
                                     </div>
@@ -165,8 +165,8 @@ include 'backEnd/prosesBerita.php';
                                     </p>
 
                                     <a href="detailBerita.php?id=<?= htmlspecialchars($item['berita_id']); ?>"
-                                        class=" fw-bold text-decoration-none d-inline-flex align-items-center mt-auto"
-                                        style="color: #FFBC3B;">
+                                        class=" fw-bold text-decoration-none bg-light d-inline-flex align-items-center mt-auto"
+                                        style="color: #1d4052; height:50px; padding-left: 20px">
                                         Baca Selengkapnya <i class="lni lni-arrow-right ms-2"></i>
                                     </a>
                                 </div>
@@ -198,7 +198,7 @@ include 'backEnd/prosesBerita.php';
                             ?>
                             <li class="page-item <?= ($i == $current_page) ? 'active' : ''; ?>">
                                 <a class="page-link" href="<?= $page_link; ?>"
-                                    style="<?= ($i == $current_page) ? 'background-color: #FFBC3B; border-color: #FFBC3B; color: white;' : 'color: #1d4052;'; ?>">
+                                    style="<?= ($i == $current_page) ? 'background-color: #FFBC3B; border-color: #FFBC3B; color: #1D4052;' : 'color: #1d4052;'; ?>">
                                     <?= $i; ?>
                                 </a>
                             </li>

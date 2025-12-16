@@ -85,7 +85,7 @@ include './backEnd/prosesIndex.php';
                     </div>
                     <div class="col-lg-6">
                         <div class="carousel-img">
-                            <img class="w-100" src="img/carousel-1.jpg" alt="Image">
+                            <img class="w-100" src="img/hero.jpeg" alt="Image">
                         </div>
                     </div>
                 </div>
@@ -355,65 +355,12 @@ include './backEnd/prosesIndex.php';
     </div>
     <!-- SOP & Layanan End -->
 
-    <!-- Fasilitas Start -->
-    <div class="container-fluid py-5">
-        <div class="container">
-            <div class="text-center mx-auto wow fadeIn" data-wow-delay="0.1s" style="max-width: 500px;">
-                <p class="section-title bg-white text-center px-3" style="color: #FFBC3B;">LAB IVSS</p>
-                <h1 class="display-6 mb-4" style="color: #1d4052;">Fasilitas Laboratorium</h1>
-            </div>
-
-            <div class="row g-4 justify-content-center">
-                <?php while ($data_fasilitas = pg_fetch_assoc($result_fasilitas_umum)) { ?>
-                <div class="col-lg-4 col-md-6 col-12">
-
-                    <div class="d-flex flex-column h-100 p-4" style="border: 1px solid #eee; border-radius: 12px; 
-                                box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
-
-                        <div style="flex-grow: 1; display: flex; flex-direction: column;">
-
-                            <!-- Gambar made same as peralatan -->
-                            <div class="position-relative mb-4"
-                                style="height: 300px; overflow: hidden; border-radius: 10px;">
-
-                                <img src="admin/assets/img/<?php echo $data_fasilitas['gambar']; ?>"
-                                    alt="<?php echo $data_fasilitas['nama']; ?>" class="w-100 h-100"
-                                    style="object-fit: cover;">
-                            </div>
-
-                            <!-- Judul -->
-                            <h4 class="mb-2" style="color: #1d4052;">
-                                <?php echo $data_fasilitas['nama']; ?>
-                            </h4>
-
-                            <!-- Deskripsi kalau ada -->
-                            <p style="color: #555; font-size: 0.95rem; flex-grow: 1;">
-                                <?php echo $data_fasilitas['isi'] ?? 'Informasi fasilitas belum tersedia.'; ?>
-                            </p>
-
-                            <!-- Tombol sejajar bawah -->
-                            <a href="#!" class="btn  w-100 py-3 mt-auto"
-                                style="border-radius: 8px; background-color:#FFBC3B; color:white">
-                                Fasilitas
-                            </a>
-
-                        </div>
-
-                    </div>
-                </div>
-                <?php } ?>
-            </div>
-
-        </div>
-    </div>
-    <!-- Fasilitas End -->
-
     <!-- Peralatan Start -->
     <div class="container-fluid py-5">
         <div class="container">
             <div class="text-center mx-auto wow fadeIn" data-wow-delay="0.1s" style="max-width: 500px;">
                 <p class="section-title bg-white text-center px-3" style="color: #FFBC3B;">LAB IVSS</p>
-                <h1 class="display-6 mb-4" style="color: #1d4052;">Peralatan Laboratorium</h1>
+                <h1 class="display-6 mb-4" style="color: #1d4052;">Fasilitas dan Peralatan Laboratorium</h1>
             </div>
 
             <?php  
@@ -593,10 +540,11 @@ include './backEnd/prosesIndex.php';
 
                         <thead style="background-color: #1d4052;">
                             <tr class="text-white text-uppercase small">
-                                <th scope="col" class="py-3 px-4 text-start">Dosen / Peneliti</th>
-                                <th scope="col" class="py-3 text-center">Scopus</th>
-                                <th scope="col" class="py-3 text-center">Google Scholar</th>
-                                <th scope="col" class="py-3 text-center">Sinta</th>
+                                <th scope="col" class="py-3 px-4 text-start" style="color: #ffffff;">Dosen / Peneliti
+                                </th>
+                                <th scope="col" class="py-3 text-center" style="color: #ffffff;">Scopus</th>
+                                <th scope="col" class="py-3 text-center" style="color: #ffffff;">Google Scholar</th>
+                                <th scope="col" class="py-3 text-center" style="color: #ffffff;">Sinta</th>
                             </tr>
                         </thead>
 
@@ -635,8 +583,9 @@ include './backEnd/prosesIndex.php';
                                 <td class="text-center">
                                     <a href="<?php echo $link_scholar; ?>" target="_blank"
                                         class="btn btn-sm <?php echo $scholar_class; ?>"
-                                        style="<?php echo ($link_scholar !== '#') ? 'background-color: #FFBC3B; border-color: #FFBC3B;' : ''; ?>">
-                                        <i class="fas fa-external-link-alt me-1"></i> Detail
+                                        style="<?php echo ($link_scholar !== '#') ? 'background-color: #FFBC3B; border-color: #FFBC3B; color: #1d4052' : ''; ?>">
+                                        <i class="fas fa-external-link-alt me-1" style="color: #1d4052;"></i> <span
+                                            style="color: #1d4052;">Detail</span>
                                     </a>
                                 </td>
 
@@ -644,7 +593,8 @@ include './backEnd/prosesIndex.php';
                                     <a href="<?php echo $link_sinta; ?>" target="_blank"
                                         class="btn btn-sm <?php echo $sinta_class; ?>"
                                         style="<?php echo ($link_sinta !== '#') ? 'background-color: #FFBC3B; border-color: #FFBC3B;' : ''; ?>">
-                                        <i class="fas fa-external-link-alt me-1"></i> Detail
+                                        <i class="fas fa-external-link-alt me-1" style="color: #1d4052;"></i> <span
+                                            style="color: #1d4052;">Detail</span>
                                     </a>
                                 </td>
                             </tr>
@@ -711,7 +661,7 @@ include './backEnd/prosesIndex.php';
                             alt="<?php echo htmlspecialchars($data_berita['judul']); ?>"
                             style="height: 200px; object-fit: cover;">
 
-                        <a href="<?php echo $berita_link; ?>" class="h4  mb-2 fw-bold d-block" style="color:#FFBC3B;">
+                        <a href="<?php echo $berita_link; ?>" class="h4  mb-2 fw-bold d-block" style="color:black;">
                             <?php echo htmlspecialchars($data_berita['judul']); ?>
                         </a>
 
@@ -721,18 +671,18 @@ include './backEnd/prosesIndex.php';
 
                         <div class="bg-light p-3 rounded mt-3">
                             <p class="mb-1" style="color: #1d4052;">
-                                <i class="fa fa-calendar-alt  me-2" style="color:#FFBC3B;"></i>
+                                <i class="fa fa-calendar-alt  me-2" style="color:black;"></i>
                                 <?php echo $tanggal_format; ?>
                             </p>
 
                             <p class="mb-2" style="color: #1d4052;">
-                                <i class="fa fa-user-edit  me-2" style="color: #FFBC3B;"></i>
+                                <i class="fa fa-user-edit  me-2" style="color: black;"></i>
                                 Penulis: <?php echo htmlspecialchars($data_berita['penulis'] ?? "-"); ?>
                             </p>
 
                             <?php if ($show_button): ?>
                             <a href="<?php echo $berita_link; ?>" class="fw-bold d-block text-end"
-                                style="color:#FFBC3B; text-decoration:none;">
+                                style="color: #1d4052; text-decoration:none;">
                                 Baca Selengkapnya →
                             </a>
                             <?php endif; ?>

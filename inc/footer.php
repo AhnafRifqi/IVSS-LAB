@@ -14,14 +14,14 @@
 
             <div class="col-lg-3 col-md-6">
                 <h4 class="text-light mb-4 border-bottom border-primary pb-2" style="width: fit-content;">Tentang LAB IVSS</h4>
-                <a class="btn btn-link text-white-50 text-decoration-none" href="index.php">Beranda</a>
-                <a class="btn btn-link text-white-50 text-decoration-none" href="berita.php">Berita</a>
-                <a class="btn btn-link text-white-50 text-decoration-none" href="dosen.php">Daftar Member</a>
+                <a class="btn btn-link text-light text-decoration-none" href="index.php">Beranda</a>
+                <a class="btn btn-link text-light text-decoration-none" href="berita.php">Berita</a>
+                <a class="btn btn-link text-light text-decoration-none" href="dosen.php">Daftar Member</a>
                 </div>
 
             <div class="col-lg-4 col-md-6">
                 <h4 class="text-light mb-4">BLU POLITEKNIK NEGERI MALANG</h4>
-                <p class="text-white-50">
+                <p class="text-light">
                     Jl. Soekarno Hatta No.9, Jatimulyo, Kec. Lowokwaru, Kota Malang, Jawa Timur 65141
                 </p>
                 <div class="d-flex justify-content-end pt-3 d-lg-none d-md-flex">
@@ -34,7 +34,7 @@
             <div class="row align-items-center">
                 
                 <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
-                    <p class="text-white-50 mb-0">
+                    <p class="text-light mb-0">
                         Copyright © 2025 Lab Intelligent Vision and Smart System Polinema
                     </p>
                 </div>
