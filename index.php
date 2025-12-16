@@ -355,18 +355,18 @@ include './backEnd/prosesIndex.php';
     </div>
     <!-- SOP & Layanan End -->
 
-    <!-- Peralatan Start -->
+    <!-- Fasilitas Start -->
     <div class="container-fluid py-5">
         <div class="container">
             <div class="text-center mx-auto wow fadeIn" data-wow-delay="0.1s" style="max-width: 500px;">
                 <p class="section-title bg-white text-center px-3" style="color: #FFBC3B;">LAB IVSS</p>
-                <h1 class="display-6 mb-4" style="color: #1d4052;">Fasilitas dan Peralatan Laboratorium</h1>
+                <h1 class="display-6 mb-4" style="color: #1d4052;">Fasilitas Laboratorium</h1>
             </div>
 
             <?php  
         // === Ambil semua data alat ke array ===
         $items = [];
-        while ($row = pg_fetch_assoc($result_peralatan_lab)) {
+        while ($row = pg_fetch_assoc($result_fasilitas_lab)) {
             $items[] = $row;
         }
 
@@ -430,7 +430,7 @@ include './backEnd/prosesIndex.php';
                                         <!-- Tombol SELALU DI BAWAH -->
                                         <a href="#!" class="btn w-100 py-3 mt-auto"
                                             style="border-radius: 8px; background-color:#FFBC3B; color:white">
-                                            Alat
+                                            Fasilitas
                                         </a>
 
                                     </div>
@@ -456,6 +456,120 @@ include './backEnd/prosesIndex.php';
                 </button>
 
                 <button class="carousel-control-next" type="button" data-bs-target="#donationCarousel"
+                    data-bs-slide="next">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="black"
+                        class="bi bi-chevron-right" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd"
+                            d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- Fasilitas End -->
+
+    <!-- Peralatan Start -->
+    <div class="container-fluid py-5">
+        <div class="container">
+            <div class="text-center mx-auto wow fadeIn" data-wow-delay="0.1s" style="max-width: 500px;">
+                <p class="section-title bg-white text-center px-3" style="color: #FFBC3B;">LAB IVSS</p>
+                <h1 class="display-6 mb-4" style="color: #1d4052;">Peralatan Laboratorium</h1>
+            </div>
+
+            <?php
+            // === Ambil semua data alat ke array ===
+            // CATATAN: Karena Anda ingin 3 item per slide, saya tidak mengubah $perSlide.
+            $items = [];
+            if (isset($result_peralatan_lab) && pg_num_rows($result_peralatan_lab) > 0) {
+                pg_result_seek($result_peralatan_lab, 0); // Pastikan pointer direset
+                while ($row = pg_fetch_assoc($result_peralatan_lab)) {
+                    $items[] = $row;
+                }
+            } else {
+                $items = [];
+            }
+            
+            // Konfigurasi
+            $totalItems = count($items);
+            $perSlide = 3; // 1 slide = 3 item
+            $totalSlides = ceil($totalItems / $perSlide);
+            $carouselIdPeralatan = "peralatanCarousel"; // ID UNIK BARU
+            ?>
+
+            <div id="<?php echo $carouselIdPeralatan; ?>" class="carousel slide" data-bs-ride="carousel">
+
+                <div class="carousel-indicators">
+                    <?php for ($i = 0; $i < $totalSlides; $i++) : ?>
+                    <button type="button" data-bs-target="#<?php echo $carouselIdPeralatan; ?>" data-bs-slide-to="<?php echo $i; ?>"
+                        class="<?php echo $i === 0 ? 'active' : ''; ?>" style="background-color:#FFC53B">
+                    </button>
+                    <?php endfor; ?>
+                </div>
+
+                <div class="carousel-inner">
+
+                    <?php for ($i = 0; $i < $totalSlides; $i++) : ?>
+                    <div class="carousel-item <?php echo $i === 0 ? 'active' : ''; ?>">
+                        <div class="row justify-content-center g-4">
+
+                            <?php
+                            $start = $i * $perSlide;
+                            $end = min($start + $perSlide, $totalItems);
+
+                            for ($j = $start; $j < $end; $j++) :
+                                $item = $items[$j];
+                            ?>
+                            <div class="col-lg-3 col-md-6 col-12">
+                                <div class="d-flex flex-column h-100 p-4" style="border: 1px solid #eee; border-radius: 12px;
+                                        box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+
+                                    <div style="flex-grow: 1; display: flex; flex-direction: column;">
+
+                                        <div class="position-relative mb-4"
+                                            style="height: 300px; overflow: hidden; border-radius: 10px;">
+
+                                            <img src="admin/assets/img/<?php echo $item['gambar']; ?>"
+                                                alt="<?php echo $item['nama']; ?>" class="w-100 h-100"
+                                                style="object-fit: cover;">
+                                        </div>
+
+                                        <a href="#!" class="h4 d-inline-block mb-2"
+                                            style="text-decoration: none; color: #1d4052;">
+                                            <?php echo $item['nama']; ?>
+                                        </a>
+
+                                        <p style="color: #555; font-size: 0.95rem; flex-grow: 1;">
+                                            <?php echo $item['isi'] ?? 'Klik detail untuk informasi lebih lanjut.'; ?>
+                                        </p>
+
+                                        <a href="#!" class="btn w-100 py-3 mt-auto"
+                                            style="border-radius: 8px; background-color:#FFBC3B; color:white">
+                                            Alat
+                                        </a>
+
+                                    </div>
+
+                                </div>
+                            </div>
+                            <?php endfor; ?>
+
+                        </div>
+                    </div>
+
+                    <?php endfor; ?>
+
+                </div>
+
+                <button class="carousel-control-prev" type="button" data-bs-target="#<?php echo $carouselIdPeralatan; ?>"
+                    data-bs-slide="prev">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="black"
+                        class="bi bi-chevron-left" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd"
+                            d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z" />
+                    </svg>
+                </button>
+
+                <button class="carousel-control-next" type="button" data-bs-target="#<?php echo $carouselIdPeralatan; ?>"
                     data-bs-slide="next">
                     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="black"
                         class="bi bi-chevron-right" viewBox="0 0 16 16">
