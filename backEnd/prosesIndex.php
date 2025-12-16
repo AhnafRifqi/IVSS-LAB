@@ -3,8 +3,8 @@ include 'inc/koneksi.php';
 $query_visi = "SELECT isi FROM visimisi WHERE nama = 'visi' LIMIT 1";
 $query_misi = "SELECT isi FROM visimisi WHERE nama = 'misi' LIMIT 1";
 $query_dosen = "SELECT * FROM dosen";
-$query_peralatan_lab = "SELECT gambar, nama, isi FROM fasilitas 
-                        ";
+$query_peralatan_lab = "SELECT gambar, nama, isi FROM fasilitas where tipe = 'peralatan'";
+$query_fasilitas_lab = "SELECT gambar, nama, isi FROM fasilitas where tipe = 'fasilitas'";
 $query_berita_terbaru = "SELECT * FROM berita ORDER BY berita_id DESC LIMIT 3";
 $sql = "SELECT * FROM logo";
 $result = pg_query($koneksi, $sql);
@@ -16,6 +16,7 @@ $result_visi = pg_query($koneksi, $query_visi);
 $result_misi = pg_query($koneksi, $query_misi);
 $result_dosen = pg_query($koneksi, $query_dosen);
 $result_peralatan_lab = pg_query($koneksi, $query_peralatan_lab);
+$result_fasilitas_lab = pg_query($koneksi, $query_fasilitas_lab);
 $result_berita_terbaru = pg_query($koneksi, $query_berita_terbaru);
 
 $data_visi = pg_fetch_assoc($result_visi);
