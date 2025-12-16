@@ -99,7 +99,7 @@ if ($q && pg_num_rows($q) > 0) {
         </a>
     </li>
 
-   
+    <hr class="sidebar-divider d-none d-md-block">
 
     <!-- Logout -->
     <li class="nav-item">
