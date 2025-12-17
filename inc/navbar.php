@@ -54,6 +54,7 @@ $logo_data = pg_fetch_assoc($result);
                     <a href="index.php" class="nav-item nav-link" style="color: white;">Beranda</a>
                     <a href="berita.php" class="nav-item nav-link" style="color: white;">Berita</a>
                     <a href="dosen.php" class="nav-item nav-link" style="color: white;">Daftar Member</a>
+                    <a href="produk.php" class="nav-item nav-link" style="color: white;">Produk</a>
                 </div>
             </div>
         </nav>
