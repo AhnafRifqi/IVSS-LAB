@@ -14,20 +14,20 @@ include 'backEnd/prosesDosen.php';
 
     <link href="img/favicon.ico" rel="icon">
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
 
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
-<link href="https://cdn.lineicons.com/4.0/lineicons.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.lineicons.com/4.0/lineicons.css" rel="stylesheet">
 
-<link href="lib/animate/animate.min.css" rel="stylesheet">
-<link href="lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
+    <link href="lib/animate/animate.min.css" rel="stylesheet">
+    <link href="lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
 
-<link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
 
-<link href="css/style.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
 </head>
 
 <body>
@@ -42,7 +42,7 @@ include 'backEnd/prosesDosen.php';
     <!-- Page Header -->
     <div class="container-fluid py-5 wow fadeIn" data-wow-delay="0.1s" style="background-color: #F3EAE0;">
         <div class="container text-center py-4">
-            <h3 class="display-3 animated slideInDown" style="color: #1d4052;">Daftar Dosen Laboratorium Visi Cerdas dan Sistem Cerdas</h3>
+            <h1 class="fw-bold display-5 mb-3" style="color: #1d4052;">Daftar Dosen Laboratorium Visi Cerdas dan Sistem Cerdas</h3>
         </div>
     </div>
 
