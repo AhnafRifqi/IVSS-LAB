@@ -114,6 +114,13 @@ if ($q && pg_num_rows($q) > 0) {
         </a>
     </li>
 
+    <li class="nav-item">
+        <a class="nav-link" href="produk.php">
+            <i class="fas fa-box-open"></i>
+            <span>Produk</span>
+        </a>
+    </li>
+
     <hr class="sidebar-divider d-none d-md-block">
 
     <!-- Manajemen Admin -->
