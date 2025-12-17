@@ -1,116 +1,120 @@
 <?php
 session_start();
 include '../inc/koneksi.php';
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'ketua') { header('Location: ../index.php'); exit; }
 
-// Cek autentikasi dan role
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'ketua') {
-    header('Location: ../index.php');
-    exit;
-}
-
-// Ambil berita (READ ONLY)
-$q = pg_query($koneksi, '
-    SELECT berita_id, judul, isi, gambar, penulis, tanggal
-    FROM berita
-    ORDER BY berita_id DESC
-');
-
-// Ambil hasil query, pastikan handle kasus kegagalan
-$beritas = $q ? pg_fetch_all($q) : [];
-if ($beritas === false) {
-    $beritas = [];
-}
+$msg = $_GET['msg'] ?? '';
+$res = pg_query($koneksi, "SELECT * FROM berita ORDER BY tanggal DESC, berita_id DESC");
 ?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="utf-8">
-    <title>Manajemen Berita</title>
-
+    <title>Daftar Berita - Admin</title>
     <link href="../assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
     <link href="../assets/css/sb-admin-2.min.css" rel="stylesheet">
     <link href="../assets/vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
-
     <style>
-        .img-thumb {
-            width: 100px;
-            border-radius: 6px;
+        /* Membatasi teks preview agar tetap rapi dalam kolom */
+        .preview-box {
+            font-size: 0.8rem;
+            line-height: 1.4;
+            max-width: 300px;
+            color: #858796;
+            display: -webkit-box;
+            -webkit-line-clamp: 2; /* Maksimal 2 baris */
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
     </style>
 </head>
 <body id="page-top">
-
     <div id="wrapper">
         <?php include 'inc/sidebar.php'; ?>
-
         <div id="content-wrapper" class="d-flex flex-column">
             <div id="content">
-
                 <nav class="navbar navbar-light bg-white shadow mb-4">
-                    <span class="h5 mb-0 text-primary">Data Berita</span>
+                    <span class="h5 text-primary font-weight-bold">Manajemen Berita</span>
                 </nav>
-
                 <div class="container-fluid">
-                    <div class="card shadow">
-                        <div class="card-header d-flex justify-content-between">
-                            <h6 class="font-weight-bold text-primary">Daftar Berita</h6>
+                    
+                    <?php if($msg): ?>
+                        <div class="alert alert-<?= $msg=='error'?'danger':'success' ?> alert-dismissible fade show">
+                            <strong>Status:</strong> 
+                            <?php
+                                if($msg == 'created') echo "Berita berhasil diterbitkan!";
+                                elseif($msg == 'updated') echo "Data berita telah diperbarui!";
+                                elseif($msg == 'deleted') echo "Berita telah berhasil dihapus!";
+                                else echo "Terjadi kesalahan sistem!";
+                            ?>
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
                         </div>
+                    <?php endif; ?>
 
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                            <h6 class="m-0 font-weight-bold text-primary">Data Berita</h6>
+                        </div>
                         <div class="card-body">
                             <div class="table-responsive">
-                                <table class="table table-bordered" id="beritaTable">
-                                    <thead class="table-primary text-center">
+                                <table class="table table-bordered table-hover" id="dataTable" width="100%">
+                                    <thead class="bg-gray-100">
                                         <tr>
-                                            <th>No</th>
-                                            <th>Judul</th>
-                                            <th>Gambar</th>
-                                            <th>Penulis</th>
-                                            <th>Tanggal</th>
+                                            <th width="30">No</th>
+                                            <th width="80">Gambar</th>
+                                            <th>Judul Berita</th>
+                                            <th>Preview Isi</th> <th width="100">Tipe</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <?php if (empty($beritas)): ?>
-                                            <tr>
-                                                <td colspan="6" class="text-center text-muted">Belum ada berita</td>
-                                            </tr>
-                                        <?php else: ?>
-                                            <?php foreach ($beritas as $i => $b): ?>
-                                                <tr>
-                                                    <td class="text-center"><?= $i + 1 ?></td>
-                                                    <td><?= htmlspecialchars($b['judul']) ?></td>
-                                                    <td class="text-center">
-                                                        <?php if ($b['gambar']): ?>
-                                                            <img src="../assets/img/<?= htmlspecialchars($b['gambar']) ?>" class="img-thumb">
-                                                        <?php else: ?>
-                                                            -
-                                                        <?php endif; ?>
-                                                    </td>
-                                                    <td><?= htmlspecialchars($b['penulis'] ?? '-') ?></td>
-                                                    <td class="text-center"><?= htmlspecialchars($b['tanggal']) ?></td>
-                                                </tr>
-                                            <?php endforeach; ?>
-                                        <?php endif; ?>
+                                        <?php $no=1; while($row = pg_fetch_assoc($res)): ?>
+                                        <tr>
+                                            <td class="text-center"><?= $no++ ?></td>
+                                            <td class="text-center">
+                                                <img src="../assets/img/<?= htmlspecialchars($row['gambar'] ?: 'default.jpg') ?>" 
+                                                     style="width:70px; height:45px; object-fit:cover;" class="border rounded shadow-sm">
+                                            </td>
+                                            <td>
+                                                <strong><?= htmlspecialchars($row['judul']) ?></strong><br>
+                                                <small class="text-muted"><?= date('d/m/Y', strtotime($row['tanggal'])) ?></small>
+                                            </td>
+                                            <td>
+                                                <div class="preview-box">
+                                                    <?= substr(strip_tags($row['isi']), 0, 150) ?>
+                                                </div>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge badge-<?= $row['tipe']=='pelatihan'?'success':'info' ?> p-2">
+                                                    <i class="fas <?= $row['tipe']=='pelatihan'?'fa-graduation-cap':'fa-newspaper' ?>"></i> 
+                                                    <?= strtoupper($row['tipe']) ?>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <?php endwhile; ?>
                                     </tbody>
                                 </table>
                             </div>
                         </div>
                     </div>
                 </div>
-
             </div>
-            <?php include '../inc/footer.php'; ?>
-        </div>
+            </div>
     </div>
 
     <script src="../assets/vendor/jquery/jquery.min.js"></script>
+    <script src="../assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="../assets/vendor/datatables/jquery.dataTables.min.js"></script>
     <script src="../assets/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+    <script src="../assets/js/sb-admin-2.min.js"></script>
 
     <script>
         $(document).ready(function() {
-            $('#beritaTable').DataTable();
+            $('#dataTable').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/Indonesian.json"
+                }
+            });
         });
     </script>
-
 </body>
 </html>
