@@ -87,6 +87,12 @@ if ($q && pg_num_rows($q) > 0) {
             <span>Dataset</span>
         </a>
     </li>
+    <li class="nav-item">
+        <a class="nav-link" href="fasilitas.php">
+            <i class="fas fa-building"></i>
+            <span>Fasilitas</span>
+        </a>
+    </li>
 
     <hr class="sidebar-divider d-none d-md-block">
 
