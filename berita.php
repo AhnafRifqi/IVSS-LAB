@@ -80,9 +80,7 @@ include 'backEnd/prosesBerita.php';
 
             <div class="py-5">
                 <div class="container">
-
-                    <?php if (!empty($paginated_items)): ?>
-
+                <?php if ($featured || !empty($other_items)): ?>
                     <?php if ($featured): ?>
                     <div class="mb-5 wow fadeIn" data-wow-delay="0.1s">
                         <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
@@ -101,6 +99,8 @@ include 'backEnd/prosesBerita.php';
                                                 <?= $featured['tanggal_formatted']; ?></span>
                                             <span><i class="lni lni-pencil  me-1" style="color: #FFBC3B;"></i>
                                                 penulis: <?= htmlspecialchars($featured['penulis']); ?></span>
+                                            <span><i class="lni lni-pencil text-primary me-1"></i>
+                                                tipe: <?= htmlspecialchars($featured['tipe']); ?></span>
                                         </div>
                                         <h2 class="h3 fw-bold mb-3">
                                             <a href="detailBerita.php?id=<?= htmlspecialchars($featured['berita_id']); ?>"
@@ -111,7 +111,7 @@ include 'backEnd/prosesBerita.php';
                                         <p class="text-muted mb-4">
                                             <?= htmlspecialchars($featured['isi_tampilan']); ?>
                                         </p>
-                                        <a href="detailBerita.php?id=<?= htmlspecialchars($item['berita_id']); ?>"
+                                        <a href="detailBerita.php?id=<?= htmlspecialchars($featured['berita_id']); ?>"
                                             class=" fw-bold text-decoration-none bg-light d-inline-flex align-items-center mt-auto"
                                             style="color: #1d4052; height:50px; padding-left: 20px">
                                             Baca Selengkapnya <i class="lni lni-arrow-right ms-2"></i>
@@ -126,8 +126,6 @@ include 'backEnd/prosesBerita.php';
                     <div class="row g-4">
                         <?php 
                             foreach ($other_items as $item): 
-                                // Membersihkan tag HTML dari isi item sebelum dipotong (Sudah ada di logika atas, 
-                                // tapi diulang di sini untuk memastikan pemotongan terjadi pada versi bersih)
                                 $isi_item_clean = strip_tags($item['isi']);
                                 
                                 $batas_karakter_item = 500;
@@ -153,6 +151,8 @@ include 'backEnd/prosesBerita.php';
                                             <?= $item['tanggal_formatted']; ?></span>
                                         <span><i class="lni lni-pencil text-primary me-1"></i>
                                             penulis: <?= htmlspecialchars($item['penulis']); ?></span>
+                                        <span><i class="lni lni-pencil text-primary me-1"></i>
+                                            tipe: <?= htmlspecialchars($item['tipe']); ?></span>
                                     </div>
                                     <h4 class="h5 fw-bold mb-3">
                                         <a href="detailBerita.php?id=<?= htmlspecialchars($item['berita_id']); ?>"
