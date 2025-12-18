@@ -84,7 +84,7 @@ if ($q && pg_num_rows($q) > 0) {
     <li class="nav-item">
         <a class="nav-link" href="acc_riset.php">
             <i class="fas fa-clipboard-check"></i>
-            <span>Review Riset</span>
+            <span>Daftar Riset Lab</span>
         </a>
     </li>
 
@@ -111,6 +111,13 @@ if ($q && pg_num_rows($q) > 0) {
         <a class="nav-link" href="fasilitas.php">
             <i class="fas fa-building"></i>
             <span>Fasilitas</span>
+        </a>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link" href="produk.php">
+            <i class="fas fa-box-open"></i>
+            <span>Produk</span>
         </a>
     </li>
 

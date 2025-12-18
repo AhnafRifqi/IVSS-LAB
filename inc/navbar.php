@@ -3,57 +3,59 @@ require_once 'koneksi.php';
 $sql = "SELECT * FROM logo";
 $result = pg_query($koneksi, $sql);
 $logo_data = pg_fetch_assoc($result);
-
-// Mendefinisikan warna kustom untuk konsistensi
-$primary_color = "#1A1A37"; // Biru Tua/Navy
-$secondary_color = "#FCB53B"; // Kuning/Warning
 ?>
 
-<section class="navbar-area navbar-nine shadow-sm fixed-top" style="background-color: <?php echo $secondary_color; ?>; padding-top: 5px; padding-bottom: 5px;">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-12">
-                <nav class="navbar navbar-expand-lg">
-                    <a class="navbar-brand me-auto" href="index.php">
-                        <img src="admin/assets/img/<?php echo $logo_data['logo'] ?>" 
-                             alt="Logo IVSS" 
-                             style="max-width: 100px; height: 100px; object-fit: contain;" /> 
-                    </a>
-                    
-                    <button class="navbar-toggler p-2" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#navbarNine" aria-controls="navbarNine" aria-expanded="false"
-                        aria-label="Toggle navigation" style="border: 1px solid <?php echo $primary_color; ?>; border-radius: 5px;">
-                        
-                        <span class="toggler-icon" style="background-color: <?php echo $primary_color; ?>;"></span>
-                        <span class="toggler-icon" style="background-color: <?php echo $primary_color; ?>;"></span>
-                        <span class="toggler-icon" style="background-color: <?php echo $primary_color; ?>;"></span>
-                    </button>
+<!-- Topbar Start -->
+<div class="container-fluid top-bar wow fadeIn" data-wow-delay="0.1s" style="background-color:#FFBC3B;">
+    <div class="row align-items-center h-100 py-2">
 
-                    <div class="collapse navbar-collapse sub-menu-bar" id="navbarNine">
-                        <ul class="navbar-nav ms-auto mb-2 mb-lg-0"> 
-                            
-                            <li class="nav-item">
-                                <a href="index.php" class="nav-link fw-bold p-3" 
-                                   style="color: <?php echo $primary_color; ?>; transition: color 0.3s; font-size: 1.05rem;"
-                                   onmouseover="this.style.color='white'"
-                                   onmouseout="this.style.color='<?php echo $primary_color; ?>'">Beranda</a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="news.php" class="nav-link fw-bold p-3" 
-                                   style="color: <?php echo $primary_color; ?>; transition: color 0.3s; font-size: 1.05rem;"
-                                   onmouseover="this.style.color='white'"
-                                   onmouseout="this.style.color='<?php echo $primary_color; ?>'">Berita</a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="daftarDosen.php" class="nav-link fw-bold p-3" 
-                                   style="color: <?php echo $primary_color; ?>; transition: color 0.3s; font-size: 1.05rem;"
-                                   onmouseover="this.style.color='white'"
-                                   onmouseout="this.style.color='<?php echo $primary_color; ?>'">Daftar Dosen</a>
-                            </li>
-                        </ul>
+        <!-- Logo rata kiri -->
+        <div class="col-lg-3 col-12 text-lg-start text-center">
+            <a href="index.html">
+                <img class="img-fluid" src="admin/assets/img/<?php echo $logo_data['logo'] ?>" alt="Logo"
+                    style="max-width: 80px;">
+            </a>
+        </div>
+
+        <!-- Contact info rata kanan -->
+        <div class="col-lg-8 d-none d-lg-block">
+            <div class="row justify-content-end">
+                <div class="col-lg-3 col-6">
+                    <div class="d-flex justify-content-lg-end justify-content-center">
+                        <div class="flex-shrink-0 btn-square" style="background-color:#1d4052;">
+                            <i class="fa fa-map-marker-alt text-light"></i>
+                        </div>
+                        <div class="ms-2">
+                            <h6 class="text-dark mb-0">Alamat</h6>
+                            <span class="text-dark" style="white-space: nowrap;">Jl. Soekarno Hatta No.9, Kota Malang</span>
+                        </div>
                     </div>
-                </nav>
+                </div>
+
             </div>
         </div>
+
+
     </div>
-</section>
+</div>
+
+<!-- Topbar End -->
+<div class="container-fluid px-0 wow fadeIn" data-wow-delay="0.1s" style="background-color: #1d4052;">
+    <div class="nav-bar">
+        <nav class="navbar navbar-expand-lg navbar-dark px-4 py-lg-0" style="background-color: #1d4052;">
+            <h4 class="d-lg-none m-0">Menu</h4>
+            <button type="button" class="navbar-toggler me-0" data-bs-toggle="collapse"
+                data-bs-target="#navbarCollapse">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+                <div class="navbar-nav me-auto">
+                    <a href="index.php" class="nav-item nav-link" style="color: white;">Beranda</a>
+                    <a href="berita.php" class="nav-item nav-link" style="color: white;">Berita</a>
+                    <a href="dosen.php" class="nav-item nav-link" style="color: white;">Daftar Member</a>
+                </div>
+            </div>
+        </nav>
+    </div>
+</div>

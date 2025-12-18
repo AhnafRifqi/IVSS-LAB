@@ -15,52 +15,43 @@ if ($id === '') {
     exit; 
 }
 
-// 3. Ambil data existing
+// 3. Ambil data existing dari database (Tabel kegiatan_proyek)
 $q = pg_query_params($koneksi, 'SELECT * FROM kegiatan_proyek WHERE id = $1', array($id));
 if (!$q || pg_num_rows($q) === 0) { 
-    header('Location: kegiatan_proyek.php?msg=notfound'); 
+    $_SESSION['error_msg'] = "Data Kegiatan Proyek dengan ID $id tidak ditemukan.";
+    header('Location: kegiatan_proyek.php'); 
     exit; 
 }
 $row = pg_fetch_assoc($q);
 pg_free_result($q);
 
+// 4. Ambil dan unset pesan notifikasi dari sesi
 $alert = '';
-
-// 4. Handle Form Submission (POST)
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $judul = trim($_POST['judul'] ?? '');
-    // Tidak menggunakan trim() pada $isi jika Summernote digunakan, karena mungkin mengandung HTML.
-    $isi = $_POST['isi'] ?? ''; 
-
-    if ($judul === '' || $isi === '') {
-        $alert = '<div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <strong>Error:</strong> Judul dan Isi wajib diisi.
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                  </div>';
-    } else {
-        // Lakukan pembaruan data
-        $res = pg_query_params($koneksi, 'UPDATE kegiatan_proyek SET judul = $1, isi = $2 WHERE id = $3', array($judul, $isi, $id));
-        
-        if ($res) { 
-            // Sukses
-            header('Location: kegiatan_proyek.php?msg=updated'); 
-            exit; 
-        } else { 
-            // Gagal Update Database
-            $alert = '<div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <strong>Error:</strong> Gagal mengupdate data. Silakan coba lagi.
-                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                      </div>';
-        }
-    }
-    // Pertahankan nilai input yang gagal di-submit
-    $row['judul'] = htmlspecialchars($judul);
-    $row['isi']   = $isi; // Simpan isi tanpa htmlspecialchars untuk Summernote
+if (isset($_SESSION['success_msg'])) {
+    $alert = '<div class="alert alert-success alert-dismissible fade show" role="alert">' . 
+             htmlspecialchars($_SESSION['success_msg']) . 
+             '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>';
+    unset($_SESSION['success_msg']);
+} elseif (isset($_SESSION['error_msg'])) {
+    $alert = '<div class="alert alert-danger alert-dismissible fade show" role="alert">' . 
+             htmlspecialchars($_SESSION['error_msg']) . 
+             '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>';
+    unset($_SESSION['error_msg']);
 }
 
-// 5. Tentukan nilai untuk ditampilkan di form
+// 5. Ambil data form lama dari sesi (jika ada error dari handler)
+$form_data = $_SESSION['old_post'] ?? null;
+unset($_SESSION['old_post']);
+
+// 6. Jika ada data form yang gagal, timpa data database dengan data post
+if ($form_data) {
+    $row['judul'] = $form_data['judul'] ?? $row['judul'];
+    $row['isi']   = $form_data['isi'] ?? $row['isi'];
+}
+
+// 7. Tentukan nilai untuk ditampilkan di form
 $judul_display = htmlspecialchars($row['judul'] ?? '');
-$isi_display = $row['isi'] ?? ''; // Isi harus ditampilkan tanpa htmlspecialchars agar Summernote merender HTML-nya
+$isi_display = $row['isi'] ?? ''; // Isi tanpa htmlspecialchars
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -88,18 +79,19 @@ $isi_display = $row['isi'] ?? ''; // Isi harus ditampilkan tanpa htmlspecialchar
                     <div class="card-body">
                         <?= $alert ?>
                         
-                        <form method="POST">
+                        <form method="POST" action="proses_kegiatan_proyek.php">
+                            <input type="hidden" name="action" value="edit">
+                            <input type="hidden" name="id" value="<?= htmlspecialchars($id) ?>">
+
                             <div class="form-group">
-                                <label for="id_static">ID Kegiatan</label>
-                                <input type="text" id="id_static" class="form-control" 
-                                       value="<?= htmlspecialchars($id) ?>" disabled>
-                                <small class="form-text text-muted">ID ini tidak dapat diubah.</small>
+                                <label>ID Kegiatan</label>
+                                <input type="text" class="form-control" value="<?= htmlspecialchars($id) ?>" disabled>
                             </div>
 
                             <div class="form-group">
                                 <label for="judul">Judul</label>
                                 <input type="text" id="judul" name="judul" class="form-control" 
-                                       value="<?= $judul_display ?>" required>
+                                        value="<?= $judul_display ?>" required>
                             </div>
 
                             <div class="form-group">
@@ -124,7 +116,6 @@ $isi_display = $row['isi'] ?? ''; // Isi harus ditampilkan tanpa htmlspecialchar
 <script src="../assets/vendor/jquery/jquery.min.js"></script>
 <script src="../assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script src="../assets/js/sb-admin-2.min.js"></script>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.18/summernote-bs4.min.js"></script>
 
 <script>

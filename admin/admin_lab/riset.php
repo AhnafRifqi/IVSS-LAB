@@ -57,7 +57,7 @@ function getStatusBadge($status)
         case 'pending':
             return '<span class="badge badge-warning"><i class="fas fa-clock"></i> Pend. Admin Lab</span>';
         case 'approve_dosen_pembimbing':
-            return '<span class="badge badge-info"><i class="fas fa-user-check"></i> Acc Admin Lab</span>';
+            return '<span class="badge badge-info"><i class="fas fa-clock"></i> Pending Ketua Lab</span>';
         case 'approve_ketua_lab':
             return '<span class="badge badge-success"><i class="fas fa-check-circle"></i> Approved</span>';
         case 'rejected':

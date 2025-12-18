@@ -2,8 +2,8 @@
 session_start();
 include '../inc/koneksi.php';
 
-if (!isset($_SESSION['user_id'])) {
-    // Jika tidak login, redirect ke halaman login
+//  role 'admin'
+if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'admin') {
     header('Location: ../index.php');
     exit;
 }

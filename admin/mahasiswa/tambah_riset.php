@@ -16,16 +16,41 @@ $mhs = pg_fetch_assoc($q_mhs);
 $dosen_pembimbing = $mhs['dosen_pembimbing'] ?? null;
 $nama_mahasiswa = $mhs['nama'] ?? '';
 
-// Ambil nama dosen pembimbing dan user_id nya
+// Ambil nama dosen pembimbing, user_id, dan role nya
 $nama_dosen = '-';
 $dosen_user_id = null;
+$dosen_role = null;
+
 if ($dosen_pembimbing) {
+    // 1. Ambil user_id dosen dari tabel dosen
     $q_dosen = pg_query_params($koneksi, "SELECT nama, user_id FROM dosen WHERE nip = $1", [$dosen_pembimbing]);
     if ($q_dosen && pg_num_rows($q_dosen) > 0) {
         $row_dosen = pg_fetch_assoc($q_dosen);
         $nama_dosen = $row_dosen['nama'];
         $dosen_user_id = $row_dosen['user_id'];
+
+        // 2. Ambil role dosen dari tabel users
+        if ($dosen_user_id) {
+            $q_role = pg_query_params($koneksi, "SELECT role FROM users WHERE user_id = $1", [$dosen_user_id]);
+            if ($q_role && pg_num_rows($q_role) > 0) {
+                $row_role = pg_fetch_assoc($q_role);
+                $dosen_role = $row_role['role'];
+            }
+        }
     }
+}
+
+// --- Logika Penentuan Status Awal Riset ---
+$initial_status = 'pending'; // Default status
+
+// HANYA role 'ketua' yang mendapatkan bypass
+if ($dosen_role === 'ketua') {
+    // Status disetujui Dospem (approved_dosen_pembimbing)
+    $initial_status = 'approve_dosen_pembimbing';
+    
+} else {
+    // Role 'admin', status tetap 'pending'
+    $initial_status = 'pending';
 }
 
 if (isset($_POST['submit'])) {
@@ -35,6 +60,16 @@ if (isset($_POST['submit'])) {
     $tanggal_selesai = trim($_POST['tanggal_selesai']);
 
     // Validasi
+    // Ambil role dosen pembimbing
+    $dosen_role = '';
+    if ($dosen_user_id) {
+        $q_role = pg_query_params($koneksi, "SELECT role FROM users WHERE user_id = $1", [$dosen_user_id]);
+        if ($q_role && pg_num_rows($q_role) > 0) {
+            $row_role = pg_fetch_assoc($q_role);
+            $dosen_role = $row_role['role'];
+        }
+    }
+
     if (empty($judul)) {
         $alert = '<div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> Judul riset harus diisi.</div>';
     } elseif (!empty($tanggal_mulai) && !empty($tanggal_selesai) && $tanggal_selesai < $tanggal_mulai) {
@@ -44,11 +79,27 @@ if (isset($_POST['submit'])) {
         $tanggal_mulai_val = !empty($tanggal_mulai) ? $tanggal_mulai : null;
         $tanggal_selesai_val = !empty($tanggal_selesai) ? $tanggal_selesai : null;
 
-        // Status langsung 'pending' agar bisa direview oleh dosen/admin
+        // LOGIC REVISI:
+        // Jika dosen pembimbing adalah KETUA LAB, maka status langsung 'approve_dosen_pembimbing'
+        // dan approved_dosen_by diisi oleh ID dosen (ketua) tersebut.
+        // Jika dosen biasa, status pending.
+
+        $initial_status = 'pending';
+        // approved_dosen_by diisi dengan ID dosen pembimbing.
+        // Jika pending: berfungsi sebagai "Assigned To" (agar muncul di dashboard dosen/admin bersangkutan).
+        // Jika approved: berfungsi sebagai "Approved By".
+        $approved_dosen_by_val = $dosen_user_id;
+
+        if ($dosen_role === 'ketua') {
+            $initial_status = 'approve_dosen_pembimbing';
+            // $approved_dosen_by_val tetap $dosen_user_id (Ketua)
+        }
+
+        // Insert riset
         $insert = pg_query_params($koneksi, "
             INSERT INTO riset (judul, deskripsi, creator_id, tanggal_mulai, tanggal_selesai, status, approved_dosen_by)
-            VALUES ($1, $2, $3, $4, $5, 'pending', $6)
-        ", [$judul, $deskripsi, $user_id, $tanggal_mulai_val, $tanggal_selesai_val, $dosen_user_id]);
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
+        ", [$judul, $deskripsi, $user_id, $tanggal_mulai_val, $tanggal_selesai_val, $initial_status, $approved_dosen_by_val]);
 
         if ($insert) {
             header('Location: riset.php?msg=created');
@@ -60,6 +111,7 @@ if (isset($_POST['submit'])) {
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="id">
 
