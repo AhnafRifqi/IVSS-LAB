@@ -68,13 +68,16 @@ if ($q && pg_num_rows($q) > 0) {
             <span>Riset Saya</span>
         </a>
     </li>
-
-
-
     <li class="nav-item">
         <a class="nav-link" href="acc_riset.php">
             <i class="fas fa-clipboard-check"></i>
             <span>Riset Mahasiswa</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="riset.php">
+            <i class="fas fa-clipboard-check"></i>
+            <span>Daftar Riset Lab</span>
         </a>
     </li>
 
