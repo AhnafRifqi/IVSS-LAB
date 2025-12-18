@@ -819,6 +819,100 @@ include './backEnd/prosesIndex.php';
 
     <!-- Berita End -->
 
+    <div class="container-fluid py-5">
+        <div class="container">
+
+            <div class="text-center mx-auto wow fadeIn" data-wow-delay="0.1s" style="max-width: 500px;">
+                <p class="section-title bg-white px-3 mb-2" style="color:#FFBC3B;">PELATIHAN</p>
+                <h1 class="display-6 mb-3" style="color: #1d4052;">Pelatihan Terbaru</h1>
+                <p class="lead " style="font-size: 1rem; color: black">Lihat Pelatihan terbaru dari Laboratorium Visi Cerdas
+                    dan Sistem Cerdas.</p>
+            </div>
+
+
+            <div class="row g-4">
+
+                <?php
+            $batas_karakter = 150;
+
+            if ($result_pelatihan_terbaru && pg_num_rows($result_pelatihan_terbaru) > 0) {
+
+                pg_result_seek($result_pelatihan_terbaru, 0);
+
+                while ($data_berita = pg_fetch_assoc($result_pelatihan_terbaru)) {
+
+                    $berita_id  = htmlspecialchars($data_berita['berita_id']);
+                    $berita_link = "detailBerita.php?id=" . urlencode($berita_id);
+                    $tanggal_format = date('d F Y', strtotime($data_berita['tanggal'] ?? date("Y-m-d")));
+
+                    // preview
+                    $isi_lengkap = strip_tags($data_berita['isi']);
+                    if (strlen($isi_lengkap) > $batas_karakter) {
+                        $potongan_isi = substr($isi_lengkap, 0, $batas_karakter);
+                        $potongan_isi = substr($potongan_isi, 0, strrpos($potongan_isi, ' '));
+                        $isi_tampilan = $potongan_isi . "...";
+                        $show_button = true;
+                    } else {
+                        $isi_tampilan = $isi_lengkap;
+                        $show_button = false;
+                    }
+            ?>
+
+                <div class="col-md-6 col-lg-4 wow fadeIn" data-wow-delay="0.1s">
+                    <div class="event-item h-100 p-4 d-flex flex-column shadow-sm border rounded">
+
+                        <img class="img-fluid w-100 mb-3 rounded"
+                            src="admin/assets/img/<?php echo htmlspecialchars($data_berita['gambar']); ?>"
+                            alt="<?php echo htmlspecialchars($data_berita['judul']); ?>"
+                            style="height: 200px; object-fit: cover;">
+
+                        <a href="<?php echo $berita_link; ?>" class="h4  mb-2 fw-bold d-block" style="color:black;">
+                            <?php echo htmlspecialchars($data_berita['judul']); ?>
+                        </a>
+
+                        <p class="flex-grow-1" style="color:black;">
+                            <?php echo htmlspecialchars($isi_tampilan); ?>
+                        </p>
+
+                        <div class="bg-light p-3 rounded mt-3">
+                            <p class="mb-1" style="color: #1d4052;">
+                                <i class="fa fa-calendar-alt  me-2" style="color:black;"></i>
+                                <?php echo $tanggal_format; ?>
+                            </p>
+
+                            <p class="mb-2" style="color: #1d4052;">
+                                <i class="fa fa-user-edit  me-2" style="color: black;"></i>
+                                Penulis: <?php echo htmlspecialchars($data_berita['penulis'] ?? "-"); ?>
+                            </p>
+
+                            <p class="mb-1" style="color: #1d4052;">
+                                <i class="fa fa-calendar-alt  me-2" style="color:black;"></i>
+                                Tipe: <?php echo htmlspecialchars($data_berita['tipe'] ?? "-"); ?>
+                            </p>
+
+                            <?php if ($show_button): ?>
+                            <a href="<?php echo $berita_link; ?>" class="fw-bold d-block text-end"
+                                style="color: #1d4052; text-decoration:none;">
+                                Baca Selengkapnya →
+                            </a>
+                            <?php endif; ?>
+                        </div>
+
+                    </div>
+                </div>
+
+                <?php
+                } // end while
+
+            } else {
+                echo "<div class='col-12 text-center'>Tidak ada pelatihan terbaru yang tersedia.</div>";
+            }
+            ?>
+
+            </div>
+        </div>
+    </div>
+
     <!-- Footer Start -->
     <?php include('inc/footer.php')?>
     <!-- Footer End -->

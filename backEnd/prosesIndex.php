@@ -5,7 +5,8 @@ $query_misi = "SELECT isi FROM visimisi WHERE nama = 'misi' LIMIT 1";
 $query_dosen = "SELECT * FROM dosen";
 $query_peralatan_lab = "SELECT gambar, nama, isi FROM fasilitas where tipe = 'peralatan'";
 $query_fasilitas_lab = "SELECT gambar, nama, isi FROM fasilitas where tipe = 'fasilitas'";
-$query_berita_terbaru = "SELECT * FROM berita ORDER BY berita_id DESC LIMIT 3";
+$query_berita_terbaru = "SELECT * FROM berita where tipe = 'umum' ORDER BY berita_id DESC LIMIT 3";
+$query_pelatihan_terbaru = "SELECT * FROM berita where tipe = 'pelatihan' ORDER BY berita_id DESC LIMIT 3";
 $sql = "SELECT * FROM logo";
 $result = pg_query($koneksi, $sql);
 $logo_data = pg_fetch_assoc($result);
@@ -18,6 +19,7 @@ $result_dosen = pg_query($koneksi, $query_dosen);
 $result_peralatan_lab = pg_query($koneksi, $query_peralatan_lab);
 $result_fasilitas_lab = pg_query($koneksi, $query_fasilitas_lab);
 $result_berita_terbaru = pg_query($koneksi, $query_berita_terbaru);
+$result_pelatihan_terbaru = pg_query($koneksi, $query_pelatihan_terbaru);
 
 $data_visi = pg_fetch_assoc($result_visi);
 $data_misi = pg_fetch_assoc($result_misi);
