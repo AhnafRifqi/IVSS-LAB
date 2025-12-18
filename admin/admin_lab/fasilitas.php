@@ -3,7 +3,7 @@ session_start();
 include '../inc/koneksi.php';
 
 // Proteksi halaman: Hanya role 'ketua' yang bisa mengakses manajemen fasilitas
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'ketua') {
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     header('Location: ../index.php');
     exit;
 }
