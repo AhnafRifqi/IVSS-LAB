@@ -13,10 +13,10 @@ switch ($mode) {
 ===================================================== */
 case 'list':
 
-    $search_query     = "";
-    $where_clause     = "";
-    $batas_karakter   = 500;
-    $limit            = 7;
+    $search_query   = "";
+    $where_clause   = "";
+    $batas_karakter = 500;
+    $limit          = 7;
 
     /* ===============================
        1. LOGIKA PENCARIAN
@@ -29,12 +29,14 @@ case 'list':
         ";
     }
 
+    $is_search = !empty($search_query);
+
     /* ===============================
        2. HITUNG TOTAL DATA
     =============================== */
-    $sql_count   = "SELECT COUNT(*) AS total FROM berita {$where_clause}";
+    $sql_count = "SELECT COUNT(*) AS total FROM berita {$where_clause}";
     $result_cnt = pg_query($koneksi, $sql_count);
-    $row_cnt    = pg_fetch_assoc($result_cnt);
+    $row_cnt = pg_fetch_assoc($result_cnt);
     $total_items = (int)$row_cnt['total'];
 
     /* ===============================
@@ -52,29 +54,42 @@ case 'list':
     $offset = ($current_page - 1) * $limit;
 
     /* ===============================
-       4. FEATURED (BUKAN PELATIHAN)
+       4. FEATURED (IKUT SEARCH)
     =============================== */
     $featured = null;
 
     if ($current_page == 1) {
-        $sql_featured = "
-            SELECT *
-            FROM berita
-            WHERE tipe != 'pelatihan'
-            ORDER BY tanggal DESC
-            LIMIT 1
-        ";
+
+        if ($is_search) {
+            $sql_featured = "
+                SELECT *
+                FROM berita
+                WHERE tipe != 'pelatihan'
+                AND (
+                    judul ILIKE '%{$search_query}%'
+                    OR tipe::TEXT ILIKE '%{$search_query}%'
+                )
+                ORDER BY tanggal DESC
+                LIMIT 1
+            ";
+        } else {
+            $sql_featured = "
+                SELECT *
+                FROM berita
+                WHERE tipe != 'pelatihan'
+                ORDER BY tanggal DESC
+                LIMIT 1
+            ";
+        }
 
         $q_featured = pg_query($koneksi, $sql_featured);
 
         if ($q_featured && pg_num_rows($q_featured) > 0) {
             $featured = pg_fetch_assoc($q_featured);
 
-            // format tanggal
             $featured['tanggal_formatted'] =
                 date('d M Y', strtotime($featured['tanggal']));
 
-            // potong isi
             $isi_clean = strip_tags($featured['isi']);
             if (strlen($isi_clean) > $batas_karakter) {
                 $potong = substr($isi_clean, 0, $batas_karakter);
@@ -103,7 +118,6 @@ case 'list':
     if ($result_data) {
         while ($row = pg_fetch_assoc($result_data)) {
 
-            // skip featured supaya tidak dobel
             if ($featured && $row['berita_id'] == $featured['berita_id']) {
                 continue;
             }
@@ -112,6 +126,22 @@ case 'list':
                 date('d M Y', strtotime($row['tanggal']));
 
             $other_items[] = $row;
+        }
+    }
+
+    /* ===============================
+       6. FALLBACK FEATURED SAAT SEARCH
+    =============================== */
+    if ($is_search && !$featured && !empty($other_items)) {
+        $featured = array_shift($other_items);
+
+        $isi_clean = strip_tags($featured['isi']);
+        if (strlen($isi_clean) > $batas_karakter) {
+            $potong = substr($isi_clean, 0, $batas_karakter);
+            $featured['isi_tampilan'] =
+                substr($potong, 0, strrpos($potong, ' ')) . '...';
+        } else {
+            $featured['isi_tampilan'] = $isi_clean;
         }
     }
 
