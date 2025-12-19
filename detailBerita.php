@@ -92,54 +92,50 @@ include 'backEnd/prosesBerita.php';
 
             <!-- ===== SIDEBAR BERITA TERBARU ===== -->
             <div class="col-lg-4">
+                <div class="p-4 rounded position-sticky" style="top:100px; background:#f8f9fa;">
+                    <h4 class="fw-bold mb-4" style="color:#1A1A37;">
+                        Berita Terbaru
+                    </h4>
 
-<div class="p-4 rounded position-sticky" style="top:100px; background:#f8f9fa;">
-    <h4 class="fw-bold mb-4" style="color:#1A1A37;">
-        Berita Terbaru
-    </h4>
+                    <?php if (!empty($latestBerita)): ?>
+                        <?php foreach ($latestBerita as $item): ?>
+                            <a href="detailBerita.php?id=<?= $item['berita_id']; ?>"
+                            class="d-flex align-items-start mb-4 text-decoration-none">
 
-    <?php if (!empty($latestBerita)): ?>
-        <?php foreach ($latestBerita as $item): ?>
-            <a href="detailBerita.php?id=<?= $item['berita_id']; ?>"
-               class="d-flex align-items-start mb-4 text-decoration-none">
+                                <!-- GAMBAR -->
+                                <div style="
+                                    width:120px;
+                                    height:90px;
+                                    border-radius:10px;
+                                    overflow:hidden;
+                                    flex-shrink:0;
+                                ">
+                                    <img src="admin/assets/img/<?= htmlspecialchars($item['gambar']); ?>"
+                                        style="width:100%; height:100%; object-fit:cover;">
+                                </div>
 
-                <!-- GAMBAR -->
-                <div style="
-                    width:120px;
-                    height:90px;
-                    border-radius:10px;
-                    overflow:hidden;
-                    flex-shrink:0;
-                ">
-                    <img src="admin/assets/img/<?= htmlspecialchars($item['gambar']); ?>"
-                         style="width:100%; height:100%; object-fit:cover;">
+                                <!-- TEKS -->
+                                <div class="ms-3">
+                                    <h6 class="mb-1 text-dark fw-semibold" style="line-height:1.4;">
+                                        <?= htmlspecialchars($item['judul']); ?>
+                                    </h6>
+                                    <small class="text-muted">
+                                        <?= $item['tanggal_format']; ?>
+                                    </small>
+                                </div>
+
+                            </a>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <p class="text-muted">Belum ada berita terbaru</p>
+                    <?php endif; ?>
                 </div>
-
-                <!-- TEKS -->
-                <div class="ms-3">
-                    <h6 class="mb-1 text-dark fw-semibold" style="line-height:1.4;">
-                        <?= htmlspecialchars($item['judul']); ?>
-                    </h6>
-                    <small class="text-muted">
-                        <?= $item['tanggal_format']; ?>
-                    </small>
-                </div>
-
-            </a>
-        <?php endforeach; ?>
-    <?php else: ?>
-        <p class="text-muted">Belum ada berita terbaru</p>
-    <?php endif; ?>
-</div>
-
-</div>
+            </div>
 
 
         </div>
     </div>
 </section>
-
-
 
     <?php include('inc/footer.php')?>
 
